@@ -30,52 +30,52 @@ import { test, expect } from '../src/fixtures/auth.fixture';
 import { buildPatient } from '../src/data/patient.data';
 import { ensureHeaderContext } from '../src/helpers/header-context.helper';
 
-// test.describe('E2E: Create Patient', () => {
+test.describe('E2E: Create Patient', () => {
 
-//   // ---------------------------------------------------------------------------
-//   // Mandatory Pre-test: Verify & set header context before every test
-//   // ---------------------------------------------------------------------------
-//   test.beforeEach(async ({ page }) => {
-//     // Reads targetBranch + targetLocation from config.json
-//     // Checks current header values; switches any that don't match
-//     await ensureHeaderContext(page);
-//   });
+  // ---------------------------------------------------------------------------
+  // Mandatory Pre-test: Verify & set header context before every test
+  // ---------------------------------------------------------------------------
+  test.beforeEach(async ({ page }) => {
+    // Reads targetBranch + targetLocation from config.json
+    // Checks current header values; switches any that don't match
+    await ensureHeaderContext(page);
+  });
 
-//   test('should create a patient end-to-end with all dynamic data', async ({ patientsPage }) => {
-//     // -----------------------------------------------------------------------
-//     // 1. Generate complete dynamic patient data
-//     //    Staff selection via Select2 is available in addPatient() as an
-//     //    optional step. To enable, pass staff names via buildPatient():
-//     //      buildPatient({ primaryTeamLeaderNurse: 'Name', ... })
-//     //    Update the names in config/config.json — staff section.
-//     //    The selectFromSelect2() method handles the full workflow:
-//     //      click → type (native value setter) → wait for AJAX → select
-//     // -----------------------------------------------------------------------
-//     const patient = buildPatient();
+  test('should create a patient end-to-end with all dynamic data', async ({ patientsPage }) => {
+    // -----------------------------------------------------------------------
+    // 1. Generate complete dynamic patient data
+    //    Staff selection via Select2 is available in addPatient() as an
+    //    optional step. To enable, pass staff names via buildPatient():
+    //      buildPatient({ primaryTeamLeaderNurse: 'Name', ... })
+    //    Update the names in config/config.json — staff section.
+    //    The selectFromSelect2() method handles the full workflow:
+    //      click → type (native value setter) → wait for AJAX → select
+    // -----------------------------------------------------------------------
+    const patient = buildPatient();
 
-//     console.log('═══════════════════════════════════════════════');
-//     console.log('  PATIENT TEST DATA');
-//     console.log(`  English: ${patient.givenNameEn} ${patient.familyNameEn}`);
-//     console.log(`  Arabic:  ${patient.firstNameAr} ${patient.familyNameAr}`);
-//     console.log(`  Mobile:  ${patient.mobile}`);
-//     console.log(`  DOB:     ${patient.dateOfBirth}`);
-//     console.log(`  Gender:  ${patient.gender}`);
-//     console.log('═══════════════════════════════════════════════');
+    console.log('═══════════════════════════════════════════════');
+    console.log('  PATIENT TEST DATA');
+    console.log(`  English: ${patient.givenNameEn} ${patient.familyNameEn}`);
+    console.log(`  Arabic:  ${patient.firstNameAr} ${patient.familyNameAr}`);
+    console.log(`  Mobile:  ${patient.mobile}`);
+    console.log(`  DOB:     ${patient.dateOfBirth}`);
+    console.log(`  Gender:  ${patient.gender}`);
+    console.log('═══════════════════════════════════════════════');
 
-//     // -----------------------------------------------------------------------
-//     // 2. Execute the full add-patient workflow
-//     // -----------------------------------------------------------------------
-//     await patientsPage.navigateToPatients();
-//     await patientsPage.addPatient(patient);
+    // -----------------------------------------------------------------------
+    // 2. Execute the full add-patient workflow
+    // -----------------------------------------------------------------------
+    await patientsPage.navigateToPatients();
+    await patientsPage.addPatient(patient);
 
-//     // -----------------------------------------------------------------------
-//     // 3. Assert — verify success
-//     // -----------------------------------------------------------------------
-//     const successVisible = await patientsPage.isSuccessMessageVisible();
-//     expect(successVisible).toBe(true);
+    // -----------------------------------------------------------------------
+    // 3. Assert — verify success
+    // -----------------------------------------------------------------------
+    const successVisible = await patientsPage.isSuccessMessageVisible();
+    expect(successVisible).toBe(true);
 
-//     const successMessage = await patientsPage.getSuccessMessage();
-//     expect(successMessage).toBeTruthy();
-//     console.log(`\n✅ Patient created: ${successMessage}`);
-//   });
-// });
+    const successMessage = await patientsPage.getSuccessMessage();
+    expect(successMessage).toBeTruthy();
+    console.log(`\n✅ Patient created: ${successMessage}`);
+  });
+});
