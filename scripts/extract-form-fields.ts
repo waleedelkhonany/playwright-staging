@@ -2,12 +2,26 @@
  * Investigate the patient detail page and appointment form fields.
  * Uses sidebar navigation (like the test does), not direct URL.
  * Run: npx tsx scripts/extract-form-fields.ts
+ *
+ * Credentials are loaded from environment variables (.env file).
+ * See .env.example for required variables.
  */
+import 'dotenv/config';
 import { chromium } from 'playwright';
 
-const BASE_URL = 'https://staging.careconnectksa.com';
-const USERNAME = 'Riyada-support';
-const PASSWORD = 'Password12345$';
+const BASE_URL = process.env.BASE_URL || 'https://staging.careconnectksa.com';
+
+const APP_USERNAME = process.env.APP_USERNAME;
+const APP_PASSWORD = process.env.APP_PASSWORD;
+if (!APP_USERNAME || !APP_PASSWORD) {
+  throw new Error(
+    'Missing authentication credentials. ' +
+    'Ensure APP_USERNAME and APP_PASSWORD are set in your .env file. ' +
+    'See .env.example for the required environment variables.',
+  );
+}
+const USERNAME = APP_USERNAME;
+const PASSWORD = APP_PASSWORD;
 
 async function main() {
   console.log('Launching browser...');

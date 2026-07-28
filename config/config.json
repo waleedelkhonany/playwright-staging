@@ -1,9 +1,5 @@
 {
   "baseUrl": "https://staging.careconnectksa.com",
-  "credentials": {
-    "username": "Riyada-support",
-    "password": "Password12345$"
-  },
   "timeouts": {
     "navigation": 30000,
     "element": 10000

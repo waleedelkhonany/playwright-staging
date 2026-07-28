@@ -1,24 +1,47 @@
+import 'dotenv/config';
 import { defineConfig, devices } from '@playwright/test';
 import path from 'path';
 
 /**
- * Read environment variables from config.json
- * @type {{ baseUrl: string; headless: boolean; credentials: { username: string; password: string }; timeouts: { navigation: number; element: number } }}
+ * Read non-sensitive configuration from config.json.
+ * Sensitive credentials (username, password) are read from environment variables
+ * via the .env file (loaded by dotenv at the top of this file).
  */
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const configJson = require('./config/config.json');
 
 /**
+ * Resolve the base URL:
+ * - Prefer the BASE_URL environment variable (from .env or CI)
+ * - Fall back to config.json baseUrl
+ */
+const baseURL = process.env.BASE_URL || configJson.baseUrl;
+
+/**
  * Resolve headless mode:
- * - Respect the PLAYWRIGHT_HEADLESS environment variable if set (CI override)
+ * - Respect the HEADLESS environment variable if set (from .env or CI override)
  * - Otherwise fall back to the headless property in config.json
  * - Default to true if neither is provided (safe headless default)
  */
-const headless = process.env.PLAYWRIGHT_HEADLESS !== undefined
-  ? process.env.PLAYWRIGHT_HEADLESS === 'true'
+const headless = process.env.HEADLESS !== undefined
+  ? process.env.HEADLESS === 'true'
   : configJson.headless !== undefined
     ? configJson.headless
     : true;
+
+/**
+ * Resolve navigation timeout:
+ * - Prefer NAVIGATION_TIMEOUT env var
+ * - Fall back to config.json -> default 30_000
+ */
+const navigationTimeout = Number(process.env.NAVIGATION_TIMEOUT) || configJson.timeouts?.navigation || 30_000;
+
+/**
+ * Resolve element timeout:
+ * - Prefer ELEMENT_TIMEOUT env var
+ * - Fall back to config.json -> default 10_000
+ */
+const elementTimeout = Number(process.env.ELEMENT_TIMEOUT) || configJson.timeouts?.element || 10_000;
 
 export default defineConfig({
   /* Test configuration */
@@ -36,25 +59,25 @@ export default defineConfig({
   /* Global timeout settings */
   timeout: 60_000,
   expect: {
-    timeout: configJson.timeouts?.element ?? 10_000,
+    timeout: elementTimeout,
   },
 
   /* Shared settings for all projects */
   use: {
-    /* Base URL from config */
-    baseURL: configJson.baseUrl,
+    /* Base URL from env var or config */
+    baseURL,
 
     /* Collect trace when retrying the failed test */
-    trace: 'on-first-retry',
+    trace: (process.env.TRACE_MODE as 'on-first-retry' | 'on' | 'off' | 'retain-on-failure') || 'on-first-retry',
 
     /* Screenshot only on failure */
-    screenshot: 'only-on-failure',
+    screenshot: (process.env.SCREENSHOT_MODE as 'on' | 'off' | 'only-on-failure') || 'only-on-failure',
 
     /* Video recording only on failure */
-    video: 'retain-on-failure',
+    video: (process.env.VIDEO_MODE as 'on' | 'off' | 'retain-on-failure' | 'on-first-retry') || 'retain-on-failure',
 
     /* Navigation timeout */
-    navigationTimeout: configJson.timeouts?.navigation ?? 30_000,
+    navigationTimeout,
 
     /* Ignore HTTPS errors for staging with self-signed certs */
     ignoreHTTPSErrors: true,

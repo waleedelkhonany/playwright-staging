@@ -1,6 +1,5 @@
 import { type BrowserContext, type Page } from '@playwright/test';
 import { LoginPage } from '../pages/login.page';
-import config from '../../config/config.json';
 
 /**
  * Interface for credentials used during login.
@@ -17,13 +16,22 @@ export interface LoginCredentials {
 const STORAGE_STATE_PATH = 'test-results/auth-storage-state.json';
 
 /**
- * Default credentials from the project configuration.
+ * Default credentials from environment variables (.env file).
+ * Falls back to a descriptive error if not set.
  */
 export function getDefaultCredentials(): LoginCredentials {
-  return {
-    username: config.credentials.username,
-    password: config.credentials.password,
-  };
+  const username = process.env.APP_USERNAME;
+  const password = process.env.APP_PASSWORD;
+
+  if (!username || !password) {
+    throw new Error(
+      'Missing authentication credentials. ' +
+      'Ensure APP_USERNAME and APP_PASSWORD are set in your .env file. ' +
+      'See .env.example for the required environment variables.',
+    );
+  }
+
+  return { username, password };
 }
 
 /**
