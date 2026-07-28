@@ -183,6 +183,53 @@ export abstract class BasePage {
   }
 
   // =========================================================================
+  // Conditional Alert Dismissal
+  // =========================================================================
+
+  /**
+   * Conditionally dismiss the "Patient Allergies & Contamination Alert" modal
+   * that randomly appears on certain patient detail pages.
+   *
+   * This modal only shows for patients who have registered allergies or
+   * contamination records. The method uses a short timeout so it does NOT
+   * throw or fail the test if the modal is absent — it gracefully proceeds.
+   *
+   * Workflow:
+   *   1. Locate the modal by its container and title text
+   *   2. If visible: target the Close/"x" button using resilient selectors
+   *   3. Force-click the button (bypasses any overlapping backdrop issues)
+   *   4. Wait for the `.modal-backdrop` overlay to completely detach
+   *   5. If not visible: catch silently and return immediately
+   *
+   * Call this method after any navigation that lands on a detail page where
+   * the conditional alert might appear.
+   */
+  async dismissAllergiesAlertIfPresent(): Promise<void> {
+    // Selector matching the popup modal container
+    const allergyModal = this.page.locator('.modal:has-text("Patient Allergies & Contamination Alert")');
+
+    try {
+      if (await allergyModal.isVisible({ timeout: 3000 })) {
+        console.log('[Alert] Allergies popup detected. Dismissing...');
+
+        // Target Close button or top-right "x" button using accurate selectors
+        const closeButton = allergyModal.locator(
+          'button:has-text("Close"), button.btn-primary:has-text("Close"), button.close, .modal-header button[data-bs-dismiss="modal"]',
+        ).first();
+
+        await closeButton.waitFor({ state: 'visible', timeout: 3000 });
+        await closeButton.click({ force: true });
+
+        // Wait for modal backdrop/overlay to completely detach
+        await this.page.locator('.modal-backdrop').waitFor({ state: 'detached', timeout: 5000 }).catch(() => {});
+        console.log('[Alert] Modal dismissed successfully.');
+      }
+    } catch {
+      // Modal did not appear for this patient, proceed normally
+    }
+  }
+
+  // =========================================================================
   // Utilities
   // =========================================================================
 

@@ -654,28 +654,107 @@ export class PatientsPage extends BasePage {
 
     await this.waitForPageLoad();
     await this.waitForAnimation(1000);
+
+    // The patient detail page may show a conditional Allergies & Contamination
+    // Alert modal for patients with registered records. Dismiss if present.
+    await this.dismissAllergiesAlertIfPresent();
   }
 
+
   // =========================================================================
-  // Appointment — Modal/Popup Dismissals
+  // Encounters → Appointments Navigation
   // =========================================================================
 
   /**
-   * Dismiss the allergies/contamination modal that occasionally appears
-   * on the patient detail page and may block interaction with other elements.
+   * Navigate from the Patient Details page to the Appointments list
+   * via the Encounters top dropdown tab.
+   *
+   * Workflow:
+   *   1. Locate the "Encounters" dropdown in the top navigation bar
+   *      (typically a `<a class="dropdown-toggle">` or nav-link)
+   *   2. Click it to expand the dropdown menu
+   *   3. Click the "Appointments" option inside the dropdown
+   *   4. Wait for the Appointments page/table to fully load
    */
-  private async dismissAllergiesModalIfPresent(): Promise<void> {
-    const allergiesModal = this.page.locator('#allergiesModal, .modal:has-text("allergy"), .modal:has-text("Allergy")').first();
-    if (await allergiesModal.isVisible({ timeout: 2000 }).catch(() => false)) {
-      console.log('[Appointment] Dismissing allergies modal...');
-      const closeBtn = allergiesModal.locator('button:has-text("Close"), button:has-text("close"), .close, .btn-close').first();
-      if (await closeBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
-        await closeBtn.click();
-      } else {
-        await this.page.keyboard.press('Escape');
-      }
-      await this.waitForAnimation(1000);
+  async navigateToEncountersAppointments(): Promise<void> {
+    // Locate the Encounters dropdown trigger (nav-link, dropdown-toggle, or tab)
+    const encountersDropdown = this.page.locator(
+      'a:has-text("Encounters"), button:has-text("Encounters"), .nav-item:has-text("Encounters") a, [class*="encounters"]',
+    ).first();
+
+    console.log('[Navigation] Opening Encounters dropdown...');
+
+    // Some dropdowns are hover-triggered, others are click-triggered.
+    // Strategy: try hover first. If the Appointments option appears, skip click.
+    // Otherwise, click to open (covers click-only dropdowns like Bootstrap's default).
+    await encountersDropdown.hover().catch(() => {});
+    await this.waitForAnimation(500);
+
+    // Define the Appointments option locator (reused in both branches)
+    const appointmentsOption = this.page.locator(
+      'a:has-text("Appointments"), .dropdown-item:has-text("Appointments"), [class*="appointments"]',
+    ).first();
+
+    // Check if hover already triggered the dropdown
+    const dropdownAppeared = await appointmentsOption.isVisible({ timeout: 1000 }).catch(() => false);
+
+    if (!dropdownAppeared) {
+      // Hover didn't work — try clicking (standard Bootstrap behavior)
+      console.log('[Navigation] Hover did not trigger dropdown — clicking instead');
+
+      // Re-query in case a Livewire re-render detached the original locator
+      const reQuery = this.page.locator(
+        'a:has-text("Encounters"), button:has-text("Encounters"), .nav-item:has-text("Encounters") a, [class*="encounters"]',
+      ).first();
+      await this.click(reQuery);
+      await this.waitForAnimation(500);
     }
+
+    console.log('[Navigation] Clicking Appointments option...');
+    await this.click(appointmentsOption);
+
+    // Wait for the appointments page/table to load
+    await this.waitForPageLoad();
+    await this.waitForAnimation(1000);
+
+    // The appointments page may display a patient alerts modal if the selected
+    // patient has registered allergies or contamination records.
+    await this.dismissAllergiesAlertIfPresent();
+  }
+
+  /**
+   * Open (view) the latest appointment whose Status badge matches the given
+   * status name (default: "New").
+   *
+   * Based on actual DOM inspection:
+   *   Parent Button: <button class="btn btn-sm btn-outline-info" title="View Appointment" wire:click.prevent="viewAppointment(...)">
+   *   Inner Icon:    <i class="ri-eye-line"></i>
+   *   Parent Column: <td class="actions-column">
+   *
+   * @param targetStatus - The status text to filter by (default: "New")
+   */
+  async openLatestAppointmentByStatus(targetStatus = 'New'): Promise<void> {
+    // 1. Locate the row containing the specified status badge (e.g. "New")
+    const targetRow = this.page.locator('tr').filter({
+      has: this.page.locator('.badge, span', { hasText: targetStatus })
+    }).first();
+
+    await targetRow.waitFor({ state: 'visible', timeout: 10000 });
+
+    // 2. Locate the "View Appointment" eye button using exact inspect properties
+    const viewButton = targetRow.locator(
+      'button[title="View Appointment"], button.btn-outline-info, button:has(i.ri-eye-line)'
+    ).first();
+
+    await viewButton.scrollIntoViewIfNeeded();
+    await viewButton.waitFor({ state: 'visible', timeout: 5000 });
+    await viewButton.click();
+
+    // Wait for the appointment detail modal/offcanvas to render after clicking
+    // View. Bootstrap modal animations and Livewire hydration need time.
+    await this.waitForAnimation(1500);
+
+    console.log(`[Appointments] Clicked View Appointment for status: ${targetStatus}`);
   }
 
   // =========================================================================
@@ -688,7 +767,9 @@ export class PatientsPage extends BasePage {
    * Then waits for the appointment modal to be fully visible.
    */
   async clickCreateAppointment(): Promise<void> {
-    await this.dismissAllergiesModalIfPresent();
+    // Dismiss any blocking patient alerts that may have appeared when landing
+    // on the patient detail page (allergies/contamination banners/modals).
+    await this.dismissAllergiesAlertIfPresent();
     await this.click(this.createAppointmentButton);
 
     // Wait for the appointment modal/form to appear (Bootstrap modal animation)
