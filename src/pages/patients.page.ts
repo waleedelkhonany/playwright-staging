@@ -726,6 +726,9 @@ export class PatientsPage extends BasePage {
    * Open (view) the latest appointment whose Status badge matches the given
    * status name (default: "New").
    *
+   * Handles paginated tables by iterating through pages if the target row
+   * is not visible on the current page.
+   *
    * Based on actual DOM inspection:
    *   Parent Button: <button class="btn btn-sm btn-outline-info" title="View Appointment" wire:click.prevent="viewAppointment(...)">
    *   Inner Icon:    <i class="ri-eye-line"></i>
@@ -734,27 +737,61 @@ export class PatientsPage extends BasePage {
    * @param targetStatus - The status text to filter by (default: "New")
    */
   async openLatestAppointmentByStatus(targetStatus = 'New'): Promise<void> {
-    // 1. Locate the row containing the specified status badge (e.g. "New")
-    const targetRow = this.page.locator('tr').filter({
-      has: this.page.locator('.badge, span', { hasText: targetStatus })
-    }).first();
+    const maxPages = 10;
 
-    await targetRow.waitFor({ state: 'visible', timeout: 10000 });
+    for (let pageIndex = 0; pageIndex < maxPages; pageIndex++) {
+      if (pageIndex > 0) {
+        // Not the first page — click the "Next" pagination button
+        const nextButton = this.page.locator(
+          'nav a:has-text("Next"), nav button:has-text("Next"), ' +
+          'nav [rel="next"], nav li:has-text("Next") button, ' +
+          '[aria-label="Next"], .pagination .next a, .pagination .next button',
+        ).first();
 
-    // 2. Locate the "View Appointment" eye button using exact inspect properties
-    const viewButton = targetRow.locator(
-      'button[title="View Appointment"], button.btn-outline-info, button:has(i.ri-eye-line)'
-    ).first();
+        const nextVisible = await nextButton.isVisible({ timeout: 2000 }).catch(() => false);
+        if (!nextVisible) break; // No more pages
 
-    await viewButton.scrollIntoViewIfNeeded();
-    await viewButton.waitFor({ state: 'visible', timeout: 5000 });
-    await viewButton.click();
+        console.log(`[Appointments] Navigating to page ${pageIndex + 2}...`);
+        await nextButton.click();
+        await this.waitForAnimation(1000);
+      }
 
-    // Wait for the appointment detail modal/offcanvas to render after clicking
-    // View. Bootstrap modal animations and Livewire hydration need time.
-    await this.waitForAnimation(1500);
+      // 1. Try to locate the row with the target status on the current page
+      const targetRow = this.page.locator('tr').filter({
+        has: this.page.locator('.badge, span', { hasText: targetStatus })
+      }).first();
 
-    console.log(`[Appointments] Clicked View Appointment for status: ${targetStatus}`);
+      const rowVisible = await targetRow.isVisible({ timeout: 3000 }).catch(() => false);
+
+      if (!rowVisible) {
+        console.log(`[Appointments] Status "${targetStatus}" not found on page ${pageIndex + 1}, checking next...`);
+        continue; // Try next page
+      }
+
+      // Row found and visible on this page
+      console.log(`[Appointments] Found ${targetStatus} row on page ${pageIndex + 1}`);
+
+      // 2. Locate the "View Appointment" eye button using exact inspect properties
+      const viewButton = targetRow.locator(
+        'button[title="View Appointment"], button.btn-outline-info, button:has(i.ri-eye-line)'
+      ).first();
+
+      await viewButton.scrollIntoViewIfNeeded();
+      await viewButton.waitFor({ state: 'visible', timeout: 5000 });
+      await viewButton.click();
+
+      // Wait for the appointment detail modal/offcanvas to render after clicking
+      // View. Bootstrap modal animations and Livewire hydration need time.
+      await this.waitForAnimation(1500);
+
+      console.log(`[Appointments] Clicked View Appointment for status: ${targetStatus}`);
+      return; // Success
+    }
+
+    // If we exhaust all pages without finding the target status, throw
+    throw new Error(
+      `[Appointments] No visible row with status "${targetStatus}" found after paginating through all available pages`
+    );
   }
 
   // =========================================================================
