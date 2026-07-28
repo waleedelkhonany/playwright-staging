@@ -58,11 +58,11 @@ test.describe('Patients Module', () => {
       //    - Form structure verified in scripts/investigate-patient-form.ts
       // -----------------------------------------------------------------------
       const patient = buildPatient({
-        secondaryMobile: undefined as any,
-        dateOfMedicalAcceptance: undefined as any,
-        dateOfHomeSettingsAcceptance: undefined as any,
-        dateOfReferral: undefined as any,
-        idExpirationDate: undefined as any,
+        secondaryMobile: undefined,
+        dateOfMedicalAcceptance: undefined,
+        dateOfHomeSettingsAcceptance: undefined,
+        dateOfReferral: undefined,
+        idExpirationDate: undefined,
       });
 
       console.log('═══════════════════════════════════════════════');

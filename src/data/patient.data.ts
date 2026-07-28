@@ -221,7 +221,7 @@ export function buildMinimalPatient(overrides?: Partial<PatientData>): PatientDa
     maritalStatus: 'Married',
     occupation: 'Student',
     nationality: 'Saudi Arabian',
-    patientSystem: 'Center',
+    patientSystem: fakerEn.helpers.arrayElement(['Center', 'Home']),  // Auto-aligned by page object
     emergencyContactPerson: 'Emergency Contact',
     emergencyContactNo: generateSaudiPhoneNumber('local'),
     governmentIdType: 'national_id',
