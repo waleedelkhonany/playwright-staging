@@ -9,7 +9,7 @@
 import 'dotenv/config';
 import { chromium } from 'playwright';
 
-const BASE_URL = process.env.BASE_URL || 'https://staging.careconnectksa.com';
+const BASE_URL = process.env.BASE_URL;
 
 const APP_USERNAME = process.env.APP_USERNAME;
 const APP_PASSWORD = process.env.APP_PASSWORD;

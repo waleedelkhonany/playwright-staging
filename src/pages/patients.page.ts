@@ -31,7 +31,6 @@ export class PatientsPage extends BasePage {
   readonly secondaryMobileInput: Locator;
   readonly emailInput: Locator;
   readonly dateOfBirthInput: Locator;
-  readonly firstEverHdInput: Locator;
   readonly emergencyContactPersonInput: Locator;
   readonly emergencyContactNoInput: Locator;
   readonly nationalIdInput: Locator;
@@ -39,7 +38,6 @@ export class PatientsPage extends BasePage {
   readonly dateOfMedicalAcceptanceInput: Locator;
   readonly dateOfHomeSettingsAcceptanceInput: Locator;
   readonly dateOfReferralInput: Locator;
-  readonly dateOfFirstHhdTreatmentInput: Locator;
 
   // Appointment
   readonly createAppointmentButton: Locator;
@@ -94,7 +92,6 @@ export class PatientsPage extends BasePage {
     this.secondaryMobileInput = page.getByPlaceholder('Enter Secondary Mobile');
     this.emailInput = page.getByPlaceholder('Enter Email');
     this.dateOfBirthInput = page.getByPlaceholder('Enter Date of birth');
-    this.firstEverHdInput = page.getByPlaceholder('Enter First Ever HD');
     this.emergencyContactNoInput = page.getByPlaceholder('Enter Contact No');
     this.nationalIdInput = page.getByPlaceholder(/National ID/i)
       .or(page.locator('input[name="national_id"]').first());
@@ -105,8 +102,6 @@ export class PatientsPage extends BasePage {
     this.dateOfMedicalAcceptanceInput = page.locator('input[name="medical_acceptance_at"]').first();
     this.dateOfHomeSettingsAcceptanceInput = page.locator('input[name="home_settings_acceptance_at"]').first();
     this.dateOfReferralInput = page.locator('input[name="referral_at"]').first();
-    this.dateOfFirstHhdTreatmentInput = page.locator('input[name="first_hhd_treatment_at"]').first();
-
     // Emergency Contact Person (precedes Contact No input)
     this.emergencyContactPersonInput = page.getByPlaceholder('Enter Contact No')
       .locator('xpath=preceding::input[1]');
@@ -248,11 +243,9 @@ export class PatientsPage extends BasePage {
     await this.fillIfDefined(this.secondaryMobileInput, patient.secondaryMobile);
     await this.fillIfDefined(this.emailInput, patient.email);
     await this.fillIfDefined(this.dateOfBirthInput, patient.dateOfBirth);
-    await this.fillIfDefined(this.firstEverHdInput, patient.firstEverHd);
     await this.fillIfDefined(this.dateOfMedicalAcceptanceInput, patient.dateOfMedicalAcceptance);
     await this.fillIfDefined(this.dateOfHomeSettingsAcceptanceInput, patient.dateOfHomeSettingsAcceptance);
     await this.fillIfDefined(this.dateOfReferralInput, patient.dateOfReferral);
-    await this.fillIfDefined(this.dateOfFirstHhdTreatmentInput, patient.dateOfFirstHhdTreatment);
     await this.fillIfDefined(this.emergencyContactPersonInput, patient.emergencyContactPerson);
     await this.fillIfDefined(this.emergencyContactNoInput, patient.emergencyContactNo);
     await this.fillIfDefined(this.nationalIdInput, patient.nationalId);
@@ -262,25 +255,56 @@ export class PatientsPage extends BasePage {
     // Each select is identified by unique option text we confirmed in diagnostics
     await this.setSelectByOptionText('select', 5, patient.codeStatus);       // Code Status
     await this.setSelectByOptionText('select', 6, patient.isolationType);    // Isolation Type
-    await this.setSelectByOptionText('select', 8, patient.gender);          // Gender
-    await this.setSelectByOptionText('select', 9, patient.maritalStatus);    // Marital Status
-    await this.setSelectByOptionText('select', 10, patient.occupation);     // Occupation
-    await this.setSelectByOptionText('select', 11, patient.nationality);    // Nationality
-    await this.setSelectByOptionText('select', 12, patient.isCash);         // Is Cash
-    await this.setSelectByOptionText('select', 13, patient.sapProject);     // SAP Project
-    await this.setSelectByOptionText('select', 14, patient.isEmployee);     // Is Employee
-    await this.setSelectByOptionText('select', 15, patient.isVisitor);      // Is Visitor
-    await this.setSelectByOptionText('select', 16, patient.patientSystem);  // Patient System
     await this.setSelectByOptionText('select', 7, patient.referredHospital);  // Referred Hospital (named)
-    await this.setSelectByOptionText('select', 18, patient.religion);       // Religion (named)
-    await this.setSelectByOptionText('select', 19, patient.preferredLanguage); // Language (named)
-
-    // Patient System toggle (no-select2 select for Center/Home toggle)
-    await this.setSelectByOptionText('select', 1, 
-      patient.patientSystem === 'Center' ? 'In Center' : 'Home Hemodialysis');
+    await this.setSelectByOptionText('select', 9, patient.gender);          // Gender
+    await this.setSelectByOptionText('select', 10, patient.maritalStatus);   // Marital Status
+    await this.setSelectByOptionText('select', 11, patient.occupation);     // Occupation
+    await this.setSelectByOptionText('select', 12, patient.nationality);    // Nationality
+    await this.setSelectByOptionText('select', 13, patient.isEmployee);     // Is Employee
+    await this.setSelectByOptionText('select', 14, patient.isVisitor);      // Is Visitor
+    await this.setSelectByOptionText('select', 15, patient.patientSystem);  // Patient System
+    // Ensure Patient System matches the header Location — the server rejects
+    // mismatches (e.g., "Home" Patient System with "In Center" header Location).
+    // This override handles any data the caller passes, making the form fill
+    // robust regardless of the patient data provided.
+    await this.syncPatientSystemWithHeaderLocation();
+    await this.setSelectByOptionText('select', 17, patient.religion);       // Religion
+    await this.setSelectByOptionText('select', 18, patient.preferredLanguage); // Language
 
     // --- Radio (Government ID Type) ---
     await this.setRadioValue('id_type', patient.governmentIdType);
+  }
+
+  /**
+   * Read the current header Location select and set the Patient System select
+   * to match. The server enforces that Patient System (#15) must align with
+   * the header Location (#1):
+   *   - "In Center"       → Patient System "Center"
+   *   - "Home Hemodialysis" → Patient System "Home"
+   *
+   * This method reads select #1's selected option text and maps it to the
+   * corresponding Patient System value for select #15, then sets it.
+   * Call this AFTER setting patientSystem to ensure alignment regardless of
+   * what data was passed in.
+   */
+  private async syncPatientSystemWithHeaderLocation(): Promise<void> {
+    const mappedSystem = await this.page.evaluate(() => {
+      const allSelects = document.querySelectorAll('select');
+      const headerLocation = allSelects[1] as HTMLSelectElement | null;
+      if (!headerLocation) return null;
+
+      const selectedText = headerLocation.options[headerLocation.selectedIndex]?.textContent?.trim() || '';
+
+      // Map header Location text to Patient System text
+      if (selectedText.includes('In Center')) return 'Center';
+      if (selectedText.includes('Home Hemodialysis')) return 'Home';
+      return null; // Unknown location — don't override
+    });
+
+    if (mappedSystem) {
+      console.log(`[PatientSystem] Header Location → "${mappedSystem}" (auto-synced)`);
+      await this.setSelectByOptionText('select', 15, mappedSystem);
+    }
   }
 
   /**
@@ -493,11 +517,42 @@ export class PatientsPage extends BasePage {
     // Check for SweetAlert2 validation popup
     const swalPopup = this.page.locator('.swal2-popup').first();
     if (await swalPopup.isVisible({ timeout: 2000 }).catch(() => false)) {
+      // Extract and log the popup text for diagnostics
+      const popupText = await this.page.evaluate(() => {
+        const containers = [
+          document.querySelector('.swal2-html-container'),
+          document.querySelector('.swal2-content'),
+          document.querySelector('.swal2-title'),
+          document.querySelector('.swal2-popup'),
+        ];
+        // Also capture validation errors in HTML lists or spans
+        const errors: string[] = [];
+        document.querySelectorAll('.swal2-html-container li, .swal2-html-container span, .invalid-feedback, .error-message, [class*="error"]').forEach(el => {
+          const t = el.textContent?.trim();
+          if (t) errors.push(t);
+        });
+        for (const el of containers) {
+          if (el?.textContent?.trim()) {
+            const fullText = el.textContent.trim();
+            if (errors.length > 0) return `${fullText} | Details: ${errors.join('; ')}`;
+            return fullText;
+          }
+        }
+        if (errors.length > 0) return errors.join('; ');
+        return '';
+      }).catch(() => '');
+      console.warn(`[Save] Validation error: "${popupText}"`);
+
+      // Capture screenshot to inspect the validation error visually
+      await this.page.screenshot({
+        path: `test-results/artifacts/save-validation-error-${Date.now()}.png`,
+      }).catch(() => {});
+
       const okBtn = swalPopup.locator('button:has-text("OK"), .swal2-confirm').first();
       if (await okBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
         await okBtn.click();
       }
-      return; // Validation failed — test should check for this
+      return; // Validation failed
     }
 
     // Otherwise wait for success navigation

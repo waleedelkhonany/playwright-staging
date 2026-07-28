@@ -1,5 +1,8 @@
 {
-  "baseUrl": "https://staging.careconnectksa.com",
+  "_comment_baseUrl": [
+    "baseUrl is NOT read from here — it MUST be set via the BASE_URL environment",
+    "variable in your .env file. See playwright.config.ts for details."
+  ],
   "timeouts": {
     "navigation": 30000,
     "element": 10000

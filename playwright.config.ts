@@ -6,16 +6,29 @@ import path from 'path';
  * Read non-sensitive configuration from config.json.
  * Sensitive credentials (username, password) are read from environment variables
  * via the .env file (loaded by dotenv at the top of this file).
+ *
+ * NOTE: baseUrl is NOT read from config.json — it MUST be set via the BASE_URL
+ * environment variable in your .env file. This ensures the target environment
+ * is always explicit and never accidentally overridden.
  */
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const configJson = require('./config/config.json');
 
 /**
- * Resolve the base URL:
- * - Prefer the BASE_URL environment variable (from .env or CI)
- * - Fall back to config.json baseUrl
+ * Resolve the base URL — ALWAYS from the .env file.
+ * A descriptive error is thrown if BASE_URL is not set.
  */
-const baseURL = process.env.BASE_URL || configJson.baseUrl;
+const baseURL = (() => {
+  const url = process.env.BASE_URL;
+  if (!url) {
+    throw new Error(
+      'BASE_URL is not set. You MUST define it in your .env file.\n' +
+      '  Copy .env.example to .env and set BASE_URL to your staging instance.\n' +
+      '  Example: BASE_URL=https://staging.careconnectksa.com',
+    );
+  }
+  return url;
+})();
 
 /**
  * Resolve headless mode:
@@ -64,7 +77,7 @@ export default defineConfig({
 
   /* Shared settings for all projects */
   use: {
-    /* Base URL from env var or config */
+    /* Base URL from .env (BASE_URL) — config.json fallback is intentionally removed */
     baseURL,
 
     /* Collect trace when retrying the failed test */

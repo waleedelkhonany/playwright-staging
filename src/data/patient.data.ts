@@ -89,8 +89,6 @@ const CODE_STATUSES = [
   'Comfort Measures Only',
 ] as const;
 
-const PATIENT_SYSTEMS = ['Center', 'Home'] as const;
-
 const ISOLATION_TYPES = [
   'Standard Precautions',
   'Contact Isolation',
@@ -178,7 +176,7 @@ export function buildPatient(overrides?: Partial<PatientData>): PatientData {
     maritalStatus: fakerEn.helpers.arrayElement([...MARITAL_STATUSES]),
     occupation: fakerEn.helpers.arrayElement([...OCCUPATIONS]),
     nationality: fakerEn.helpers.arrayElement([...NATIONALITIES]),
-    patientSystem: fakerEn.helpers.arrayElement([...PATIENT_SYSTEMS]),
+    patientSystem: fakerEn.helpers.arrayElement(['Center', 'Home']),  // Auto-aligned by page object syncPatientSystemWithHeaderLocation()
     emergencyContactPerson: sanitizeEnglishName(`${fakerEn.person.firstName()} ${fakerEn.person.lastName()}`),
     emergencyContactNo,
     governmentIdType: 'national_id', // Radio button VALUE (not display text)
@@ -194,14 +192,10 @@ export function buildPatient(overrides?: Partial<PatientData>): PatientData {
     email: fakerEn.internet.email().toLowerCase(),
     secondaryMobile: generateSaudiPhoneNumber('local'),
     isolationType: fakerEn.helpers.arrayElement([...ISOLATION_TYPES]),
-    firstEverHd: generateDateOfBirth(), // Date of first Hemodialysis
     dateOfMedicalAcceptance: generateFutureDate(1),
     dateOfHomeSettingsAcceptance: generateFutureDate(1),
     dateOfReferral: generateFutureDate(1),
-    dateOfFirstHhdTreatment: generateFutureDate(1),
     referredHospital: fakerEn.helpers.arrayElement([...REFERRED_HOSPITALS]),
-    // Is Cash is a SELECT with options Yes/No (value 1/0)
-    isCash: fakerEn.datatype.boolean() ? '1' : '0',
     isEmployee: fakerEn.datatype.boolean() ? '1' : '0',
     isVisitor: fakerEn.datatype.boolean() ? '1' : '0',
     idExpirationDate: generateFutureDate(10),
@@ -217,9 +211,9 @@ export function buildMinimalPatient(overrides?: Partial<PatientData>): PatientDa
     firstNameAr: fakerAr.person.firstName(),
     middleNameAr: fakerAr.person.firstName(),
     familyNameAr: fakerAr.person.lastName(),
-    givenNameEn: fakerEn.person.firstName(),
-    middleNameEn: fakerEn.person.firstName(),
-    familyNameEn: fakerEn.person.lastName(),
+    givenNameEn: sanitizeEnglishName(fakerEn.person.firstName()),
+    middleNameEn: sanitizeEnglishName(fakerEn.person.firstName()),
+    familyNameEn: sanitizeEnglishName(fakerEn.person.lastName()),
     mobile: generateSaudiPhoneNumber('local'),
     codeStatus: 'Full Code',
     dateOfBirth: generateDateOfBirth(),
@@ -232,6 +226,15 @@ export function buildMinimalPatient(overrides?: Partial<PatientData>): PatientDa
     emergencyContactNo: generateSaudiPhoneNumber('local'),
     governmentIdType: 'national_id',
     nationalId: generateNationalId(),
+    isolationType: 'No Isolation Required',
+    // Additional fields the server may require for a successful save
+    email: fakerEn.internet.email().toLowerCase(),
+    referredHospital: 'King Abdulaziz Medical City',
+    religion: 'Islam',
+    preferredLanguage: 'English',
+    // Boolean selects (Yes/No with values 1/0)
+    isEmployee: '0',
+    isVisitor: '0',
     ...overrides,
   };
 }
