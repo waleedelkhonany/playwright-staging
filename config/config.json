@@ -1,0 +1,67 @@
+{
+  "baseUrl": "https://staging.careconnectksa.com",
+  "credentials": {
+    "username": "Riyada-support",
+    "password": "Password12345$"
+  },
+  "timeouts": {
+    "navigation": 30000,
+    "element": 10000
+  },
+
+  "_comment_execution": [
+    "Execution visibility — controls whether the browser shows on screen:",
+    "  \"headless\": false  →  Visible (Headed) mode — watch tests run in real time",
+    "  \"headless\": true   →  Background (Headless) mode — runs silently, no UI"
+  ],
+  "headless": false,
+
+  "saudiPhone": {
+    "prefixes": ["055", "056", "057", "058", "059", "053", "054", "050"],
+    "landlinePrefixes": ["011", "012", "013", "014", "016", "017"],
+    "mobileFormat": "+9665#########"
+  },
+  "staff": {
+    "primaryTeamLeaderNurse": "Test Nurse",
+    "primaryNurseName": "Test Nurse",
+    "primaryPhysicianName": "Test_Doctor",
+    "primarySocialWorkerName": "waad.albaqami"
+  },
+  "locale": "ar-SA",
+  "timezone": "Asia/Riyadh",
+
+  "appointment": {
+    "targetPatientIdentifier": "121",
+    "visitType": "Treatment Nurse Visit",
+    "_comment_availableVisitTypes": ["Select Visit Type", "Initial Visit", "Treatment Nurse Visit", "Social Worker Visit", "Test Nurse All Forme"],
+
+    "_comment_dynamicDateTime": "Optional: override auto-generated values. Set to null or omit to use today/now defaults.",
+    "appointmentDate": null,
+    "startTime": null,
+    "endTime": null,
+
+    "_comment_defaultDurationMinutes": "Used to calculate endTime when startTime is provided but endTime is not (unless both are null).",
+    "defaultDurationMinutes": 60
+  },
+
+  "headerContext": {
+    "_comment_branchOptions": [
+      "Available Branch options in the top navigation header:",
+      "  - Main Branch",
+      "  - Jeddah",
+      "  - Branch 3",
+      "  - Branch 4",
+      "  - Branch 5",
+      "  - Branch 6",
+      "  - Branch 7"
+    ],
+    "targetBranch": "Main Branch",
+
+    "_comment_locationOptions": [
+      "Available Location/System options in the top navigation header:",
+      "  - In Center",
+      "  - Home Hemodialysis"
+    ],
+    "targetLocation": "In Center"
+  }
+}

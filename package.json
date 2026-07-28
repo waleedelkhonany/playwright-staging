@@ -1,0 +1,20 @@
+{
+  "name": "careconnect-ksa-e2e",
+  "version": "1.0.0",
+  "description": "Playwright E2E tests for CareConnect KSA (staging)",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:headed": "npx playwright test --headed",
+    "test:debug": "npx playwright test --debug",
+    "test:chrome": "npx playwright test --project=chromium",
+    "report": "npx playwright show-report",
+    "codegen": "npx playwright codegen",
+    "install": "npx playwright install --with-deps"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^9.2.0",
+    "@playwright/test": "^1.48.0",
+    "@types/node": "^26.1.1",
+    "typescript": "^5.6.0"
+  }
+}
