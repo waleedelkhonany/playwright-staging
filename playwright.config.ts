@@ -80,6 +80,9 @@ export default defineConfig({
     /* Base URL from .env (BASE_URL) — config.json fallback is intentionally removed */
     baseURL,
 
+    /* Headless/headed mode — set at the test runner fixture level (not inside launchOptions) */
+    headless,
+
     /* Collect trace when retrying the failed test */
     trace: (process.env.TRACE_MODE as 'on-first-retry' | 'on' | 'off' | 'retain-on-failure') || 'on-first-retry',
 
@@ -102,11 +105,6 @@ export default defineConfig({
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
-
-        /* Launch options — headless/headed controlled by config.json */
-        launchOptions: {
-          headless,
-        },
 
         /* Use a fixed viewport for consistency */
         viewport: { width: 1366, height: 768 },
