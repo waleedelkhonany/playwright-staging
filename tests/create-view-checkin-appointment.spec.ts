@@ -25,7 +25,7 @@
  * Configuration is loaded from config/config.json for settings like the
  * target patient identifier, visit type, header context, etc.
  *
- * @see config/config.json — appointment section (targetPatientIdentifier, visitType)
+ * @see config/appointment.config.json — appointment settings (targetPatientIdentifier)
  * @see config/config.json — headerContext section
  * @see src/pages/patients.page.ts — patient search & appointments navigation
  * @see src/pages/appointment-detail.page.ts — modal confirm + check-in
@@ -33,8 +33,8 @@
  */
 
 import { test, expect } from '../src/fixtures/auth.fixture';
-import { buildAppointment } from '../src/data/appointment.data';
-import config from '../config/config.json';
+import { getAppointmentData } from '../src/helpers/appointment-data.loader';
+import fullScenario from '../config/appointment-scenarios/full-appointment.scenario.json';
 import { ensureHeaderContext } from '../src/helpers/header-context.helper';
 import { AppointmentDetailPage } from '../src/pages/appointment-detail.page';
 import { VisitsPage } from '../src/pages/visits.page';
@@ -50,10 +50,10 @@ test.describe('E2E: Create → View → Check-In Appointment', () => {
 
   test('should create an appointment, view it, confirm care team, check in, and redirect to Visit page', async ({ page, patientsPage }) => {
     // =========================================================================
-    // 1. Load configurable test parameters and generate dynamic data
+    // 1. Load configurable test parameters and generate appointment data from JSON
     // =========================================================================
-    const targetPatient = config.appointment.targetPatientIdentifier;
-    const appointment = buildAppointment();
+    const targetPatient = fullScenario._config.targetPatientIdentifier;
+    const appointment = getAppointmentData('full-appointment.scenario.json');
 
     console.log('═══════════════════════════════════════════════');
     console.log('  COMBINED APPOINTMENT LIFECYCLE TEST');
@@ -61,7 +61,7 @@ test.describe('E2E: Create → View → Check-In Appointment', () => {
     console.log(`  Visit Type:      ${appointment.visitType}`);
     console.log(`  Appointment Date: ${appointment.appointmentDate}`);
     console.log(`  Appointment Time: ${appointment.appointmentTime}`);
-    console.log(`  Duration:         ${appointment.durationMinutes} min`);
+    console.log(`  End Time:         ${appointment.endTime}`);
     console.log(`  Notes:            ${appointment.notes}`);
     console.log('═══════════════════════════════════════════════');
 

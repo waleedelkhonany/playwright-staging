@@ -21,7 +21,7 @@
  * Configuration is loaded from config/config.json for settings like the
  * target patient identifier, header context, etc.
  *
- * @see config/config.json — appointment section (targetPatientIdentifier)
+ * @see config/appointment-scenarios/view-checkin-appointment.scenario.json — _config
  * @see config/config.json — headerContext section
  * @see src/pages/patients.page.ts — patient search & appointments navigation
  * @see src/pages/appointment-detail.page.ts — modal confirm + check-in
@@ -29,7 +29,7 @@
  */
 
 import { test, expect } from '../src/fixtures/auth.fixture';
-import config from '../config/config.json';
+import viewCheckinScenario from '../config/appointment-scenarios/view-checkin-appointment.scenario.json';
 import { ensureHeaderContext } from '../src/helpers/header-context.helper';
 import { AppointmentDetailPage } from '../src/pages/appointment-detail.page';
 import { VisitsPage } from '../src/pages/visits.page';
@@ -47,11 +47,13 @@ test.describe('E2E: View and Check-In Appointment', () => {
     // =========================================================================
     // 1. Load configurable test parameters
     // =========================================================================
-    const targetPatient = config.appointment.targetPatientIdentifier;
+    const targetPatient = viewCheckinScenario._config.targetPatientIdentifier;
+    const today = new Date().toLocaleDateString('en-CA').replace(/-/g, '/'); // YYYY/MM/DD (matching table display)
 
     console.log('═══════════════════════════════════════════════');
     console.log('  VIEW & CHECK-IN APPOINTMENT TEST');
     console.log(`  Target Patient:  ${targetPatient}`);
+    console.log(`  Target Date:     ${today}`);
     console.log('═══════════════════════════════════════════════');
 
     // =========================================================================
@@ -77,10 +79,10 @@ test.describe('E2E: View and Check-In Appointment', () => {
     console.log('[Test] ✅ Encounters → Appointments navigated');
 
     // =========================================================================
-    // 4. Open the latest "New" appointment detail modal
+    // 4. Open today's "New" appointment detail modal
     // =========================================================================
-    console.log('\n📋 Step 3: Open latest "New" appointment...');
-    await patientsPage.openLatestAppointmentByStatus('New');
+    console.log('\n📋 Step 3: Open today\'s "New" appointment...');
+    await patientsPage.openLatestAppointmentByStatus('New', today);
 
 
     // =========================================================================
@@ -177,7 +179,7 @@ test.describe('E2E: View and Check-In Appointment', () => {
     console.log('  ✅ FULL WORKFLOW COMPLETED SUCCESSFULLY');
     console.log('  ✅ Patient selected');
     console.log('  ✅ Encounters → Appointments navigated');
-    console.log(`  ✅ Latest "New" appointment opened`);
+    console.log(`  ✅ Today's "New" appointment opened (${today})`);
     console.log(`  ✅ ${confirmedCount} care team member(s) confirmed`);
     console.log(`  ✅ Check-In performed: "${checkInResult}"`);
     console.log('  ✅ Redirected to Visit page');

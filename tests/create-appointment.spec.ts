@@ -28,8 +28,10 @@
  */
 
 import { test, expect } from '../src/fixtures/auth.fixture';
-import { buildAppointment } from '../src/data/appointment.data';
-import config from '../config/config.json';
+import { getAppointmentData } from '../src/helpers/appointment-data.loader';
+import fullScenario from '../config/appointment-scenarios/full-appointment.scenario.json';
+import minimalScenario from '../config/appointment-scenarios/minimal-appointment.scenario.json';
+import morningScenario from '../config/appointment-scenarios/morning-appointment.scenario.json';
 import { ensureHeaderContext } from '../src/helpers/header-context.helper';
 
 test.describe('E2E: Create Patient Appointment', () => {
@@ -47,24 +49,23 @@ test.describe('E2E: Create Patient Appointment', () => {
     // -----------------------------------------------------------------------
     // 1. Load configurable test parameters
     // -----------------------------------------------------------------------
-    const targetPatient = config.appointment.targetPatientIdentifier;
-    const defaultVisitType = config.appointment.visitType;
+    const targetPatient = fullScenario._config.targetPatientIdentifier;
 
     console.log('═══════════════════════════════════════════════');
     console.log('  APPOINTMENT TEST CONFIGURATION');
     console.log(`  Target Patient:  ${targetPatient}`);
-    console.log(`  Visit Type:      ${defaultVisitType}`);
     console.log('═══════════════════════════════════════════════');
 
     // -----------------------------------------------------------------------
-    // 2. Generate dynamic appointment data using Faker
-    //    Uses config.json visit type by default, but can be overridden.
+    // 2. Generate appointment data from scenario file
+    //    'DYNAMIC' fields produce fresh random values each run.
     // -----------------------------------------------------------------------
-    const appointment = buildAppointment();
+    const appointment = getAppointmentData('full-appointment.scenario.json');
 
+    console.log(`  Visit Type:       ${appointment.visitType}`);
     console.log(`  Appointment Date: ${appointment.appointmentDate}`);
     console.log(`  Appointment Time: ${appointment.appointmentTime}`);
-    console.log(`  Duration:         ${appointment.durationMinutes} min`);
+    console.log(`  End Time:         ${appointment.endTime}`);
     console.log(`  Notes:            ${appointment.notes}`);
     console.log('═══════════════════════════════════════════════\\n');
 
@@ -89,72 +90,74 @@ test.describe('E2E: Create Patient Appointment', () => {
     console.log(`\n✅ Appointment created successfully: "${successMessage}"`);
   });
 
-  // test('should create an appointment with minimal required fields', async ({ patientsPage }) => {
-  //   // -----------------------------------------------------------------------
-  //   // 1. Use config values for target patient and visit type
-  //   // -----------------------------------------------------------------------
-  //   const targetPatient = config.appointment.targetPatientIdentifier;
+    // =========================================================================
+    // Custom Scenario: Morning appointment with fixed time slot
+    // =========================================================================
 
-  //   // Minimal appointment: only visit type and date (no time/notes/duration)
-  //   const appointment = buildAppointment({
-  //     appointmentTime: undefined,
-  //     notes: undefined,
-  //     durationMinutes: undefined,
-  //   });
+    test('should create a morning appointment with a fixed 09:00 time slot', async ({ patientsPage }) => {
+      // -----------------------------------------------------------------------
+      // 1. Load configurable test parameters
+      // -----------------------------------------------------------------------
+      const targetPatient = morningScenario._config.targetPatientIdentifier;
 
-  //   console.log('═══════════════════════════════════════════════');
-  //   console.log('  MINIMAL APPOINTMENT TEST');
-  //   console.log(`  Patient:   ${targetPatient}`);
-  //   console.log(`  Visit:     ${appointment.visitType}`);
-  //   console.log(`  Date:      ${appointment.appointmentDate}`);
-  //   console.log('═══════════════════════════════════════════════\\n');
+      // -----------------------------------------------------------------------
+      // 2. Generate appointment data from the morning-scenario JSON file
+      //    - visitType:     "Initial Visit" (static)
+      //    - appointmentTime: "09:00" (static morning slot)
+      //    - endTime:       "10:00" (static, 1-hour slot)
+      //    - appointmentDate: {{future_date}} (dynamic, random future date)
+      //    - notes:         DYNAMIC (random sentence each run)
+      // -----------------------------------------------------------------------
+      const appointment = getAppointmentData('morning-appointment.scenario.json');
 
-  //   // -----------------------------------------------------------------------
-  //   // 2. Execute workflow
-  //   // -----------------------------------------------------------------------
-  //   await patientsPage.navigateToPatients();
-  //   const successMessage = await patientsPage.createAppointment(
-  //     targetPatient,
-  //     appointment,
-  //   );
+      console.log('═══════════════════════════════════════════════');
+      console.log('  MORNING APPOINTMENT SCENARIO');
+      console.log(`  Target Patient:  ${targetPatient}`);
+      console.log(`  Visit Type:      ${appointment.visitType}`);
+      console.log(`  Appointment Date: ${appointment.appointmentDate}`);
+      console.log(`  Appointment Time: ${appointment.appointmentTime}`);
+      console.log(`  End Time:         ${appointment.endTime}`);
+      console.log(`  Notes:            ${appointment.notes}`);
+      console.log('═══════════════════════════════════════════════\\n');
 
-  //   // -----------------------------------------------------------------------
-  //   // 3. Assert
-  //   // -----------------------------------------------------------------------
-  //   expect(successMessage).toBeTruthy();
-  //   console.log(`\n✅ Minimal appointment created: "${successMessage}"`);
-  // });
+      // -----------------------------------------------------------------------
+      // 3. Execute the full create-appointment workflow
+      // -----------------------------------------------------------------------
+      await patientsPage.navigateToPatients();
+      const successMessage = await patientsPage.createAppointment(
+        targetPatient,
+        appointment,
+      );
 
-  // test('should create an appointment with a different visit type', async ({ patientsPage }) => {
-  //   // -----------------------------------------------------------------------
-  //   // 1. Use config target patient but override to a different valid visit type
-  //   // -----------------------------------------------------------------------
-  //   const targetPatient = config.appointment.targetPatientIdentifier;
+      // -----------------------------------------------------------------------
+      // 4. Assert — verify success toast/notification
+      // -----------------------------------------------------------------------
+      expect(successMessage).toBeTruthy();
+      console.log(`\n✅ Morning appointment created: "${successMessage}"`);
+    });
 
-  //   // Override to a different valid visit type from the actual dropdown
-  //   const appointment = buildAppointment({ visitType: 'Social Worker Visit' });
+    // =========================================================================
+    // Minimal Required Fields
+    // =========================================================================
 
-  //   console.log('═══════════════════════════════════════════════');
-  //   console.log('  ALTERNATE VISIT TYPE TEST');
-  //   console.log(`  Patient:   ${targetPatient}`);
-  //   console.log(`  Visit:     ${appointment.visitType}`);
-  //   console.log(`  Date:      ${appointment.appointmentDate}`);
-  //   console.log(`  Time:      ${appointment.appointmentTime}`);
-  //   console.log('═══════════════════════════════════════════════\\n');
+    test('should create an appointment with minimal required fields only', async ({ patientsPage }) => {
+      const targetPatient = minimalScenario._config.targetPatientIdentifier;
+      const appointment = getAppointmentData('minimal-appointment.scenario.json');
 
-  //   // -----------------------------------------------------------------------
-  //   // 2. Execute workflow
-  //   // -----------------------------------------------------------------------
-  //   await patientsPage.navigateToPatients();
-  //   const successMessage = await patientsPage.createAppointment(
-  //     targetPatient,
-  //     appointment,
-  //   );
+      console.log('═══════════════════════════════════════════════');
+      console.log('  MINIMAL APPOINTMENT TEST');
+      console.log(`  Patient:   ${targetPatient}`);
+      console.log(`  Visit:     ${appointment.visitType}`);
+      console.log(`  Date:      ${appointment.appointmentDate}`);
+      console.log('═══════════════════════════════════════════════\\n');
 
-  //   // -----------------------------------------------------------------------
-  //   // 3. Assert
-  //   // -----------------------------------------------------------------------
-  //   expect(successMessage).toBeTruthy();
-  //   console.log(`\n✅ Alternate visit type appointment created: "${successMessage}"`);
-  // });
+      await patientsPage.navigateToPatients();
+      const successMessage = await patientsPage.createAppointment(
+        targetPatient,
+        appointment,
+      );
+
+      expect(successMessage).toBeTruthy();
+      console.log(`\n✅ Minimal appointment created: "${successMessage}"`);
+    });
 });

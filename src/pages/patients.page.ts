@@ -778,8 +778,12 @@ export class PatientsPage extends BasePage {
   }
 
   /**
-   * Open (view) the latest appointment whose Status badge matches the given
-   * status name (default: "New").
+   * Open (view) the appointment whose Status badge matches the given
+   * status name (default: "New"), optionally filtered by a date string.
+   *
+   * When `dateFilter` is provided, only rows containing that date text AND
+   * the target status badge are considered. This lets tests target a specific
+   * date (e.g., today's appointments) instead of just the first matching row.
    *
    * Handles paginated tables by iterating through pages if the target row
    * is not visible on the current page.
@@ -790,8 +794,10 @@ export class PatientsPage extends BasePage {
    *   Parent Column: <td class="actions-column">
    *
    * @param targetStatus - The status text to filter by (default: "New")
+   * @param dateFilter   - Optional date text to require in the row
+   *                       (e.g., "2026-07-30" for today's appointments)
    */
-  async openLatestAppointmentByStatus(targetStatus = 'New'): Promise<void> {
+  async openLatestAppointmentByStatus(targetStatus = 'New', dateFilter?: string): Promise<void> {
     const maxPages = 10;
 
     for (let pageIndex = 0; pageIndex < maxPages; pageIndex++) {
@@ -811,20 +817,30 @@ export class PatientsPage extends BasePage {
         await this.waitForAnimation(1000);
       }
 
-      // 1. Try to locate the row with the target status on the current page
-      const targetRow = this.page.locator('tr').filter({
+      // Build the row locator: filter by status badge, and optionally by date
+      let targetRow = this.page.locator('tr').filter({
         has: this.page.locator('.badge, span', { hasText: targetStatus })
-      }).first();
+      });
+
+      if (dateFilter) {
+        targetRow = targetRow.filter({ hasText: dateFilter });
+        console.log(`[Appointments] Looking for "${targetStatus}" with date "${dateFilter}" on page ${pageIndex + 1}...`);
+      }
+
+      targetRow = targetRow.first();
 
       const rowVisible = await targetRow.isVisible({ timeout: 3000 }).catch(() => false);
 
       if (!rowVisible) {
-        console.log(`[Appointments] Status "${targetStatus}" not found on page ${pageIndex + 1}, checking next...`);
+        const searchDesc = dateFilter
+          ? `"${targetStatus}" with date "${dateFilter}"`
+          : `"${targetStatus}"`;
+        console.log(`[Appointments] ${searchDesc} not found on page ${pageIndex + 1}, checking next...`);
         continue; // Try next page
       }
 
       // Row found and visible on this page
-      console.log(`[Appointments] Found ${targetStatus} row on page ${pageIndex + 1}`);
+      console.log(`[Appointments] Found ${targetStatus} row${dateFilter ? ` for date ${dateFilter}` : ''} on page ${pageIndex + 1}`);
 
       // 2. Locate the "View Appointment" eye button using exact inspect properties
       const viewButton = targetRow.locator(
@@ -844,8 +860,11 @@ export class PatientsPage extends BasePage {
     }
 
     // If we exhaust all pages without finding the target status, throw
+    const searchDesc = dateFilter
+      ? `"${targetStatus}" with date "${dateFilter}"`
+      : `"${targetStatus}"`;
     throw new Error(
-      `[Appointments] No visible row with status "${targetStatus}" found after paginating through all available pages`
+      `[Appointments] No visible row with ${searchDesc} found after paginating through all available pages`
     );
   }
 

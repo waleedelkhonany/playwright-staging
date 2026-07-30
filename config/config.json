@@ -20,6 +20,7 @@
     "landlinePrefixes": ["011", "012", "013", "014", "016", "017"],
     "mobileFormat": "+9665#########"
   },
+  "_comment_staff": "Staff names for patient Select2 interactions. Also available in config/patient-scenarios/*.scenario.json (_config.staff) for per-scenario overrides.",
   "staff": {
     "primaryTeamLeaderNurse": "Test Nurse",
     "primaryNurseName": "Test Nurse",
@@ -29,22 +30,7 @@
   "locale": "ar-SA",
   "timezone": "Asia/Riyadh",
 
-  "appointment": {
-    "targetPatientIdentifier": "121",
-    "_comment_targetPatientIdentifier": ["109", "120", "122", "107", "176", "177", "144", "158"],
-
-    "visitType": "Treatment Nurse Visit",
-    "_comment_availableVisitTypes": ["Select Visit Type", "Initial Visit", "Treatment Nurse Visit", "Social Worker Visit", "Test Nurse All Forme"],
-
-    "_comment_dynamicDateTime": "Optional: override auto-generated values. Set to null or omit to use today/now defaults.",
-    "_comment_appointmentDate": ["2026-07-30"],
-    "appointmentDate": null,
-    "startTime": null,
-    "endTime": null,
-
-    "_comment_defaultDurationMinutes": "Used to calculate endTime when startTime is provided but endTime is not (unless both are null).",
-    "defaultDurationMinutes": 60
-  },
+  "_comment_appointmentConfig": "Appointment settings (targetPatientIdentifier, defaultDurationMinutes, visitType, etc.) have been moved to dedicated scenario files in config/appointment-scenarios/",
 
   "headerContext": {
     "_comment_branchOptions": [

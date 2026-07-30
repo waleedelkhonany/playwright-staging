@@ -1,5 +1,8 @@
 import { faker } from '@faker-js/faker';
-import config from '../../config/config.json';
+import fullScenario from '../../config/appointment-scenarios/full-appointment.scenario.json';
+
+/** Shorthand to the scenario's _config block */
+const C = fullScenario._config;
 
 // =========================================================================
 // Types
@@ -78,55 +81,24 @@ function addMinutesToTime(time: string, minutes: number): string {
 }
 
 /**
- * Generate a future appointment date within the next 30 days.
- * (Used as fallback when config.appointmentDate is null)
- */
-function generateAppointmentDate(): string {
-  const date = faker.date.soon({ days: 30 });
-  return date.toISOString().split('T')[0];
-}
-
-/**
- * Generate a random appointment time in HH:MM format (business hours).
- * (Used as fallback when config.startTime is null)
- */
-function generateAppointmentTime(): string {
-  const hour = faker.number.int({ min: 8, max: 17 });
-  const minute = faker.helpers.arrayElement(['00', '15', '30', '45']);
-  return `${hour.toString().padStart(2, '0')}:${minute}`;
-}
-
-/**
- * Resolve the appointment date from config, or fall back to today's date.
+ * Resolve the appointment date: today's date (no config dependency).
  */
 function resolveAppointmentDate(): string {
-  const configured = config.appointment?.appointmentDate;
-  if (configured) return configured;
   return getTodayDate();
 }
 
 /**
- * Resolve the start time from config, or fall back to the current time.
+ * Resolve the start time: current time (no config dependency).
  */
 function resolveStartTime(): string {
-  const configured = config.appointment?.startTime;
-  if (configured) return configured;
   return getCurrentTime();
 }
 
 /**
- * Resolve the end time from config, or calculate from startTime + defaultDurationMinutes.
+ * Resolve the end time: startTime + defaultDurationMinutes.
  */
-function resolveEndTime(startTime: string): string | undefined {
-  const configured = config.appointment?.endTime;
-  if (configured) return configured;
-
-  const defaultDuration = config.appointment?.defaultDurationMinutes;
-  if (defaultDuration) {
-    return addMinutesToTime(startTime, defaultDuration);
-  }
-
-  return undefined;
+function resolveEndTime(startTime: string): string {
+  return addMinutesToTime(startTime, C.defaultDurationMinutes);
 }
 
 // =========================================================================
@@ -134,26 +106,21 @@ function resolveEndTime(startTime: string): string | undefined {
 // =========================================================================
 
 /**
- * Build appointment data with all fields dynamically generated.
- * Uses the visit type from config.json by default, but supports overrides.
+ * Build appointment data with all fields dynamically generated via faker.
+ * Supports overrides for any field.
  *
  * @param overrides - Optional partial AppointmentData to override generated values
  * @returns Complete AppointmentData object
  *
  * @example
  *   const appointment = buildAppointment();
- *   // => { visitType: "In-Center", appointmentDate: "2026-08-15", ... }
- *
  *   const custom = buildAppointment({ visitType: "Home Visit", durationMinutes: 60 });
  */
 export function buildAppointment(overrides?: Partial<AppointmentData>): AppointmentData {
   // --- Visit Type: config value or random fallback ---
-  const configuredVisitType = config.appointment?.visitType;
-  const visitType = configuredVisitType && VISIT_TYPES.includes(configuredVisitType as any)
-    ? configuredVisitType
-    : faker.helpers.arrayElement([...VISIT_TYPES]);
+  const visitType = faker.helpers.arrayElement([...VISIT_TYPES]);
 
-  // --- Date & Time: config values or dynamic defaults ---
+  // --- Date & Time: dynamic defaults ---
   const appointmentDate = resolveAppointmentDate();
   const startTime = resolveStartTime();
   const endTime = resolveEndTime(startTime);
@@ -164,23 +131,20 @@ export function buildAppointment(overrides?: Partial<AppointmentData>): Appointm
     appointmentTime: startTime,
     endTime,
     notes: faker.lorem.sentence(),
-    durationMinutes: config.appointment?.defaultDurationMinutes ?? 60,
+    durationMinutes: C.defaultDurationMinutes,
     ...overrides,
   };
 }
 
 /**
  * Build appointment data with only the minimum required fields.
- * Relies on config.json for visit type and date/time defaults.
+ * Date and visit type are dynamically generated via faker.
  *
  * @param overrides - Optional partial AppointmentData to override values
  * @returns Minimal AppointmentData object (date + visit type only)
  */
 export function buildMinimalAppointment(overrides?: Partial<AppointmentData>): AppointmentData {
-  const configuredVisitType = config.appointment?.visitType;
-  const visitType = configuredVisitType && VISIT_TYPES.includes(configuredVisitType as any)
-    ? configuredVisitType
-    : faker.helpers.arrayElement([...VISIT_TYPES]);
+  const visitType = faker.helpers.arrayElement([...VISIT_TYPES]);
 
   return {
     visitType,

@@ -1,0 +1,57 @@
+{
+  "_description": "Full patient scenario — every field populated with varied data. _config holds test parameters (staff names). _fields holds the form payload with DYNAMIC placeholders.",
+  "_config": {
+    "staff": {
+      "primaryTeamLeaderNurse": "Test Nurse",
+      "primaryNurseName": "Test Nurse",
+      "primaryPhysicianName": "Test_Doctor",
+      "primarySocialWorkerName": "waad.albaqami"
+    }
+  },
+  "_fields": {
+    "firstNameAr":                  "DYNAMIC",
+    "middleNameAr":                 "DYNAMIC",
+    "familyNameAr":                 "DYNAMIC",
+    "givenNameEn":                  "DYNAMIC",
+    "middleNameEn":                 "DYNAMIC",
+    "familyNameEn":                 "DYNAMIC",
+
+    "mobile":                       "DYNAMIC",
+    "codeStatus":                   "DYNAMIC",
+    "dateOfBirth":                  "DYNAMIC",
+    "gender":                       "DYNAMIC",
+    "maritalStatus":                "DYNAMIC",
+    "occupation":                   "DYNAMIC",
+    "nationality":                  "DYNAMIC",
+    "patientSystem":                "DYNAMIC",
+    "emergencyContactPerson":       "DYNAMIC",
+    "emergencyContactNo":           "DYNAMIC",
+    "governmentIdType":             "national_id",
+    "nationalId":                   "DYNAMIC",
+
+    "email":                        "DYNAMIC",
+    "isolationType":                "DYNAMIC",
+    "referredHospital":             "DYNAMIC",
+    "religion":                     "DYNAMIC",
+    "preferredLanguage":            "DYNAMIC",
+    "isEmployee":                   "DYNAMIC",
+    "isVisitor":                    "DYNAMIC",
+
+    "oldMrn":                       "",
+    "farabiFileNo":                 "",
+    "secondaryMobile":              "",
+    "firstEverHd":                  "",
+    "dateOfMedicalAcceptance":      "",
+    "dateOfHomeSettingsAcceptance": "",
+    "dateOfReferral":               "",
+    "dateOfFirstHhdTreatment":      "",
+    "isCash":                       "",
+    "sapProject":                   "",
+    "idExpirationDate":             "",
+
+    "primaryTeamLeaderNurse":       "",
+    "primaryNurseName":             "",
+    "primaryPhysicianName":         "",
+    "primarySocialWorkerName":      ""
+  }
+}

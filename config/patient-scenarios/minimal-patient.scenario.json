@@ -1,0 +1,38 @@
+{
+  "_description": "Minimal patient scenario — only required fields populated. _config holds test parameters (staff names). _fields holds the form payload with DYNAMIC/static/default placeholders.",
+  "_config": {
+    "staff": {
+      "primaryTeamLeaderNurse": "Test Nurse",
+      "primaryNurseName": "Test Nurse",
+      "primaryPhysicianName": "Test_Doctor",
+      "primarySocialWorkerName": "waad.albaqami"
+    }
+  },
+  "_fields": {
+    "firstNameAr":         "",
+    "middleNameAr":        "",
+    "familyNameAr":        "",
+    "givenNameEn":         "{{random_first_name}}",
+    "middleNameEn":        "DYNAMIC",
+    "familyNameEn":        "{{random_last_name}}",
+    "mobile":              "+966500000000",
+    "codeStatus":          "Full Code",
+    "dateOfBirth":         "",
+    "gender":              "Male",
+    "maritalStatus":       "Married",
+    "occupation":          "Student",
+    "nationality":         "Saudi Arabian",
+    "patientSystem":       "",
+    "emergencyContactPerson": "Emergency Contact",
+    "emergencyContactNo":  "DYNAMIC",
+    "governmentIdType":    "national_id",
+    "nationalId":          "DYNAMIC",
+    "isolationType":       "No Isolation Required",
+    "email":               "DYNAMIC",
+    "referredHospital":    "King Abdulaziz Medical City",
+    "religion":            "Islam",
+    "preferredLanguage":   "English",
+    "isEmployee":          "0",
+    "isVisitor":           "0"
+  }
+}

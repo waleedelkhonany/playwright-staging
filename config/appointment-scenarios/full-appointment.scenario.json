@@ -1,0 +1,21 @@
+{
+  "_description": "Full appointment scenario — config settings + form payload in one file. _config holds test parameters (target patient, duration defaults). _fields holds the actual form data with DYNAMIC placeholders.",
+  "_config": {
+    "targetPatientIdentifier": "121",
+    "defaultDurationMinutes": 60,
+
+    "_comment_targetPatientIdentifier": ["109", "120", "122", "107", "176", "177", "144", "158"],
+    "_comment_availableVisitTypes": ["Select Visit Type", "Initial Visit", "Treatment Nurse Visit", "Social Worker Visit", "Test Nurse All Forme"],
+    "_comment_dynamicDateTime": "Optional: override auto-generated values. Set to null or omit to use today/now defaults.",
+    "_comment_defaultDurationMinutes": "Used to calculate endTime when startTime is provided but endTime is not (unless both are null)."
+
+  },
+  "_fields": {
+    "visitType":         "DYNAMIC",
+    "appointmentDate":   null,
+    "appointmentTime":   null,
+    "endTime":           null,
+    "assignedStaff":     "",
+    "notes":             "Test notes for the appointment. This field can be left empty or populated with any text."
+  }
+}

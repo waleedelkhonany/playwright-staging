@@ -15,8 +15,8 @@
  *   No additional beforeEach is needed — the context persists across tests
  *   within the same session.
  *
- * Staff names are loaded from config/config.json so they can be updated
- * without modifying the test code. Simply edit the JSON file.
+ * Staff names are available in config/patient-scenarios/*.scenario.json (_config.staff)
+ * so they can be updated per-scenario without modifying the test code.
  *
  * Test Flow:
  *   1. Auto-login (via auth fixture)
@@ -29,12 +29,15 @@
  *   7. Click Save
  *   8. Assert success toast appears
  *
- * @see config/config.json — staff section
+ * @see config/patient-scenarios/ — scenario files with _config + _fields
  * @see config/config.json — headerContext section
  */
 
 import { test, expect } from '../src/fixtures/auth.fixture';
-import { buildPatient, buildMinimalPatient } from '../src/data/patient.data';
+import { getPatientData } from '../src/helpers/patient-data.loader';
+// Scenario JSONs (_config + _fields) live in config/patient-scenarios/.
+// Import them directly when a test needs _config values (e.g. staff names):
+//   import scenario from '../config/patient-scenarios/full-patient.scenario.json';
 
 // =============================================================================
 // Patients Module — E2E Browser Tests
@@ -49,21 +52,16 @@ test.describe('Patients Module', () => {
 
     test('should create a new patient with all required dynamic data', async ({ patientsPage }) => {
       // -----------------------------------------------------------------------
-      // 1. Generate complete patient data
-      //    - patientSystem is 'Center' to match the header Location "In Center"
-      //      from config.json (server rejects mismatches)
-      //    - Fields below are excluded because they trigger client-side
-      //      validation errors on the form despite having no server-side
-      //      name attribute or causing flatpickr parse failures
-      //    - Form structure verified in scripts/investigate-patient-form.ts
+      // 1. Generate complete patient data from JSON file
+      //    - 'DYNAMIC' fields in the JSON produce fresh random values each run
+      //    - Problematic fields (secondaryMobile, dateOfMedicalAcceptance, etc.)
+      //      are left empty in the JSON, resolving to undefined via the loader,
+      //      avoiding client-side validation errors from missing server-side
+      //      name attributes or flatpickr parse issues.
+      //    - patientSystem is auto-aligned by the page object's
+      //      syncPatientSystemWithHeaderLocation() method.
       // -----------------------------------------------------------------------
-      const patient = buildPatient({
-        secondaryMobile: undefined,
-        dateOfMedicalAcceptance: undefined,
-        dateOfHomeSettingsAcceptance: undefined,
-        dateOfReferral: undefined,
-        idExpirationDate: undefined,
-      });
+      const patient = getPatientData('full-patient.scenario.json');
 
       console.log('═══════════════════════════════════════════════');
       console.log('  PATIENT TEST DATA');
@@ -103,7 +101,7 @@ test.describe('Patients Module', () => {
     // =========================================================================
 
     test('should create a patient with minimal required fields only', async ({ patientsPage }) => {
-      const patient = buildMinimalPatient();
+      const patient = getPatientData('minimal-patient.scenario.json');
 
       console.log('═══════════════════════════════════════════════');
       console.log('  MINIMAL PATIENT TEST DATA');
@@ -124,53 +122,43 @@ test.describe('Patients Module', () => {
     });
 
     // =========================================================================
-    // Saudi Phone Number Formats (disabled — needs server-side support)
+    // Custom Scenario: Female Saudi patient with static constraints
     // =========================================================================
 
-    // test('should create a patient with custom Saudi phone number', async ({ patientsPage }) => {
-    //   const patient = buildPatient({
-    //     mobile: generateSaudiPhoneNumber('local'),
-    //     emergencyContactNo: generateSaudiPhoneNumber('local'),
-    //   });
-    //
-    //   console.log(`[Phone] Mobile: ${patient.mobile}`);
-    //
-    //   await patientsPage.navigateToPatients();
-    //   await patientsPage.addPatient(patient);
-    //
-    //   const successVisible = await patientsPage.isSuccessMessageVisible();
-    //   expect(successVisible).toBe(true);
-    // });
+    test('should create a Saudi female patient with specific nationality and gender', async ({ patientsPage }) => {
+      // -----------------------------------------------------------------------
+      // 1. Generate patient data from custom scenario JSON
+      //    - gender:        "Female" (static)
+      //    - nationality:   "Saudi Arabian" (static)
+      //    - maritalStatus: "Married" (static)
+      //    - All other fields are DYNAMIC or empty (default/undefined)
+      // -----------------------------------------------------------------------
+      const patient = getPatientData('female-saudi-patient.scenario.json');
 
-    // =========================================================================
-    // Custom Field Overrides (disabled — needs server-side validation)
-    // =========================================================================
+      console.log('═══════════════════════════════════════════════');
+      console.log('  FEMALE SAUDI PATIENT SCENARIO');
+      console.log(`  English: ${patient.givenNameEn} ${patient.familyNameEn}`);
+      console.log(`  Gender:  ${patient.gender}`);
+      console.log(`  Nat'l:   ${patient.nationality}`);
+      console.log(`  Marital: ${patient.maritalStatus}`);
+      console.log('═══════════════════════════════════════════════');
 
-    // test('should create a Saudi female patient with specific nationality and gender', async ({ page, patientsPage }) => {
-    //   const patient = buildPatient({
-    //     gender: 'Female',
-    //     nationality: 'Saudi Arabian',
-    //     maritalStatus: 'Married',
-    //     patientSystem: 'Center',
-    //   });
-    //
-    //   console.log(`[Custom] ${patient.givenNameEn} — ${patient.gender}, ${patient.nationality}`);
-    //
-    //   await patientsPage.navigateToPatients();
-    //   await patientsPage.addPatient(patient);
-    //
-    //   const swalPopup = page.locator('.swal2-popup').first();
-    //   if (await swalPopup.isVisible({ timeout: 2000 }).catch(() => false)) {
-    //     const errText = await page.evaluate(() => {
-    //       const html = document.querySelector('.swal2-html-container');
-    //       return html?.textContent?.trim() || 'No error details in popup';
-    //     });
-    //     console.log(`[Custom] Validation error: ${errText}`);
-    //   }
-    //
-    //   const successVisible = await patientsPage.isSuccessMessageVisible();
-    //   expect(successVisible).toBe(true);
-    // });
+      // -----------------------------------------------------------------------
+      // 2. Execute the full add-patient workflow
+      // -----------------------------------------------------------------------
+      await patientsPage.navigateToPatients();
+      await patientsPage.addPatient(patient);
+
+      // -----------------------------------------------------------------------
+      // 3. Assert — verify success indicator
+      // -----------------------------------------------------------------------
+      const successVisible = await patientsPage.isSuccessMessageVisible();
+      expect(successVisible).toBe(true);
+
+      const successMessage = await patientsPage.getSuccessMessage();
+      expect(successMessage).toBeTruthy();
+      console.log(`\n✅ Female Saudi patient created: ${successMessage}`);
+    });
   });
 
   // =========================================================================
