@@ -18,6 +18,7 @@
 │   ├── create-appointment.spec.ts            # Create appointment workflows
 │   ├── physician-orders.spec.ts              # Create Dialysis Order workflow
 │   ├── lab-order.spec.ts                     # Create Lab Order workflow
+│   ├── employee-create.spec.ts               # Create employee workflow
 │   ├── visit_filter.spec.ts                  # Data-driven Visit Filter tests
 │   ├── patient_filter.spec.ts                # Data-driven Patient Filter tests
 │   └── employee_filter.spec.ts               # Data-driven Employee Filter tests
@@ -30,7 +31,7 @@
 │   │   ├── header.page.ts     # Top navigation (Branch/Location selectors)
 │   │   ├── visits.page.ts     # Visit details/edit page verification
 │   │   ├── appointment-detail.page.ts  # Appointment modal confirmation & check-in
-│   │   ├── employees.page.ts  # Employee management page
+│   │   ├── employees.page.ts  # Employee management (create form aligned to staging DOM)
 │   │   └── filter-list.page.ts  # Shared base for list-page filter specs
 │   │
 │   ├── fixtures/              # Test fixtures and shared state
@@ -38,6 +39,7 @@
 │   │
 │   ├── helpers/               # Utility functions and data loaders
 │   │   ├── patient-data.loader.ts       # Patient data generation from scenarios
+│   │   ├── employee-data.loader.ts      # Employee data generation from scenarios
 │   │   ├── appointment-data.loader.ts   # Appointment data generation
 │   │   ├── header-context.helper.ts     # Branch/Location context management
 │   │   ├── login.helper.ts              # Login automation logic
@@ -46,6 +48,7 @@
 │   │
 │   └── data/                  # Test data definitions
 │       ├── patient.data.ts    # Patient data type definitions
+│       ├── employee.data.ts   # Employee data type + buildEmployee factory
 │       └── appointment.data.ts  # Appointment data type definitions
 │
 ├── config/
@@ -61,10 +64,13 @@
 │   ├── physician-order-scenarios/  # Physician order scenario files
 │   │   ├── dialysis-order.scenario.json       # Dialysis Order modal payload
 │   │   └── lab-order.scenario.json            # Lab Order form payload
-│   └── patient-scenarios/      # Patient scenario files
-│       ├── full-patient.scenario.json         # Full patient data
-│       ├── minimal-patient.scenario.json      # Minimal fields only
-│       └── female-saudi-patient.scenario.json # Saudi female scenario
+│   ├── patient-scenarios/      # Patient scenario files
+│   │   ├── full-patient.scenario.json         # Full patient data
+│   │   ├── minimal-patient.scenario.json      # Minimal fields only
+│   │   └── female-saudi-patient.scenario.json # Saudi female scenario
+│   └── employee-scenarios/     # Employee scenario files
+│       ├── full-employee.scenario.json        # Full employee data (licensed title: Nurse)
+│       └── minimal-employee.scenario.json     # Minimal fields (non-licensed title: Driver)
 │
 ├── scripts/                   # Diagnostic/debugging scripts
 │   ├── diagnose-patient-save.ts       # Diagnose patient save issues
@@ -76,6 +82,8 @@
 │   ├── probe-patient-filter.ts        # Probe patient list pagination/empty state
 │   ├── probe-patient-filter-2.ts      # Verify patient filter values
 │   ├── inspect-employee-filter.ts     # Dump Employee Filter DOM on staging
+│   ├── inspect-employee-create.ts     # Dump Employee create form DOM on staging
+│   ├── probe-employee-create.ts       # Smoke-test employee creation end-to-end
 │   ├── probe-employee-filter.ts       # Probe employee search behavior
 │   ├── probe-employee-filter-2.ts     # Verify employee filter values
 │   └── probe-employee-filter-3.ts     # Verify employee combos + pagination
@@ -99,6 +107,7 @@
 | `create-appointment.spec.ts` | Create appointments for existing patients (full, minimal, morning-time slot scenarios) |
 | `physician-orders.spec.ts` | Create a Dialysis Order via Physician Orders → Dialysis Order tab |
 | `lab-order.spec.ts` | Create a Lab Order via Physician Orders → Labs & Imaging → Create Lab Order form |
+| `employee-create.spec.ts` | Create an employee via the `/employees/create` Livewire form: fill Main Info (incl. the SCFHS/NPHIES license section for licensed titles), wait for the server-validated "Create" button, assert the success redirect to `/employees/{id}/edit` |
 | `visit_filter.spec.ts` | Data-driven Visit Filter tests (config/visit_filters.json): happy path, single filters, empty state, boundary & reset |
 | `patient_filter.spec.ts` | Data-driven Patient Filter tests (config/patient_filters.json): name/MRN/mobile/email/ID/status filters, empty state, boundary & reset |
 | `employee_filter.spec.ts` | Data-driven Employee Filter tests (config/employee_filters.json): live name/email/mobile + username searches, empty state, boundary & reset |
@@ -201,7 +210,28 @@ Appointment detail modal interactions:
 - `performCheckIn()` - Perform check-in, return success message or empty string
 
 #### EmployeesPage (`employees.page.ts`)
-Employee management interactions (POM for staff list operations).
+Employee management POM aligned to the real staging DOM (verified via
+`scripts/inspect-employee-create.ts`):
+
+**Employee Creation (`/employees/create`):**
+- The "Add New" link on `/employees` navigates to the create form — a Livewire
+  component (no modal). All locators target the `wire:model.live` attributes
+  directly (e.g. `input[wire\:model\.live="name"]`).
+- `fillEmployeeForm(employee)` fills Name, Title, Status, Gender, Marital
+  status, Nationality, ID Type radio (via evaluate — Playwright `check()` does
+  not reliably commit Livewire radios), National ID, expiration/DOB dates
+  (flatpickr text inputs), Religion, Language, and — for LICENSED titles —
+  the SCFHS License Number / Expiry Date and NPHIES Provider ID once the
+  hidden license section is revealed.
+- `waitForCreateEnabled()` polls until the "Create" button (which sits
+  OUTSIDE the `<form>` and is disabled until the server-side computed property
+  `isFormValidForCreation` returns true) becomes enabled.
+- `saveEmployee()` clicks Create → waits for the `employee-created` event →
+  SweetAlert "Employee Created Successfully!" → redirect to
+  `/employees/{id}/edit` (~3s), and returns the edit URL.
+
+**List page:** `searchEmployee()` targets the live "Search by name, email, or
+mobile" input; `getEmployeeList()` reads the result table rows.
 
 #### FilterListPage (`filter-list.page.ts`)
 Shared base class for the list-page filter specs (Visit / Patient / Employee):
@@ -256,6 +286,14 @@ Generates patient data from scenario JSON files:
 Generates appointment data from scenario JSON files:
 - DYNAMIC fields → random future date, notes each run
 - Static fields → fixed visit type, time slots, etc.
+
+#### `employee-data.loader.ts`
+Generates employee data from scenario JSON files
+(`config/employee-scenarios/`):
+- DYNAMIC fields → random name/gender plus timestamp-derived UNIQUE values for
+  `nationalId`, `scfhsLicenseNumber` and `nphiesProviderId` (the server
+  validates uniqueness on all three — stale values cause save failures)
+- Static fields → fixed title, status, nationality, religion, etc.
 
 #### `header-context.helper.ts`
 Header context management:
@@ -380,6 +418,33 @@ Structure:
 4. saveAppointment() / save patient form
    ↓
 5. Success toast appears
+```
+
+### Employee Creation Flow:
+```
+1. Scenario JSON (config/employee-scenarios/full-employee.scenario.json)
+   ↓
+2. getEmployeeData() resolves DYNAMIC fields (name + UNIQUE ID fields)
+   ↓
+3. EmployeesPage.navigateToEmployees() → click "Add New" → /employees/create
+   ↓
+4. fillEmployeeForm(employee)
+   - wire:model.live text/date inputs via fill()
+   - Selects (title/status/gender/nationality/...) via selectOption({ label })
+   - ID Type radio via evaluate (reliable for Livewire)
+   - Licensed title (Nurse) reveals SCFHS/NPHIES license section → fill it
+   ↓
+5. waitForCreateEnabled() — disabled until server-side isFormValidForCreation
+   ↓
+6. Click "Create" → dispatchBeforeSave() → Livewire call('save')
+   ↓
+7. Server dispatches `employee-created` → SweetAlert (~3s) →
+   redirect to /employees/{id}/edit
+   ↓
+8. Assert edit URL + the created employee's name is pre-filled on the edit page
+   ↓
+9. Search the Employees list by name (live search → ?search=) →
+   assert the new employee appears in the results
 ```
 
 ### Appointment Creation Flow:

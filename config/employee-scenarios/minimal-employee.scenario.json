@@ -1,0 +1,20 @@
+{
+  "_description": [
+    "Minimal employee creation scenario for the /employees/create form.",
+    "Title is 'Driver' — a NON-licensed title, so the SCFHS/NPHIES license",
+    "section stays hidden and only the base required fields are needed:",
+    "Name, Title, Gender, Nationality, ID Type, National ID, ID Expiration",
+    "date and Religion. (Branches/Systems are pre-selected and locked.)",
+    "",
+    "nationalId is validated server-side for UNIQUENESS — the loader's DYNAMIC",
+    "generator always produces a fresh value."
+  ],
+  "name": "DYNAMIC",
+  "title": "Driver",
+  "gender": "DYNAMIC",
+  "nationality": "Saudi Arabian",
+  "idType": "national_id",
+  "nationalId": "DYNAMIC",
+  "expirationDate": "{{future_expiration_date}}",
+  "religion": "Islam"
+}

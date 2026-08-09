@@ -1,0 +1,30 @@
+{
+  "_description": [
+    "Full employee creation scenario for the /employees/create form (Main Info tab).",
+    "DYNAMIC fields are resolved at runtime by src/helpers/employee-data.loader.ts.",
+    "",
+    "Title is fixed to 'Nurse' — a LICENSED title that reveals the SCFHS/NPHIES",
+    "license section (those fields are required server-side for licensed titles).",
+    "",
+    "nationalId / scfhsLicenseNumber / nphiesProviderId are validated server-side",
+    "for UNIQUENESS — the loader's DYNAMIC generators always produce fresh values.",
+    "",
+    "Branches (Main Branch) and Systems (In Center) are pre-selected and locked",
+    "on staging — the test leaves them untouched."
+  ],
+  "name": "DYNAMIC",
+  "title": "Nurse",
+  "status": "Active",
+  "gender": "DYNAMIC",
+  "maritalStatus": "Married",
+  "nationality": "Saudi Arabian",
+  "idType": "national_id",
+  "nationalId": "DYNAMIC",
+  "expirationDate": "{{future_expiration_date}}",
+  "dateOfBirth": "{{random_dob}}",
+  "religion": "Islam",
+  "language": "English",
+  "scfhsLicenseNumber": "DYNAMIC",
+  "scfhsLicenseExpiryDate": "{{future_expiration_date}}",
+  "nphiesProviderId": "DYNAMIC"
+}
