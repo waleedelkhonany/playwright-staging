@@ -82,6 +82,9 @@ config/
 │   ├── full-appointment.scenario.json
 │   ├── minimal-appointment.scenario.json
 │   └── morning-appointment.scenario.json
+├── physician-order-scenarios/
+│   ├── dialysis-order.scenario.json
+│   └── lab-order.scenario.json
 └── patient-scenarios/
     ├── full-patient.scenario.json
     ├── minimal-patient.scenario.json
@@ -113,6 +116,8 @@ tests/
 ├── create-appointment.spec.ts           ← Appointment creation tests
 ├── create-view-checkin-appointment.spec.ts  ← Combined lifecycle test
 ├── view-and-checkin-appointment.spec.ts ← View & check-in test
+├── physician-orders.spec.ts             ← Create Dialysis Order test
+├── lab-order.spec.ts                    ← Create Lab Order test
 └── header-context.spec.ts               ← Header context tests
 ```
 
@@ -487,6 +492,15 @@ Remove unused imports. If a scenario JSON is imported solely for `_config` value
 | `src/fixtures/auth.fixture.ts` | Auto-login fixture with page object injection |
 | `src/pages/patients.page.ts` | Patient page object — form filling, search, appointments |
 | `src/pages/appointment-detail.page.ts` | Appointment detail modal — confirm, check-in |
+| `src/pages/physician-orders.page.ts` | Physician Orders → Dialysis Order & Lab Order creation |
+| `src/data/dialysis-order.data.ts` | DialysisOrderData interface |
+| `src/helpers/dialysis-order-data.loader.ts` | Loads `dialysis-order.scenario.json` (`getDialysisOrderData()`) |
+| `config/physician-order-scenarios/dialysis-order.scenario.json` | Dialysis Order form payload |
+| `tests/physician-orders.spec.ts` | E2E test — create a Dialysis Order |
+| `src/data/lab-order.data.ts` | LabOrderData interface |
+| `src/helpers/lab-order-data.loader.ts` | Loads `lab-order.scenario.json` (`getLabOrderData()`) |
+| `config/physician-order-scenarios/lab-order.scenario.json` | Lab Order form payload |
+| `tests/lab-order.spec.ts` | E2E test — create a Lab Order |
 | `src/pages/visits.page.ts` | Visit details page verification |
 | `playwright.config.ts` | Playwright runner configuration |
 | `.env.example` | Environment variable template |

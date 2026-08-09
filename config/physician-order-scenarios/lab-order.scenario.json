@@ -1,0 +1,17 @@
+{
+  "_description": "Lab Order scenario — form payload for the 'Create Lab Order' form (Labs & Imaging → Create Lab Order on the Patient page, ?tab=lab_orders). _fields values are the option texts exactly as rendered (e.g. \"Alfarabi (E-Order)\") plus the due date, collection-by, the Lab Test Tom Select options to pick (one per test row — labTest for row 0, labTest2 for row 1 added via the Add button), and free-text fields. The form is not a modal — it renders on the tab with a Save button (wire:click=\"update\").",
+  "_config": {
+    "_comment_targetPatient": "The target patient identifier is NOT stored here — it is read from config/config.json (appointment.targetPatientIdentifier), the single source of truth shared by every appointment/order test.",
+    "_comment_dueDate": "Due date as YYYY-MM-DD, filled into the dueDate text input (no datepicker interaction required)."
+  },
+  "_fields": {
+    "labCompany":  "Alfarabi (E-Order)",
+    "collectionBy": "nurse",
+    "dueDate":      "2026-08-20",
+    "labTest":      "Sodium (Na+)",
+    "labTest2":     "Hemoglobin",
+    "comment":      "E2E test lab order — created by Playwright.",
+    "description":  "Routine follow-up lab workup.",
+    "notes":        "Priority: routine. Please review results in 48h."
+  }
+}

@@ -31,6 +31,9 @@ config/
 │   ├── full-appointment.scenario.json
 │   ├── minimal-appointment.scenario.json
 │   └── morning-appointment.scenario.json
+├── physician-order-scenarios/         ← physician order form payloads + config
+│   ├── dialysis-order.scenario.json
+│   └── lab-order.scenario.json
 └── patient-scenarios/                 ← patient form payloads + config
     ├── full-patient.scenario.json
     ├── minimal-patient.scenario.json
@@ -133,6 +136,13 @@ Each field in `_fields` is resolved according to this table:
 | `full-appointment.scenario.json` | All fields populated with DYNAMIC values; used for standard create-appointment tests |
 | `minimal-appointment.scenario.json` | Only visitType + appointmentDate; time and notes fall to defaults |
 | `morning-appointment.scenario.json` | Fixed 09:00–10:00 slot with "Initial Visit" type; demonstrates static+dynamic mixing |
+
+### Physician Order Scenarios (`config/physician-order-scenarios/`)
+
+| File | Description |
+|---|---|
+| `dialysis-order.scenario.json` | Dialysis Order modal payload — static option texts (AV-Fistula, 36.0°C, etc.); loaded via `getDialysisOrderData()` |
+| `lab-order.scenario.json` | Lab Order form payload — lab company, collection-by, due date, two Lab Test options (Sodium (Na+), Hemoglobin) for the two test rows, free text; loaded via `getLabOrderData()` |
 
 ### Patient Scenarios (`config/patient-scenarios/`)
 
@@ -263,7 +273,9 @@ The generic loader lives at `src/helpers/data.loader.ts` and is used by both dom
 src/helpers/
 ├── data.loader.ts                   ← generic: createDataLoader<T>()
 ├── patient-data.loader.ts           ← patient: getPatientData()
-└── appointment-data.loader.ts       ← appointment: getAppointmentData()
+├── appointment-data.loader.ts       ← appointment: getAppointmentData()
+├── dialysis-order-data.loader.ts    ← dialysis order: getDialysisOrderData()
+└── lab-order-data.loader.ts         ← lab order: getLabOrderData()
 ```
 
 Each domain loader:

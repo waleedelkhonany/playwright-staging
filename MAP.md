@@ -15,7 +15,9 @@
 │   ├── view-and-checkin-appointment.spec.ts  # View & Check-in appointment workflow
 │   ├── patients.spec.ts                      # Patient CRUD operations
 │   ├── create-view-checkin-appointment.spec.ts  # Combined create/view/check-in flow
-│   └── create-appointment.spec.ts            # Create appointment workflows
+│   ├── create-appointment.spec.ts            # Create appointment workflows
+│   ├── physician-orders.spec.ts              # Create Dialysis Order workflow
+│   └── lab-order.spec.ts                     # Create Lab Order workflow
 │
 ├── src/
 │   ├── pages/                 # Page Object Models (POM)
@@ -45,10 +47,13 @@
 ├── config/
 │   ├── config.json            # Global configuration (headers, locales)
 │   ├── README.md              # Configuration documentation
-│   └── appointment-scenarios/  # Appointment scenario files
-│       ├── full-appointment.scenario.json     # Full appointment test data
-│       ├── morning-appointment.scenario.json  # Morning slot appointment
-│       └── minimal-appointment.scenario.json  # Minimal fields only
+│   ├── appointment-scenarios/  # Appointment scenario files
+│   │   ├── full-appointment.scenario.json     # Full appointment test data
+│   │   ├── morning-appointment.scenario.json  # Morning slot appointment
+│   │   └── minimal-appointment.scenario.json  # Minimal fields only
+│   ├── physician-order-scenarios/  # Physician order scenario files
+│   │   ├── dialysis-order.scenario.json       # Dialysis Order modal payload
+│   │   └── lab-order.scenario.json            # Lab Order form payload
 │   └── patient-scenarios/      # Patient scenario files
 │       ├── full-patient.scenario.json         # Full patient data
 │       ├── minimal-patient.scenario.json      # Minimal fields only
@@ -76,6 +81,8 @@
 | `patients.spec.ts` | Patient CRUD operations: create full patient, create minimal patient, create Saudi female patient with specific constraints |
 | `create-view-checkin-appointment.spec.ts` | Combined workflow: create appointment within test → view it → confirm care team → check-in → verify redirect |
 | `create-appointment.spec.ts` | Create appointments for existing patients (full, minimal, morning-time slot scenarios) |
+| `physician-orders.spec.ts` | Create a Dialysis Order via Physician Orders → Dialysis Order tab |
+| `lab-order.spec.ts` | Create a Lab Order via Physician Orders → Labs & Imaging → Create Lab Order form |
 
 ### 2. Page Object Models (`src/pages/*.ts`)
 

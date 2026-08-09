@@ -1,0 +1,45 @@
+{
+  "_description": "Dialysis Order scenario — form payload for the 'Add New Selections' modal opened from Physician Orders → Dialysis Order on the Patient page. _fields values are the option texts exactly as rendered in the modal (e.g. \"AV-Fistula\", \"36.0°C\", \"1.6 m²\"). Concrete values are used (never \"Other\") so no conditional other_* inputs are required.",
+  "_config": {
+    "_comment_targetPatient": "The target patient identifier is NOT stored here — it is read from config/config.json (appointment.targetPatientIdentifier), the single source of truth shared by every appointment/order test.",
+    "_comment_orderType": "Conventional Dialysis | Portable Low Dialysate Dialysis"
+  },
+  "_fields": {
+    "orderType":              "Conventional Dialysis",
+    "modality":               "Hemodialysis (HD)",
+    "dryWeight":              "70",
+    "uf":                     "2.0",
+    "vascularAccessType":     "AV-Fistula",
+    "accessSite":             "Right",
+    "needleGauge":            "16G",
+    "dwellType":              "Heparin",
+    "dwellVolumeArterial":    "150",
+    "dwellVolumeVenous":      "150",
+    "frequency":              "Three times per week",
+    "duration":               "4 hours",
+    "bloodFlowRate":          "300 mL/min",
+    "dialysateType":          "Bicarbonate",
+    "picar":                  "35",
+    "lactatePercent":         "40%",
+    "dialysateSodium":        "138 mmol/L",
+    "potassium":              "2 mmol/L",
+    "bicarbonate":            "35 mmol/L",
+    "calcium":                "1.5 mmol/L",
+    "temperature":            "36.0°C",
+    "anticoagulationType":    "Unfractionated Heparin (UFH)",
+    "dialyzerType":           "High Flux",
+    "dialyzerSurfaceArea":    "1.6 m²",
+
+    "mode":                   "Hemodialysis (HD)",
+    "dialysateVolume":        "30L",
+    "dialyzerCartridge":      "Cartridge 172",
+    "dialyzerCartridgeExtra": "High Flux",
+    "electrolyteSodium":      "140 mmol/L",
+    "electrolytePotassium":   "2 mmol/L",
+    "electrolyteCalcium":     "1.5 mmol/L",
+    "electrolyteGlucose":     "1 g",
+    "dialysateTemperature":   "36.0°C",
+
+    "additionalInformation":  "E2E test dialysis order — created by Playwright."
+  }
+}
