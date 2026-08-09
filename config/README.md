@@ -58,10 +58,13 @@ Holds **test parameters** that are not form fields but control how the test runs
 **Appointment `_config` example:**
 ```json
 "_config": {
-  "targetPatientIdentifier": "121",
   "defaultDurationMinutes": 60
 }
 ```
+
+> **Note:** The target patient identifier is **not** stored in scenario files. It
+> is defined once in `config/config.json` under `appointment.targetPatientIdentifier`
+> so every appointment test targets the same patient — do not duplicate it here.
 
 **Patient `_config` example:**
 ```json
@@ -148,12 +151,11 @@ Each field in `_fields` is resolved according to this table:
 ```typescript
 import { test, expect } from '../src/fixtures/auth.fixture';
 import { getAppointmentData } from '../src/helpers/appointment-data.loader';
-import fullScenario from '../config/appointment-scenarios/full-appointment.scenario.json';
 import config from '../config/config.json';
 
 test('should create an appointment', async ({ patientsPage }) => {
-  // 1. Read test parameters from _config
-  const targetPatient = fullScenario._config.targetPatientIdentifier;
+  // 1. Read the target patient from config.json (single source of truth)
+  const targetPatient = config.appointment.targetPatientIdentifier;
 
   // 2. Load resolved form payload via the loader
   const appointment = getAppointmentData('full-appointment.scenario.json');
@@ -195,7 +197,6 @@ Create a new file `config/appointment-scenarios/afternoon-appointment.scenario.j
 {
   "_description": "Afternoon slot scenario — static 14:00 time, specific visit type, dynamic notes.",
   "_config": {
-    "targetPatientIdentifier": "121",
     "defaultDurationMinutes": 60
   },
   "_fields": {
@@ -212,10 +213,8 @@ Create a new file `config/appointment-scenarios/afternoon-appointment.scenario.j
 Then use it in a test:
 
 ```typescript
-import afternoonScenario from '../config/appointment-scenarios/afternoon-appointment.scenario.json';
-
-const targetPatient = afternoonScenario._config.targetPatientIdentifier;
 const appointment = getAppointmentData('afternoon-appointment.scenario.json');
+// Target patient: config.appointment.targetPatientIdentifier from config.json
 ```
 
 ---
@@ -231,7 +230,6 @@ const appointment = getAppointmentData('afternoon-appointment.scenario.json');
    {
      "_description": "Brief explanation of what this scenario covers.",
      "_config": {
-       "targetPatientIdentifier": "121",
        "defaultDurationMinutes": 60
      },
      "_fields": {
@@ -248,6 +246,8 @@ const appointment = getAppointmentData('afternoon-appointment.scenario.json');
    - Use `"DYNAMIC"` for fields that should be randomized each run
    - Use `"{{template}}"` for specific generated values
    - Use any other string for fixed/static values
+   - The target patient identifier is set once in `config/config.json`
+     (`appointment.targetPatientIdentifier`) — never in a scenario file
 
 4. **No trailing commas!** JSON is strict — a trailing comma will cause a `SyntaxError` at runtime.
 

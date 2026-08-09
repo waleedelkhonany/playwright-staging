@@ -1,7 +1,0 @@
-{
-  "_description": "View & check-in scenario — this test does NOT create an appointment. It views an existing 'New' appointment and performs check-in. Only _config is needed; _fields is empty since no form is filled.",
-  "_config": {
-    "targetPatientIdentifier": "121"
-  },
-  "_fields": {}
-}

@@ -48,8 +48,7 @@
 │   └── appointment-scenarios/  # Appointment scenario files
 │       ├── full-appointment.scenario.json     # Full appointment test data
 │       ├── morning-appointment.scenario.json  # Morning slot appointment
-│       ├── minimal-appointment.scenario.json  # Minimal fields only
-│       └── view-checkin-appointment.scenario.json
+│       └── minimal-appointment.scenario.json  # Minimal fields only
 │   └── patient-scenarios/      # Patient scenario files
 │       ├── full-patient.scenario.json         # Full patient data
 │       ├── minimal-patient.scenario.json      # Minimal fields only
@@ -231,6 +230,9 @@ Header context management:
   "staff": { ... },
   "locale": "ar-SA",
   "timezone": "Asia/Riyadh",
+  "appointment": {
+    "targetPatientIdentifier": "121"
+  },
   "headerContext": {
     "targetBranch": "Main Branch",
     "targetLocation": "In Center"
@@ -256,7 +258,7 @@ Header context management:
 Structure:
 ```json
 {
-  "_config": { "targetPatientIdentifier": "patient-123" },
+  "_config": { "defaultDurationMinutes": 60 },
   "visitType": "Initial Visit",
   "appointmentDate": "{{future_date}}",
   "appointmentTime": "{{dynamic_time}}",
@@ -264,6 +266,8 @@ Structure:
   "notes": "DYNAMIC"
 }
 ```
+The target patient identifier is read from `config/config.json`
+(`appointment.targetPatientIdentifier`), shared by all appointment tests.
 
 **Patient Scenarios (`config/patient-scenarios/*.scenario.json`):**
 Structure:

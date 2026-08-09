@@ -138,11 +138,11 @@ A well-structured test follows this pattern:
 ```typescript
 import { test, expect } from '../src/fixtures/auth.fixture';
 import { getAppointmentData } from '../src/helpers/appointment-data.loader';
-import scenario from '../config/appointment-scenarios/full-appointment.scenario.json';
+import config from '../config/config.json';
 
 test('should create an appointment', async ({ patientsPage }) => {
-  // 1. Read test parameters from _config
-  const targetPatient = scenario._config.targetPatientIdentifier;
+  // 1. Read the target patient from config.json (single source of truth)
+  const targetPatient = config.appointment.targetPatientIdentifier;
 
   // 2. Load resolved form payload
   const appointment = getAppointmentData('full-appointment.scenario.json');
@@ -197,7 +197,6 @@ Every scenario file follows this structure:
 {
   "_description": "What this scenario tests and any special notes.",
   "_config": {
-    "targetPatientIdentifier": "121",
     "defaultDurationMinutes": 60
   },
   "_fields": {
@@ -211,6 +210,10 @@ Every scenario file follows this structure:
 }
 ```
 
+The target patient identifier is defined once in `config/config.json`
+(`appointment.targetPatientIdentifier`) so all appointment tests use the same
+patient — do not duplicate it in scenario files.
+
 ### `_config` Block
 
 Holds **test parameters** that control how the test runs but are not form fields. Read directly by the test via JSON import.
@@ -218,10 +221,12 @@ Holds **test parameters** that control how the test runs but are not form fields
 **Appointment `_config`:**
 ```json
 "_config": {
-  "targetPatientIdentifier": "121",     // Which patient to search for
   "defaultDurationMinutes": 60          // End time = start time + this
 }
 ```
+
+The patient to search for comes from `config/config.json`
+(`appointment.targetPatientIdentifier`).
 
 **Patient `_config`:**
 ```json
@@ -470,7 +475,7 @@ Remove unused imports. If a scenario JSON is imported solely for `_config` value
 
 | File | Purpose |
 |---|---|
-| `config/config.json` | Global settings: header context, timeouts, staff names, locale |
+| `config/config.json` | Global settings: header context, timeouts, staff names, locale, target patient identifier |
 | `config/README.md` | Detailed documentation of the scenario file pattern |
 | `config/appointment-scenarios/*.json` | Appointment test data files |
 | `config/patient-scenarios/*.json` | Patient test data files |

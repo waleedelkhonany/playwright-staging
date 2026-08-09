@@ -11,15 +11,17 @@
  *   "{{template}}"     →  resolved template placeholder
  *   anything else      →  used as-is (static hardcoded value)
  *
- * The _config block in each scenario file is read directly by the test (via
- * JSON import) for parameters like targetPatientIdentifier.
+ * The target patient identifier is NOT read from scenario files — it lives in
+ * config/config.json (appointment.targetPatientIdentifier) so every test uses
+ * the same value. Scenario _config blocks hold remaining test parameters such
+ * as defaultDurationMinutes.
  *
  * Usage in tests:
  *
- *   import scenario from '../config/appointment-scenarios/full-appointment.scenario.json';
+ *   import config from '../../config/config.json';
  *   import { getAppointmentData } from '../helpers/appointment-data.loader';
  *
- *   const targetPatient = scenario._config.targetPatientIdentifier;
+ *   const targetPatient = config.appointment.targetPatientIdentifier;
  *   const appointment = getAppointmentData('full-appointment.scenario.json');
  *   await patientsPage.createAppointment(targetPatient, appointment);
  *

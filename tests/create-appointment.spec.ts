@@ -10,7 +10,7 @@
  *   4. Search for a target patient using the identifier from config.json
  *   5. Click the patient's name to open their detail/profile page
  *   6. Click "Create Appointment" button
- *   7. Select the Visit Type from config.json
+ *   7. Select the Visit Type from the scenario file
  *   8. Fill in dynamically generated appointment details (date, time, notes, etc.)
  *   9. Click Save
  *   10. Verify success message/toast appears
@@ -23,15 +23,13 @@
  *   Location match config.json headerContext targets. If the current UI state
  *   does not match, the test automatically switches before proceeding.
  *
- * @see config/config.json — appointment section
+ * @see config/config.json — appointment.targetPatientIdentifier (target patient)
  * @see config/config.json — headerContext section
  */
 
 import { test, expect } from '../src/fixtures/auth.fixture';
 import { getAppointmentData } from '../src/helpers/appointment-data.loader';
-import fullScenario from '../config/appointment-scenarios/full-appointment.scenario.json';
-import minimalScenario from '../config/appointment-scenarios/minimal-appointment.scenario.json';
-import morningScenario from '../config/appointment-scenarios/morning-appointment.scenario.json';
+import config from '../config/config.json';
 import { ensureHeaderContext } from '../src/helpers/header-context.helper';
 
 test.describe('E2E: Create Patient Appointment', () => {
@@ -49,7 +47,7 @@ test.describe('E2E: Create Patient Appointment', () => {
     // -----------------------------------------------------------------------
     // 1. Load configurable test parameters
     // -----------------------------------------------------------------------
-    const targetPatient = fullScenario._config.targetPatientIdentifier;
+    const targetPatient = config.appointment.targetPatientIdentifier;
 
     console.log('═══════════════════════════════════════════════');
     console.log('  APPOINTMENT TEST CONFIGURATION');
@@ -98,7 +96,7 @@ test.describe('E2E: Create Patient Appointment', () => {
       // -----------------------------------------------------------------------
       // 1. Load configurable test parameters
       // -----------------------------------------------------------------------
-      const targetPatient = morningScenario._config.targetPatientIdentifier;
+      const targetPatient = config.appointment.targetPatientIdentifier;
 
       // -----------------------------------------------------------------------
       // 2. Generate appointment data from the morning-scenario JSON file
@@ -141,7 +139,7 @@ test.describe('E2E: Create Patient Appointment', () => {
     // =========================================================================
 
     test('should create an appointment with minimal required fields only', async ({ patientsPage }) => {
-      const targetPatient = minimalScenario._config.targetPatientIdentifier;
+      const targetPatient = config.appointment.targetPatientIdentifier;
       const appointment = getAppointmentData('minimal-appointment.scenario.json');
 
       console.log('═══════════════════════════════════════════════');
