@@ -1,0 +1,462 @@
+[
+  {
+    "id": "PTC-01",
+    "description": "Happy path — multi-filter (name + status + referral status)",
+    "category": "happy-path",
+    "filters": {
+      "name": "Riyada",
+      "mobile": null,
+      "email": null,
+      "patientId": null,
+      "mrn": null,
+      "nationalId": null,
+      "status": "active",
+      "referralStatus": "New Referral"
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": ["Riyada", "9901121"],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "PTC-02",
+    "description": "Happy path — multi-filter (patient ID + status)",
+    "category": "happy-path",
+    "filters": {
+      "name": null,
+      "mobile": null,
+      "email": null,
+      "patientId": "121",
+      "mrn": null,
+      "nationalId": null,
+      "status": "active",
+      "referralStatus": null
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": ["9901121"],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "PTC-03",
+    "description": "Single filter — patient ID only",
+    "category": "single-filter",
+    "filters": {
+      "name": null,
+      "mobile": null,
+      "email": null,
+      "patientId": "121",
+      "mrn": null,
+      "nationalId": null,
+      "status": null,
+      "referralStatus": null
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": ["9901121"],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "PTC-04",
+    "description": "Single filter — patient name only",
+    "category": "single-filter",
+    "filters": {
+      "name": "Riyada",
+      "mobile": null,
+      "email": null,
+      "patientId": null,
+      "mrn": null,
+      "nationalId": null,
+      "status": null,
+      "referralStatus": null
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": ["Riyada"],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "PTC-05",
+    "description": "Single filter — MRN only",
+    "category": "single-filter",
+    "filters": {
+      "name": null,
+      "mobile": null,
+      "email": null,
+      "patientId": null,
+      "mrn": "9901121",
+      "nationalId": null,
+      "status": null,
+      "referralStatus": null
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": ["9901121"],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "PTC-06",
+    "description": "Single filter — mobile only",
+    "category": "single-filter",
+    "filters": {
+      "name": null,
+      "mobile": "502050400",
+      "email": null,
+      "patientId": null,
+      "mrn": null,
+      "nationalId": null,
+      "status": null,
+      "referralStatus": null
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": ["502050400"],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "PTC-07",
+    "description": "Single filter — email only",
+    "category": "single-filter",
+    "filters": {
+      "name": null,
+      "mobile": null,
+      "email": "Riyada_Patient_Test@gmail.com",
+      "patientId": null,
+      "mrn": null,
+      "nationalId": null,
+      "status": null,
+      "referralStatus": null
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": ["Riyada_Patient_Test@gmail.com"],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "PTC-08",
+    "description": "Single filter — government ID only",
+    "category": "single-filter",
+    "filters": {
+      "name": null,
+      "mobile": null,
+      "email": null,
+      "patientId": null,
+      "mrn": null,
+      "nationalId": "5065858595",
+      "status": null,
+      "referralStatus": null
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": ["5065858595"],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "PTC-09",
+    "description": "Single filter — status only (Select2)",
+    "category": "single-filter",
+    "filters": {
+      "name": null,
+      "mobile": null,
+      "email": null,
+      "patientId": null,
+      "mrn": null,
+      "nationalId": null,
+      "status": "active",
+      "referralStatus": null
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "PTC-10",
+    "description": "Single filter — referral status only (Select2)",
+    "category": "single-filter",
+    "filters": {
+      "name": null,
+      "mobile": null,
+      "email": null,
+      "patientId": null,
+      "mrn": null,
+      "nationalId": null,
+      "status": null,
+      "referralStatus": "New Referral"
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "PTC-11",
+    "description": "No results — non-existent patient ID",
+    "category": "no-results",
+    "filters": {
+      "name": null,
+      "mobile": null,
+      "email": null,
+      "patientId": "999999999",
+      "mrn": null,
+      "nationalId": null,
+      "status": null,
+      "referralStatus": null
+    },
+    "expected": {
+      "outcome": "noRecords",
+      "minRows": 1,
+      "noRecordsMessage": "No Data Available",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "PTC-12",
+    "description": "No results — non-existent patient name",
+    "category": "no-results",
+    "filters": {
+      "name": "zzz_non_existent_patient",
+      "mobile": null,
+      "email": null,
+      "patientId": null,
+      "mrn": null,
+      "nationalId": null,
+      "status": null,
+      "referralStatus": null
+    },
+    "expected": {
+      "outcome": "noRecords",
+      "minRows": 1,
+      "noRecordsMessage": "No Data Available",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "PTC-13",
+    "description": "No results — non-existent MRN",
+    "category": "no-results",
+    "filters": {
+      "name": null,
+      "mobile": null,
+      "email": null,
+      "patientId": null,
+      "mrn": "0000000",
+      "nationalId": null,
+      "status": null,
+      "referralStatus": null
+    },
+    "expected": {
+      "outcome": "noRecords",
+      "minRows": 1,
+      "noRecordsMessage": "No Data Available",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "PTC-14",
+    "description": "No results — non-existent email",
+    "category": "no-results",
+    "filters": {
+      "name": null,
+      "mobile": null,
+      "email": "nobody@example.com",
+      "patientId": null,
+      "mrn": null,
+      "nationalId": null,
+      "status": null,
+      "referralStatus": null
+    },
+    "expected": {
+      "outcome": "noRecords",
+      "minRows": 1,
+      "noRecordsMessage": "No Data Available",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "PTC-15",
+    "description": "No results — valid status with zero matching patients in staging (Select2; verified: deceased has none)",
+    "category": "no-results",
+    "filters": {
+      "name": null,
+      "mobile": null,
+      "email": null,
+      "patientId": null,
+      "mrn": null,
+      "nationalId": null,
+      "status": "deceased",
+      "referralStatus": null
+    },
+    "expected": {
+      "outcome": "noRecords",
+      "minRows": 1,
+      "noRecordsMessage": "No Data Available",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "PTC-16",
+    "description": "No results — valid referral status with zero matching patients in staging (Select2 option text \"Referral Rejected\"; verified: value rejected referral has none)",
+    "category": "no-results",
+    "filters": {
+      "name": null,
+      "mobile": null,
+      "email": null,
+      "patientId": null,
+      "mrn": null,
+      "nationalId": null,
+      "status": null,
+      "referralStatus": "Referral Rejected"
+    },
+    "expected": {
+      "outcome": "noRecords",
+      "minRows": 1,
+      "noRecordsMessage": "No Data Available",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "PTC-17",
+    "description": "Boundary — all filters null (empty submit returns the full default list)",
+    "category": "boundary",
+    "filters": {
+      "name": null,
+      "mobile": null,
+      "email": null,
+      "patientId": null,
+      "mrn": null,
+      "nationalId": null,
+      "status": null,
+      "referralStatus": null
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "PTC-18",
+    "description": "Boundary — empty-string patient name treated as no value",
+    "category": "boundary",
+    "filters": {
+      "name": "",
+      "mobile": null,
+      "email": null,
+      "patientId": null,
+      "mrn": null,
+      "nationalId": null,
+      "status": null,
+      "referralStatus": null
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "PTC-19",
+    "description": "Reset — apply a no-results filter (patient ID), reset, assert full list restored across pages",
+    "category": "boundary",
+    "filters": {
+      "name": null,
+      "mobile": null,
+      "email": null,
+      "patientId": "999999999",
+      "mrn": null,
+      "nationalId": null,
+      "status": null,
+      "referralStatus": null
+    },
+    "expected": {
+      "outcome": "resetRestoresRecords",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": "noRecords"
+    }
+  },
+  {
+    "id": "PTC-20",
+    "description": "Reset — apply a narrowing filter (status active), reset, assert full list restored across pages",
+    "category": "boundary",
+    "filters": {
+      "name": null,
+      "mobile": null,
+      "email": null,
+      "patientId": null,
+      "mrn": null,
+      "nationalId": null,
+      "status": "active",
+      "referralStatus": null
+    },
+    "expected": {
+      "outcome": "resetRestoresRecords",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": ["active"],
+      "filteredState": "records"
+    }
+  }
+]

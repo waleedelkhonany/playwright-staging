@@ -69,10 +69,13 @@
  * @see src/fixtures/auth.fixture.ts — auto-login before every test
  * @see src/helpers/header-context.helper.ts — branch/location sync
  * @see src/helpers/select2.helper.ts — Select2 dropdown interaction
+ * @see src/pages/filter-list.page.ts — shared FilterListPage base (result
+ *      inspection: pagination walk, settle waits, empty-state readers)
  */
 
 import { type Locator, type Page } from '@playwright/test';
 import { test, expect } from '../src/fixtures/auth.fixture';
+import { FilterListPage } from '../src/pages/filter-list.page';
 import { selectFromSelect2ByLocator } from '../src/helpers/select2.helper';
 import visitFilterCases from '../config/visit_filters.json';
 
@@ -167,8 +170,12 @@ interface VisitFilters {
 /**
  * VisitFilterPage — Page Object Model for the Visit Filter component.
  *
- * Kept lightweight and self-contained in this spec for now; extract to
- * src/pages/visit-filter.page.ts if the suite grows.
+ * Extends the shared FilterListPage base (src/pages/filter-list.page.ts),
+ * which provides the pagination walk, settle waits and empty-state readers
+ * common to all list-page filter specs. This subclass supplies the
+ * page-specific filter interaction: the filter modal (toggle, fields,
+ * submit) and the modal's "Clear" reset — which OVERRIDES the base class's
+ * plain goto-based resetFilters().
  *
  * The real filter form is a GET form inside Bootstrap modal `#filterModal`,
  * opened by the "Visits Filter" button. The `date_from`/`date_to` inputs are
@@ -182,17 +189,10 @@ interface VisitFilters {
  *
  * Select2-enhanced dropdowns (status, visit type, insurance, date preset) are
  * handled automatically in setField() via the shared src/helpers/select2.helper.ts.
- *
- * Result inspection walks paginated pages (Next-button pattern from
- * PatientsPage.openLatestAppointmentByStatus), so row count and text
- * assertions cover the entire result set rather than only the current page.
  */
-class VisitFilterPage {
-  /** The Playwright page instance */
-  readonly page: Page;
-
+class VisitFilterPage extends FilterListPage {
   // ---------------------------------------------------------------------------
-  // Locators
+  // Locators — page-specific filter modal
   // ---------------------------------------------------------------------------
   readonly filterModalButton: Locator;
   readonly patientNameInput: Locator;
@@ -207,14 +207,10 @@ class VisitFilterPage {
   readonly dateFromInput: Locator;
   readonly dateToInput: Locator;
   readonly applyButton: Locator;
-  readonly nextPageButton: Locator;
   readonly resetButton: Locator;
-  readonly resultRows: Locator;
-  readonly noRecordsMessage: Locator;
-  readonly errorMessage: Locator;
 
   constructor(page: Page) {
-    this.page = page;
+    super(page, '/visits');
 
     // Opens the Bootstrap modal (#filterModal) containing the GET filter form.
     // NOTE: keep this distinct from the "Filters" submit button — Playwright's
@@ -278,47 +274,11 @@ class VisitFilterPage {
       '#filterModal button[type="submit"], #filterModal button:has-text("Filters"), [data-testid="filter-apply"]',
     ).first();
 
-    // Pagination "Next" button — same resilient selector set as
-    // PatientsPage.openLatestAppointmentByStatus()
-    this.nextPageButton = page.locator(
-      'nav a:has-text("Next"), nav button:has-text("Next"), ' +
-      'nav [rel="next"], nav li:has-text("Next") button, ' +
-      '[aria-label="Next"], .pagination .next a, .pagination .next button',
-    ).first();
-
     // "Clear" link in the modal footer — resets to the full list (also
     // scoped to the modal to avoid matching any page-wide "Clear" text)
     this.resetButton = page.locator(
       '[data-testid="filter-reset"], #filterModal a:has-text("Clear"), #filterModal button:has-text("Clear"), button:has-text("Reset")',
     ).first();
-
-    // Result rows — the real table renders its header as a <tr> with <th>
-    // cells INSIDE tbody, plus a "No Data Available" empty-state row. Exclude
-    // both so count()/visibility assertions only consider real data rows.
-    this.resultRows = page
-      .locator('[data-testid="results-table"] tbody tr, table tbody tr')
-      .filter({ hasNot: page.locator('th') })
-      .filter({ hasNot: page.locator('[data-testid="no-records"]') })
-      .filter({ hasNot: page.locator('.dataTables_empty') })
-      .filter({ hasNot: page.locator('td:has-text("No Data Available")') })
-      .filter({ hasNot: page.locator('td:has-text("No records found")') });
-
-    this.noRecordsMessage = page.locator(
-      '[data-testid="no-records"], td:has-text("No Data Available"), td:has-text("No records found"), .dataTables_empty, tr:has-text("No records found")',
-    ).first();
-
-    this.errorMessage = page.locator(
-      '[data-testid="filter-error"], .alert-danger, .invalid-feedback, .swal2-popup',
-    ).first();
-  }
-
-  // ---------------------------------------------------------------------------
-  // Navigation
-  // ---------------------------------------------------------------------------
-
-  /** Navigate to the Visits list page. */
-  async goto(): Promise<void> {
-    await this.page.goto('/visits', { waitUntil: 'networkidle', timeout: 30_000 });
   }
 
   // ---------------------------------------------------------------------------
@@ -412,142 +372,15 @@ class VisitFilterPage {
   /**
    * Click the Reset/Clear link and wait for the results to refresh back to
    * the unfiltered full list. (The Clear link lives inside the modal, so it
-   * must be reopened after the GET submit reloads the page.)
+   * must be reopened after the GET submit reloads the page.) This overrides
+   * the base class's plain goto-based reset, which would return the
+   * RESTRICTED default /visits view instead of the true full list.
    */
   async resetFilters(): Promise<void> {
     await this.openFilterModal();
     await this.resetButton.waitFor({ state: 'visible', timeout: 10_000 });
     await this.resetButton.click();
     await this.waitForResultsRefresh();
-  }
-
-  /**
-   * Wait for the results to refresh after a submit action (Apply/Reset).
-   * `networkidle` may not fire for AJAX-only frameworks, so a short fixed
-   * wait is used as a fallback — the web-first assertions downstream do the
-   * real waiting.
-   */
-  private async waitForResultsRefresh(): Promise<void> {
-    await this.page.waitForLoadState('networkidle').catch(() => {});
-    await this.page.waitForTimeout(800);
-  }
-
-  // ---------------------------------------------------------------------------
-  // Result inspection
-  // ---------------------------------------------------------------------------
-
-  /**
-   * Wait until the results area has rendered — either data rows or the
-   * "No Data Available" empty-state message — so row collection never reads a
-   * table that has not loaded yet. Tolerant of an empty database (no rows AND
-   * no empty-state message just logs a warning and proceeds).
-   */
-  async waitForResultsSettled(timeout = 10_000): Promise<void> {
-    await Promise.race([
-      this.resultRows.first().waitFor({ state: 'visible', timeout }),
-      this.noRecordsMessage.waitFor({ state: 'visible', timeout }),
-    ]).catch(() => {
-      console.warn('[VisitFilter] Results area did not settle within timeout');
-    });
-  }
-
-  /**
-   * Wait until the results table settles after applying filters: either the
-   * empty-state message appears or the first data row's text no longer matches
-   * the pre-filter first row. Guards against collecting stale pre-filter rows.
-   * Falls back gracefully if the first row is legitimately identical across
-   * the two states — downstream assertions surface any genuine mismatch.
-   */
-  async waitForFilteredResults(previousFirstRow: string, timeout = 10_000): Promise<void> {
-    try {
-      await expect(async () => {
-        const emptyVisible = await this.noRecordsMessage.isVisible().catch(() => false);
-        const firstRowText = await this.resultRows.first()
-          .textContent()
-          .then((t) => t?.trim() ?? '');
-        return emptyVisible || (firstRowText !== '' && firstRowText !== previousFirstRow);
-      }).toPass({ timeout, intervals: [500, 1000, 2000, 2000] });
-    } catch {
-      // Timed out waiting for a visible change — downstream assertions surface
-      // any genuine mismatch.
-    }
-  }
-
-  /**
-   * Collect result-row texts across ALL paginated pages by walking the
-   * "Next" pagination button until it disappears or `maxPages` is reached.
-   *
-   * Reuses the pagination interaction pattern from
-   * PatientsPage.openLatestAppointmentByStatus() so minRows/rowContains
-   * assertions see the full dataset, not just the current page. After each
-   * Next click it waits for the new page's first row to render before
-   * collecting, so stale rows are never double-counted.
-   *
-   * @param maxPages - Safety cap on how many pages to walk (default 10)
-   * @returns One trimmed string per data row across all visited pages
-   */
-  async getAllResultRowTexts(maxPages = 10): Promise<string[]> {
-    const allRows: string[] = [];
-
-    for (let pageIndex = 0; pageIndex < maxPages; pageIndex++) {
-      // Collect the data rows rendered on the current page
-      const pageRows = await this.resultRows.evaluateAll((rows) =>
-        rows.map((row) => row.textContent?.trim() ?? ''),
-      );
-      allRows.push(...pageRows);
-
-      // Empty current page → no more data to paginate into
-      if (pageRows.length === 0) break;
-
-      // No "Next" button → we are on the last page
-      const nextVisible = await this.nextPageButton
-        .isVisible({ timeout: 2000 })
-        .catch(() => false);
-      if (!nextVisible) break;
-
-      // Safety cap reached with more pages available — warn and stop. Note
-      // that truncated results can make minRows/rowContains assertions fail.
-      if (pageIndex === maxPages - 1) {
-        console.warn(
-          `[VisitFilter] Pagination cap (${maxPages} pages) reached — results truncated; ` +
-          'minRows/rowContains assertions may fail for larger datasets',
-        );
-        break;
-      }
-
-      await this.nextPageButton.click();
-
-      // Keep the fixed settle-wait from the openLatestAppointmentByStatus
-      // pattern, then poll briefly until the new page's first row renders
-      // (guards against reading stale rows on slow networks). Falls back
-      // gracefully if rows are legitimately identical across pages.
-      await this.page.waitForTimeout(1000);
-
-      const previousFirstRow = pageRows[0] ?? '';
-      try {
-        await expect(async () => {
-          const firstRowText = await this.resultRows.first()
-            .textContent()
-            .then((t) => t?.trim() ?? '');
-          return firstRowText !== '' && firstRowText !== previousFirstRow;
-        }).toPass({ timeout: 3000, intervals: [250, 500, 1000] });
-      } catch {
-        // Identical first row across pages (or app finished before the poll) —
-        // proceed with whatever the next iteration collects.
-      }
-    }
-
-    return allRows;
-  }
-
-  /** Text of the "no records found" message, if visible. */
-  async getNoRecordsText(): Promise<string> {
-    return (await this.noRecordsMessage.textContent())?.trim() ?? '';
-  }
-
-  /** Text of the validation/error feedback, if visible. */
-  async getErrorText(): Promise<string> {
-    return (await this.errorMessage.textContent())?.trim() ?? '';
   }
 }
 

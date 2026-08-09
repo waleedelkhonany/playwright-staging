@@ -1,0 +1,291 @@
+[
+  {
+    "id": "ETC-01",
+    "description": "Happy path — combined search + username (both match employee hossam)",
+    "category": "happy-path",
+    "filters": {
+      "search": "hossam",
+      "username": "hossam"
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": ["hossam"],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "ETC-02",
+    "description": "Happy path — combined email-fragment search + username (AND semantics)",
+    "category": "happy-path",
+    "filters": {
+      "search": "@gmail",
+      "username": "hossam"
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": ["hossam"],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "ETC-03",
+    "description": "Single filter — name search only (Mohamed matches one or more employees)",
+    "category": "single-filter",
+    "filters": {
+      "search": "Mohamed",
+      "username": null
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": ["Mohamed"],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "ETC-04",
+    "description": "Single filter — name search only (Wajd)",
+    "category": "single-filter",
+    "filters": {
+      "search": "Wajd",
+      "username": null
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": ["Wajd"],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "ETC-05",
+    "description": "Single filter — name search only (shawki sherwali)",
+    "category": "single-filter",
+    "filters": {
+      "search": "shawki",
+      "username": null
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": ["shawki"],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "ETC-06",
+    "description": "Single filter — name search only (Faisal Mukadam)",
+    "category": "single-filter",
+    "filters": {
+      "search": "Faisal",
+      "username": null
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": ["Faisal"],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "ETC-07",
+    "description": "Single filter — search by username-like value through the general search (waad.albaqami)",
+    "category": "single-filter",
+    "filters": {
+      "search": "waad.albaqami",
+      "username": null
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": ["waad.albaqami"],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "ETC-08",
+    "description": "Single filter — email fragment search (@gmail matches employee emails)",
+    "category": "single-filter",
+    "filters": {
+      "search": "@gmail",
+      "username": null
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": ["hossam"],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "ETC-09",
+    "description": "Single filter — username search only (hossam)",
+    "category": "single-filter",
+    "filters": {
+      "search": null,
+      "username": "hossam"
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": ["hossam"],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "ETC-10",
+    "description": "No results — non-existent name search",
+    "category": "no-results",
+    "filters": {
+      "search": "zzz_nobody",
+      "username": null
+    },
+    "expected": {
+      "outcome": "noRecords",
+      "minRows": 1,
+      "noRecordsMessage": "No Data Available",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "ETC-11",
+    "description": "No results — non-existent employee name",
+    "category": "no-results",
+    "filters": {
+      "search": "NonExistentEmployeeXYZ",
+      "username": null
+    },
+    "expected": {
+      "outcome": "noRecords",
+      "minRows": 1,
+      "noRecordsMessage": "No Data Available",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "ETC-12",
+    "description": "No results — non-existent username",
+    "category": "no-results",
+    "filters": {
+      "search": null,
+      "username": "zzz_nobody"
+    },
+    "expected": {
+      "outcome": "noRecords",
+      "minRows": 1,
+      "noRecordsMessage": "No Data Available",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "ETC-13",
+    "description": "No results — valid values that never co-occur (AND semantics: Wajd is not his own username)",
+    "category": "no-results",
+    "filters": {
+      "search": "Wajd",
+      "username": "Wajd"
+    },
+    "expected": {
+      "outcome": "noRecords",
+      "minRows": 1,
+      "noRecordsMessage": "No Data Available",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "ETC-14",
+    "description": "Boundary — all filters null (empty search returns the full employee list)",
+    "category": "boundary",
+    "filters": {
+      "search": null,
+      "username": null
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "ETC-15",
+    "description": "Boundary — empty-string search treated as no value",
+    "category": "boundary",
+    "filters": {
+      "search": "",
+      "username": null
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "ETC-16",
+    "description": "Reset — apply a no-results search, reset, assert full list restored across pages",
+    "category": "boundary",
+    "filters": {
+      "search": "zzz_nobody",
+      "username": null
+    },
+    "expected": {
+      "outcome": "resetRestoresRecords",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": "noRecords"
+    }
+  },
+  {
+    "id": "ETC-17",
+    "description": "Reset — apply a narrowing search (Mohamed), reset, assert full list restored across pages",
+    "category": "boundary",
+    "filters": {
+      "search": "Mohamed",
+      "username": null
+    },
+    "expected": {
+      "outcome": "resetRestoresRecords",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": ["Mohamed"],
+      "filteredState": "records"
+    }
+  }
+]

@@ -17,7 +17,10 @@
 │   ├── create-view-checkin-appointment.spec.ts  # Combined create/view/check-in flow
 │   ├── create-appointment.spec.ts            # Create appointment workflows
 │   ├── physician-orders.spec.ts              # Create Dialysis Order workflow
-│   └── lab-order.spec.ts                     # Create Lab Order workflow
+│   ├── lab-order.spec.ts                     # Create Lab Order workflow
+│   ├── visit_filter.spec.ts                  # Data-driven Visit Filter tests
+│   ├── patient_filter.spec.ts                # Data-driven Patient Filter tests
+│   └── employee_filter.spec.ts               # Data-driven Employee Filter tests
 │
 ├── src/
 │   ├── pages/                 # Page Object Models (POM)
@@ -27,7 +30,8 @@
 │   │   ├── header.page.ts     # Top navigation (Branch/Location selectors)
 │   │   ├── visits.page.ts     # Visit details/edit page verification
 │   │   ├── appointment-detail.page.ts  # Appointment modal confirmation & check-in
-│   │   └── employees.page.ts  # Employee management page
+│   │   ├── employees.page.ts  # Employee management page
+│   │   └── filter-list.page.ts  # Shared base for list-page filter specs
 │   │
 │   ├── fixtures/              # Test fixtures and shared state
 │   │   └── auth.fixture.ts    # Auto-login + page object injection
@@ -47,6 +51,9 @@
 ├── config/
 │   ├── config.json            # Global configuration (headers, locales)
 │   ├── README.md              # Configuration documentation
+│   ├── visit_filters.json     # Data-driven Visit Filter test cases
+│   ├── patient_filters.json   # Data-driven Patient Filter test cases
+│   ├── employee_filters.json  # Data-driven Employee Filter test cases
 │   ├── appointment-scenarios/  # Appointment scenario files
 │   │   ├── full-appointment.scenario.json     # Full appointment test data
 │   │   ├── morning-appointment.scenario.json  # Morning slot appointment
@@ -62,7 +69,16 @@
 ├── scripts/                   # Diagnostic/debugging scripts
 │   ├── diagnose-patient-save.ts       # Diagnose patient save issues
 │   ├── investigate-patient-form.ts    # Investigate form structure
-│   └── extract-form-fields.ts         # Extract form field definitions
+│   ├── extract-form-fields.ts         # Extract form field definitions
+│   ├── inspect-visit-filter.ts        # Dump Visit Filter DOM on staging
+│   ├── debug-visit-filter-tc01.ts     # Smoke-test Visit Filter case TC-01
+│   ├── inspect-patient-filter.ts      # Dump Patient Filter DOM on staging
+│   ├── probe-patient-filter.ts        # Probe patient list pagination/empty state
+│   ├── probe-patient-filter-2.ts      # Verify patient filter values
+│   ├── inspect-employee-filter.ts     # Dump Employee Filter DOM on staging
+│   ├── probe-employee-filter.ts       # Probe employee search behavior
+│   ├── probe-employee-filter-2.ts     # Verify employee filter values
+│   └── probe-employee-filter-3.ts     # Verify employee combos + pagination
 │
 ├── .env.example               # Environment template (BASE_URL required)
 ├── package.json               # Project dependencies & scripts
@@ -83,8 +99,17 @@
 | `create-appointment.spec.ts` | Create appointments for existing patients (full, minimal, morning-time slot scenarios) |
 | `physician-orders.spec.ts` | Create a Dialysis Order via Physician Orders → Dialysis Order tab |
 | `lab-order.spec.ts` | Create a Lab Order via Physician Orders → Labs & Imaging → Create Lab Order form |
+| `visit_filter.spec.ts` | Data-driven Visit Filter tests (config/visit_filters.json): happy path, single filters, empty state, boundary & reset |
+| `patient_filter.spec.ts` | Data-driven Patient Filter tests (config/patient_filters.json): name/MRN/mobile/email/ID/status filters, empty state, boundary & reset |
+| `employee_filter.spec.ts` | Data-driven Employee Filter tests (config/employee_filters.json): live name/email/mobile + username searches, empty state, boundary & reset |
 
 ### 2. Page Object Models (`src/pages/*.ts`)
+
+> **Note:** The three filter specs each keep a lightweight filter-specific
+> POM (e.g. `PatientFilterPage`) inline in the spec file. The shared
+> result-inspection logic (pagination walk, settle waits, empty-state readers)
+> lives in the common `FilterListPage` base in `src/pages/filter-list.page.ts`,
+> which all three extend.
 
 #### BasePage (`base.page.ts`)
 Shared utilities:
@@ -178,6 +203,17 @@ Appointment detail modal interactions:
 #### EmployeesPage (`employees.page.ts`)
 Employee management interactions (POM for staff list operations).
 
+#### FilterListPage (`filter-list.page.ts`)
+Shared base class for the list-page filter specs (Visit / Patient / Employee):
+- Result-row collection across ALL paginated pages (Next-button walk)
+- Settle waits after applying/resetting filters
+- Empty-state (`"No Data Available"`) and validation/error readers
+- Pagination "Next" locator covering GET-link and Livewire `wire:click` variants
+
+Subclasses supply the list URL and the page-specific filter interaction
+(`setField` / `applyFilters`), and may override `resetFilters()` (the Visits
+spec does — its reset is the modal's "Clear" link, not a plain navigation).
+
 ---
 
 ### 3. Fixtures (`src/fixtures/auth.fixture.ts`)
@@ -256,6 +292,41 @@ Header context management:
 - Screenshots: `only-on-failure` (configurable via SCREENSHOT_MODE env var)
 - Video recording: `retain-on-failure` (configurable via VIDEO_MODE env var)
 - Projects: chromium with fixed viewport (1366x768), ar-SA locale, Asia/Riyadh timezone
+
+#### Filter Test Cases (`config/*_filters.json`)
+Each of the three filter specs is driven by an ARRAY of test-case objects in
+its own config file — one Playwright test is registered per case at collection
+time, grouped into `test.describe` blocks by `category`:
+
+- `visit_filters.json` → `tests/visit_filter.spec.ts` — Visit Filter modal
+  (patient name/MRN, nurse/doctor/driver, visit type, status, insurance,
+  date preset & range)
+- `patient_filters.json` → `tests/patient_filter.spec.ts` — Patients list GET
+  form (name, mobile, email, patient ID, MRN, government ID, status,
+  referral status)
+- `employee_filters.json` → `tests/employee_filter.spec.ts` — Employees list
+  live searches (`search`, `username_filter`)
+
+Shared case structure:
+```json
+{
+  "id": "TC-01",
+  "description": "What this case verifies",
+  "category": "happy-path | single-filter | no-results | boundary",
+  "filters": { "<field>": "value or null" },
+  "expected": {
+    "outcome": "records | noRecords | validationError | resetRestoresRecords",
+    "minRows": 1,
+    "noRecordsMessage": "No Data Available",
+    "validationMessage": "",
+    "rowContains": ["text expected in at least one result row"],
+    "filteredState": "records | noRecords"
+  }
+}
+```
+`null` / `""` filter values mean "do not touch this field". The visit filter
+config also supports `{{today}}` / `{{yesterday}}` / `{{daysAgo:30}}` date
+placeholders resolved at runtime so dates never go stale.
 
 ---
 
@@ -401,6 +472,13 @@ npm run report
    - Programmatic option selection first (fast)
    - Falls back to UI interaction if options not pre-populated
    - Handles Select2 AJAX loading gracefully
+
+6. **Data-Driven Filter Tests:**
+   - One Playwright test per JSON case in `config/*_filters.json`, grouped by `category`
+   - Outcomes: `records`, `noRecords`, `validationError`, `resetRestoresRecords`
+   - Pagination-aware result walking (Next button) so assertions cover the full result set
+   - Reset cases capture the baseline after an explicit reset and compare restored rows by stable ID
+   - Locators aligned to the real staging DOM via `scripts/inspect-*-filter.ts`
 
 ---
 
