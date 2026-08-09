@@ -1,0 +1,600 @@
+[
+  {
+    "id": "TC-01",
+    "description": "Happy path — multi-filter (patient name + status + last-30-days date range)",
+    "category": "happy-path",
+    "filters": {
+      "patientName": "Riyada",
+      "patientMrn": null,
+      "nurseName": null,
+      "doctorName": null,
+      "driverName": null,
+      "visitType": null,
+      "status": "In Progress",
+      "insuranceCompany": null,
+      "datePreset": null,
+      "dateFrom": "{{daysAgo:30}}",
+      "dateTo": "{{today}}"
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": ["Riyada"],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "TC-02",
+    "description": "Single filter — patient name only",
+    "category": "single-filter",
+    "filters": {
+      "patientName": "Riyada",
+      "patientMrn": null,
+      "nurseName": null,
+      "doctorName": null,
+      "driverName": null,
+      "visitType": null,
+      "status": "All",
+      "insuranceCompany": null,
+      "datePreset": null,
+      "dateFrom": null,
+      "dateTo": null
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": ["Riyada"],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "TC-03",
+    "description": "Single filter — date range only (last 30 days)",
+    "category": "single-filter",
+    "filters": {
+      "patientName": null,
+      "patientMrn": null,
+      "nurseName": null,
+      "doctorName": null,
+      "driverName": null,
+      "visitType": null,
+      "status": "All",
+      "insuranceCompany": null,
+      "datePreset": null,
+      "dateFrom": "{{daysAgo:30}}",
+      "dateTo": "{{today}}"
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "TC-04",
+    "description": "Single filter — doctor name only (value must be a real doctor in staging, e.g. 'Test')",
+    "category": "single-filter",
+    "filters": {
+      "patientName": null,
+      "patientMrn": null,
+      "nurseName": null,
+      "doctorName": "Test",
+      "driverName": null,
+      "visitType": null,
+      "status": "All",
+      "insuranceCompany": null,
+      "datePreset": null,
+      "dateFrom": null,
+      "dateTo": null
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "TC-05",
+    "description": "Single filter — status only (in progress)",
+    "category": "single-filter",
+    "filters": {
+      "patientName": null,
+      "patientMrn": null,
+      "nurseName": null,
+      "doctorName": null,
+      "driverName": null,
+      "visitType": null,
+      "status": "In Progress",
+      "insuranceCompany": null,
+      "datePreset": null,
+      "dateFrom": null,
+      "dateTo": null
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "TC-06",
+    "description": "No results — non-existent patient name",
+    "category": "no-results",
+    "filters": {
+      "patientName": "NonExistentPatient123",
+      "patientMrn": null,
+      "nurseName": null,
+      "doctorName": null,
+      "driverName": null,
+      "visitType": null,
+      "status": "All",
+      "insuranceCompany": null,
+      "datePreset": null,
+      "dateFrom": null,
+      "dateTo": null
+    },
+    "expected": {
+      "outcome": "noRecords",
+      "minRows": 1,
+      "noRecordsMessage": "No Data Available",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "TC-07",
+    "description": "Boundary — invalid/reversed date range (from after to) returns empty state",
+    "category": "boundary",
+    "filters": {
+      "patientName": null,
+      "patientMrn": null,
+      "nurseName": null,
+      "doctorName": null,
+      "driverName": null,
+      "visitType": null,
+      "status": "All",
+      "insuranceCompany": null,
+      "datePreset": null,
+      "dateFrom": "{{tomorrow}}",
+      "dateTo": "{{yesterday}}"
+    },
+    "expected": {
+      "outcome": "noRecords",
+      "minRows": 1,
+      "noRecordsMessage": "No Data Available",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "TC-08",
+    "description": "Boundary — all filters null/cleared (status explicitly reset to All; empty submit returns the full default list)",
+    "category": "boundary",
+    "filters": {
+      "patientName": null,
+      "patientMrn": null,
+      "nurseName": null,
+      "doctorName": null,
+      "driverName": null,
+      "visitType": null,
+      "status": "All",
+      "insuranceCompany": null,
+      "datePreset": null,
+      "dateFrom": null,
+      "dateTo": null
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "TC-09",
+    "description": "Boundary — empty-string patient name treated as no value (status explicitly reset to All)",
+    "category": "boundary",
+    "filters": {
+      "patientName": "",
+      "patientMrn": null,
+      "nurseName": null,
+      "doctorName": null,
+      "driverName": null,
+      "visitType": null,
+      "status": "All",
+      "insuranceCompany": null,
+      "datePreset": null,
+      "dateFrom": null,
+      "dateTo": null
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "TC-10",
+    "description": "Reset — apply a no-results filter, click Clear, assert full list restored across pages",
+    "category": "boundary",
+    "filters": {
+      "patientName": "NonExistentPatient123",
+      "patientMrn": null,
+      "nurseName": null,
+      "doctorName": null,
+      "driverName": null,
+      "visitType": null,
+      "status": "All",
+      "insuranceCompany": null,
+      "datePreset": null,
+      "dateFrom": null,
+      "dateTo": null
+    },
+    "expected": {
+      "outcome": "resetRestoresRecords",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": "noRecords"
+    }
+  },
+  {
+    "id": "TC-11",
+    "description": "Reset — apply realistic narrowing filter (nurse name; DB must contain visits from other nurses too), click Clear, assert full list restored across pages",
+    "category": "boundary",
+    "filters": {
+      "patientName": null,
+      "patientMrn": null,
+      "nurseName": "Test Nurse",
+      "doctorName": null,
+      "driverName": null,
+      "visitType": null,
+      "status": "All",
+      "insuranceCompany": null,
+      "datePreset": null,
+      "dateFrom": null,
+      "dateTo": null
+    },
+    "expected": {
+      "outcome": "resetRestoresRecords",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": ["Test Nurse"],
+      "filteredState": "records"
+    }
+  },
+  {
+    "id": "TC-12",
+    "description": "Single filter — visit type only (Select2)",
+    "category": "single-filter",
+    "filters": {
+      "patientName": null,
+      "patientMrn": null,
+      "nurseName": null,
+      "doctorName": null,
+      "driverName": null,
+      "visitType": "Initial Visit",
+      "status": "All",
+      "insuranceCompany": null,
+      "datePreset": null,
+      "dateFrom": null,
+      "dateTo": null
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "TC-13",
+    "description": "Single filter — patient MRN only (value must match a real MRN in staging)",
+    "category": "single-filter",
+    "filters": {
+      "patientName": null,
+      "patientMrn": "121",
+      "nurseName": null,
+      "doctorName": null,
+      "driverName": null,
+      "visitType": null,
+      "status": "All",
+      "insuranceCompany": null,
+      "datePreset": null,
+      "dateFrom": null,
+      "dateTo": null
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "TC-14",
+    "description": "Single filter — nurse name only",
+    "category": "single-filter",
+    "filters": {
+      "patientName": null,
+      "patientMrn": null,
+      "nurseName": "Test Nurse",
+      "doctorName": null,
+      "driverName": null,
+      "visitType": null,
+      "status": "All",
+      "insuranceCompany": null,
+      "datePreset": null,
+      "dateFrom": null,
+      "dateTo": null
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "TC-15",
+    "description": "Single filter — insurance company only (Select2)",
+    "category": "single-filter",
+    "filters": {
+      "patientName": null,
+      "patientMrn": null,
+      "nurseName": null,
+      "doctorName": null,
+      "driverName": null,
+      "visitType": null,
+      "status": "All",
+      "insuranceCompany": "Self Pay",
+      "datePreset": null,
+      "dateFrom": null,
+      "dateTo": null
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "TC-16",
+    "description": "Happy path — combined real fields (patient name + visit type + insurance, all Select2/text)",
+    "category": "happy-path",
+    "filters": {
+      "patientName": "Riyada",
+      "patientMrn": null,
+      "nurseName": null,
+      "doctorName": null,
+      "driverName": null,
+      "visitType": "Treatment Nurse Visit",
+      "status": "All",
+      "insuranceCompany": "Self Pay",
+      "datePreset": null,
+      "dateFrom": null,
+      "dateTo": null
+    },
+    "expected": {
+      "outcome": "records",
+      "minRows": 1,
+      "noRecordsMessage": "",
+      "validationMessage": "",
+      "rowContains": ["Riyada"],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "TC-17",
+    "description": "No results — non-existent patient MRN",
+    "category": "no-results",
+    "filters": {
+      "patientName": null,
+      "patientMrn": "999999999",
+      "nurseName": null,
+      "doctorName": null,
+      "driverName": null,
+      "visitType": null,
+      "status": "All",
+      "insuranceCompany": null,
+      "datePreset": null,
+      "dateFrom": null,
+      "dateTo": null
+    },
+    "expected": {
+      "outcome": "noRecords",
+      "minRows": 1,
+      "noRecordsMessage": "No Data Available",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "TC-18",
+    "description": "No results — valid visit type combined with an impossible date window (every visit type has data in staging, so the empty state is proven with the visit-type filter active)",
+    "category": "no-results",
+    "filters": {
+      "patientName": null,
+      "patientMrn": null,
+      "nurseName": null,
+      "doctorName": null,
+      "driverName": null,
+      "visitType": "Initial Visit",
+      "status": "All",
+      "insuranceCompany": null,
+      "datePreset": null,
+      "dateFrom": "{{daysAgo:3650}}",
+      "dateTo": "{{daysAgo:3650}}"
+    },
+    "expected": {
+      "outcome": "noRecords",
+      "minRows": 1,
+      "noRecordsMessage": "No Data Available",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "TC-19",
+    "description": "No results — valid insurance company with no visits in staging (Select2; verified: MetLife AIG ANB has none)",
+    "category": "no-results",
+    "filters": {
+      "patientName": null,
+      "patientMrn": null,
+      "nurseName": null,
+      "doctorName": null,
+      "driverName": null,
+      "visitType": null,
+      "status": "All",
+      "insuranceCompany": "MetLife AIG ANB",
+      "datePreset": null,
+      "dateFrom": null,
+      "dateTo": null
+    },
+    "expected": {
+      "outcome": "noRecords",
+      "minRows": 1,
+      "noRecordsMessage": "No Data Available",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "TC-20",
+    "description": "No results — non-existent nurse name",
+    "category": "no-results",
+    "filters": {
+      "patientName": null,
+      "patientMrn": null,
+      "nurseName": "NonExistentNurseXYZ",
+      "doctorName": null,
+      "driverName": null,
+      "visitType": null,
+      "status": "All",
+      "insuranceCompany": null,
+      "datePreset": null,
+      "dateFrom": null,
+      "dateTo": null
+    },
+    "expected": {
+      "outcome": "noRecords",
+      "minRows": 1,
+      "noRecordsMessage": "No Data Available",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "TC-21",
+    "description": "No results — valid status with no matching visits in staging (Select2; verified: co_sign has none)",
+    "category": "no-results",
+    "filters": {
+      "patientName": null,
+      "patientMrn": null,
+      "nurseName": null,
+      "doctorName": null,
+      "driverName": null,
+      "visitType": null,
+      "status": "co_sign",
+      "insuranceCompany": null,
+      "datePreset": null,
+      "dateFrom": null,
+      "dateTo": null
+    },
+    "expected": {
+      "outcome": "noRecords",
+      "minRows": 1,
+      "noRecordsMessage": "No Data Available",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "TC-22",
+    "description": "No results — non-existent doctor name",
+    "category": "no-results",
+    "filters": {
+      "patientName": null,
+      "patientMrn": null,
+      "nurseName": null,
+      "doctorName": "NonExistentDoctorXYZ",
+      "driverName": null,
+      "visitType": null,
+      "status": "All",
+      "insuranceCompany": null,
+      "datePreset": null,
+      "dateFrom": null,
+      "dateTo": null
+    },
+    "expected": {
+      "outcome": "noRecords",
+      "minRows": 1,
+      "noRecordsMessage": "No Data Available",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  },
+  {
+    "id": "TC-23",
+    "description": "No results — date range far in the past (10 years ago) returns empty state deterministically",
+    "category": "no-results",
+    "filters": {
+      "patientName": null,
+      "patientMrn": null,
+      "nurseName": null,
+      "doctorName": null,
+      "driverName": null,
+      "visitType": null,
+      "status": "All",
+      "insuranceCompany": null,
+      "datePreset": null,
+      "dateFrom": "{{daysAgo:3650}}",
+      "dateTo": "{{daysAgo:3650}}"
+    },
+    "expected": {
+      "outcome": "noRecords",
+      "minRows": 1,
+      "noRecordsMessage": "No Data Available",
+      "validationMessage": "",
+      "rowContains": [],
+      "filteredState": ""
+    }
+  }
+]

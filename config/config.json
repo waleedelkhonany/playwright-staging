@@ -13,7 +13,7 @@
     "  \"headless\": false  →  Visible (Headed) mode — watch tests run in real time",
     "  \"headless\": true   →  Background (Headless) mode — runs silently, no UI"
   ],
-  "headless": true,
+  "headless": false,
 
   "saudiPhone": {
     "prefixes": ["055", "056", "057", "058", "059", "053", "054", "050"],
