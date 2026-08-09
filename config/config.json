@@ -37,7 +37,7 @@
       "by every appointment test — do NOT duplicate it in scenario files.",
       "Other available IDs in staging: [109, 120, 122, 107, 176, 177, 144, 158]"
     ],
-    "targetPatientIdentifier": "121"
+    "targetPatientIdentifier": "222"
   },
   "_comment_appointmentConfig": "Appointment test parameters (defaultDurationMinutes, etc.) live in the _config block of each file in config/appointment-scenarios/, and form fields (visitType, date, etc.) in _fields. targetPatientIdentifier is the exception — it is defined above under \"appointment\" so all tests share one consistent value.",
 
@@ -59,6 +59,6 @@
       "  - In Center",
       "  - Home Hemodialysis"
     ],
-    "targetLocation": "In Center"
+    "targetLocation": "Home Hemodialysis"
   }
 }

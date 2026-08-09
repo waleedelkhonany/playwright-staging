@@ -1,0 +1,45 @@
+{
+  "_description": "Dialysis Order scenario — HDF variant. orderType and modality are pinned to the Portable Low Dialysate Dialysis + Hemodiafiltration (HDF) combination (the SECOND value in each select), while every other field is DYNAMIC so each test run still fills different values/choices. Select values come from the exact option texts rendered in the staging modal, excluding 'Other'.",
+  "_config": {
+    "_comment_targetPatient": "The target patient identifier is NOT stored here — it is read from config/config.json (appointment.targetPatientIdentifier), the single source of truth shared by every appointment/order test.",
+    "_comment_fixed": "orderType = 'Portable Low Dialysate Dialysis', modality = 'Hemodiafiltration (HDF)' — exercises a different branch of the form than the conventional-HD baseline."
+  },
+  "_fields": {
+    "orderType":              "Portable Low Dialysate Dialysis",
+    "modality":               "Hemodiafiltration (HDF)",
+    "dryWeight":              "DYNAMIC",
+    "uf":                     "DYNAMIC",
+    "vascularAccessType":     "DYNAMIC",
+    "accessSite":             "DYNAMIC",
+    "needleGauge":            "DYNAMIC",
+    "dwellType":              "DYNAMIC",
+    "dwellVolumeArterial":    "DYNAMIC",
+    "dwellVolumeVenous":      "DYNAMIC",
+    "frequency":              "DYNAMIC",
+    "duration":               "DYNAMIC",
+    "bloodFlowRate":          "DYNAMIC",
+    "dialysateType":          "DYNAMIC",
+    "picar":                  "DYNAMIC",
+    "lactatePercent":         "DYNAMIC",
+    "dialysateSodium":        "DYNAMIC",
+    "potassium":              "DYNAMIC",
+    "bicarbonate":            "DYNAMIC",
+    "calcium":                "DYNAMIC",
+    "temperature":            "DYNAMIC",
+    "anticoagulationType":    "DYNAMIC",
+    "dialyzerType":           "DYNAMIC",
+    "dialyzerSurfaceArea":    "DYNAMIC",
+
+    "mode":                   "DYNAMIC",
+    "dialysateVolume":        "DYNAMIC",
+    "dialyzerCartridge":      "DYNAMIC",
+    "dialyzerCartridgeExtra": "DYNAMIC",
+    "electrolyteSodium":      "DYNAMIC",
+    "electrolytePotassium":   "DYNAMIC",
+    "electrolyteCalcium":     "DYNAMIC",
+    "electrolyteGlucose":     "DYNAMIC",
+    "dialysateTemperature":   "DYNAMIC",
+
+    "additionalInformation":  "DYNAMIC"
+  }
+}

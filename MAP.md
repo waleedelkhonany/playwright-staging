@@ -62,7 +62,9 @@
 │   │   ├── morning-appointment.scenario.json  # Morning slot appointment
 │   │   └── minimal-appointment.scenario.json  # Minimal fields only
 │   ├── physician-order-scenarios/  # Physician order scenario files
-│   │   ├── dialysis-order.scenario.json       # Dialysis Order modal payload
+│   │   ├── dialysis-order.scenario.json       # Dialysis Order modal payload (static baseline)
+│   │   ├── dynamic-dialysis-order.scenario.json  # All fields DYNAMIC (random values/choices)
+│   │   ├── hdf-dialysis-order.scenario.json   # Fixed Portable + HDF, rest DYNAMIC
 │   │   └── lab-order.scenario.json            # Lab Order form payload
 │   ├── patient-scenarios/      # Patient scenario files
 │   │   ├── full-patient.scenario.json         # Full patient data
@@ -105,7 +107,7 @@
 | `patients.spec.ts` | Patient CRUD operations: create full patient, create minimal patient, create Saudi female patient with specific constraints |
 | `create-view-checkin-appointment.spec.ts` | Combined workflow: create appointment within test → view it → confirm care team → check-in → verify redirect |
 | `create-appointment.spec.ts` | Create appointments for existing patients (full, minimal, morning-time slot scenarios) |
-| `physician-orders.spec.ts` | Create a Dialysis Order via Physician Orders → Dialysis Order tab |
+| `physician-orders.spec.ts` | Create a Dialysis Order via Physician Orders → Dialysis Order tab (runs 3 scenarios: static baseline, all-DYNAMIC, and HDF-variant) |
 | `lab-order.spec.ts` | Create a Lab Order via Physician Orders → Labs & Imaging → Create Lab Order form |
 | `employee-create.spec.ts` | Create an employee via the `/employees/create` Livewire form: fill Main Info (incl. the SCFHS/NPHIES license section for licensed titles), wait for the server-validated "Create" button, assert the success redirect to `/employees/{id}/edit` |
 | `visit_filter.spec.ts` | Data-driven Visit Filter tests (config/visit_filters.json): happy path, single filters, empty state, boundary & reset |

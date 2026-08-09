@@ -17,6 +17,7 @@
  */
 import 'dotenv/config';
 import { chromium } from 'playwright';
+import config from '../config/config.json';
 
 const BASE_URL = process.env.BASE_URL;
 const USERNAME = process.env.APP_USERNAME;
@@ -26,7 +27,9 @@ if (!BASE_URL || !USERNAME || !PASSWORD) {
   throw new Error('Set BASE_URL, APP_USERNAME, APP_PASSWORD in .env');
 }
 
-const TARGET_PATIENT = '121';
+// Target patient comes from config.json (single source of truth used by every
+// test) — was hardcoded to '121' before, which no longer exists in staging.
+const TARGET_PATIENT = config.appointment.targetPatientIdentifier;
 
 async function main() {
   const browser = await chromium.launch({ headless: true });

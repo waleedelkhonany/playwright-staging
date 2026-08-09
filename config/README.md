@@ -33,6 +33,8 @@ config/
 │   └── morning-appointment.scenario.json
 ├── physician-order-scenarios/         ← physician order form payloads + config
 │   ├── dialysis-order.scenario.json
+│   ├── dynamic-dialysis-order.scenario.json
+│   ├── hdf-dialysis-order.scenario.json
 │   └── lab-order.scenario.json
 └── patient-scenarios/                 ← patient form payloads + config
     ├── full-patient.scenario.json
@@ -125,6 +127,35 @@ Each field in `_fields` is resolved according to this table:
 | `{{random_ar_first}}` | Random Arabic first name |
 | `{{random_ar_last}}` | Random Arabic last name |
 
+**Available templates (dialysis orders):**
+| Template | Resolves to |
+|---|---|
+| `{{random_order_type}}` | Random order type (Conventional Dialysis / Portable Low Dialysate Dialysis) |
+| `{{random_modality}}` | Random modality (Hemodialysis (HD) / Hemodiafiltration (HDF)) |
+| `{{random_vascular_access}}` | Random vascular access (AV-Fistula / AV-Graft / CVC / Permacath) |
+| `{{random_access_site}}` | Random access site (Right / Left) |
+| `{{random_needle_gauge}}` | Random needle gauge (15G / 16G / 17G) |
+| `{{random_dwell_type}}` | Random dwell type (Heparin / Normal Saline) |
+| `{{random_frequency}}` | Random frequency (2–5 times per week) |
+| `{{random_duration}}` | Random duration (3–5 hours) |
+| `{{random_blood_flow_rate}}` | Random blood flow rate (200–500 mL/min) |
+| `{{random_dialysate_type}}` | Random dialysate type (Bicarbonate / Lactate) |
+| `{{random_lactate_percent}}` | Random lactate percent (40% / 45%) |
+| `{{random_dialysate_sodium}}` | Random dialysate sodium (130–140 mmol/L) |
+| `{{random_potassium}}` | Random potassium (1–3 mmol/L) |
+| `{{random_bicarbonate}}` | Random bicarbonate (30–40 mmol/L) |
+| `{{random_calcium}}` | Random calcium (1.25–1.75 mmol/L) |
+| `{{random_temperature}}` | Random temperature (35.5–37.0°C) |
+| `{{random_anticoagulation}}` | Random anticoagulation (UFH / LMWH / Saline Flushes / None) |
+| `{{random_dialyzer_type}}` | Random dialyzer type (High Flux / Low Flux) |
+| `{{random_dialyzer_surface}}` | Random dialyzer surface area (1.0–2.2 m²) |
+| `{{random_dialysate_volume}}` | Random dialysate volume (20L–60L) |
+| `{{random_cartridge}}` | Random cartridge (172 / 124) |
+| `{{random_dry_weight}}` | Random dry weight in kg (55–120) |
+| `{{random_uf}}` | Random ultrafiltration in L (1.0–4.0) |
+| `{{random_dwell_volume}}` | Random dwell volume in mL (100–250) |
+| `{{random_notes}}` | Random lorem-ipsum test note |
+
 ---
 
 ## Available Scenario Files
@@ -141,7 +172,9 @@ Each field in `_fields` is resolved according to this table:
 
 | File | Description |
 |---|---|
-| `dialysis-order.scenario.json` | Dialysis Order modal payload — static option texts (AV-Fistula, 36.0°C, etc.); loaded via `getDialysisOrderData()` |
+| `dialysis-order.scenario.json` | Dialysis Order modal payload — static baseline with concrete option texts (AV-Fistula, 36.0°C, etc.); loaded via `getDialysisOrderData()` |
+| `dynamic-dialysis-order.scenario.json` | Dialysis Order modal payload — EVERY field is `DYNAMIC`, so each test run fills different values and different select choices (randomized from the exact staging option texts, excluding "Other") |
+| `hdf-dialysis-order.scenario.json` | Dialysis Order modal payload — fixed Portable Low Dialysate Dialysis + Hemodiafiltration (HDF) combo with every other field `DYNAMIC`; exercises a different form branch than the conventional-HD baseline |
 | `lab-order.scenario.json` | Lab Order form payload — lab company, collection-by, due date, two Lab Test options (Sodium (Na+), Hemoglobin) for the two test rows, free text; loaded via `getLabOrderData()` |
 
 ### Patient Scenarios (`config/patient-scenarios/`)
@@ -234,6 +267,7 @@ const appointment = getAppointmentData('afternoon-appointment.scenario.json');
 1. **Create the JSON file** in the appropriate subdirectory under `config/`:
    - `config/appointment-scenarios/` for appointment tests
    - `config/patient-scenarios/` for patient tests
+   - `config/physician-order-scenarios/` for physician order tests (dialysis / lab)
 
 2. **Follow the structure:**
    ```json
@@ -274,7 +308,8 @@ src/helpers/
 ├── data.loader.ts                   ← generic: createDataLoader<T>()
 ├── patient-data.loader.ts           ← patient: getPatientData()
 ├── appointment-data.loader.ts       ← appointment: getAppointmentData()
-├── dialysis-order-data.loader.ts    ← dialysis order: getDialysisOrderData()
+├── dialysis-order-data.loader.ts    ← dialysis order: getDialysisOrderData() (DYNAMIC + templates)
+├── lab-order-data.loader.ts         ← lab order: getLabOrderData()
 └── lab-order-data.loader.ts         ← lab order: getLabOrderData()
 ```
 

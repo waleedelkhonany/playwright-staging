@@ -39,6 +39,77 @@ const INPUT_INDEX = {
 // NOTE: UF inputs carry id="uf" (one per section) and are filled by id via
 // fillUfInputs(), not by index.
 
+/**
+ * Data-driven fill map for the "Dialysis Order Type" section (Section 1).
+ * Each entry selects the option whose text equals `order[key]`, at the given
+ * occurrence among all selects containing that option. These arrays are the
+ * SINGLE source of truth for both filling and verifying the form, so the
+ * read-back check in verifyDialysisOrderForm() targets exactly the same
+ * controls that were filled.
+ */
+const SECTION_1_SELECTS: ReadonlyArray<{ key: keyof DialysisOrderData; occurrence: number }> = [
+  { key: 'orderType', occurrence: 1 },
+  { key: 'modality', occurrence: 1 },
+  { key: 'vascularAccessType', occurrence: 1 },
+  { key: 'accessSite', occurrence: 1 },
+  { key: 'needleGauge', occurrence: 1 },
+  { key: 'dwellType', occurrence: 1 },
+  { key: 'frequency', occurrence: 1 },
+  { key: 'duration', occurrence: 1 },
+  { key: 'bloodFlowRate', occurrence: 1 },
+  { key: 'dialysateType', occurrence: 1 },
+  { key: 'picar', occurrence: 1 },
+  { key: 'lactatePercent', occurrence: 1 },
+  { key: 'dialysateSodium', occurrence: 1 },
+  { key: 'potassium', occurrence: 1 },
+  { key: 'bicarbonate', occurrence: 1 },
+  { key: 'calcium', occurrence: 1 },
+  { key: 'temperature', occurrence: 1 },
+  { key: 'anticoagulationType', occurrence: 1 },
+  { key: 'dialyzerType', occurrence: 1 },
+  { key: 'dialyzerSurfaceArea', occurrence: 1 },
+];
+
+/**
+ * Data-driven fill map for the "Additional Information" section (Section 2).
+ * Most fields duplicate Section 1 (matched by occurrence 2); the section-2-
+ * only fields (dialysateVolume, dialyzerCartridge, electrolyteGlucose) use
+ * occurrence 1 because their option text exists nowhere else in the modal.
+ */
+const SECTION_2_SELECTS: ReadonlyArray<{ key: keyof DialysisOrderData; occurrence: number }> = [
+  { key: 'mode', occurrence: 2 },
+  { key: 'vascularAccessType', occurrence: 2 },
+  { key: 'accessSite', occurrence: 2 },
+  { key: 'needleGauge', occurrence: 2 },
+  { key: 'dwellType', occurrence: 2 },
+  { key: 'frequency', occurrence: 2 },
+  { key: 'duration', occurrence: 2 },
+  { key: 'bloodFlowRate', occurrence: 2 },
+  { key: 'dialysateType', occurrence: 2 },
+  { key: 'picar', occurrence: 2 },
+  { key: 'lactatePercent', occurrence: 2 },
+  { key: 'dialysateVolume', occurrence: 1 },
+  { key: 'dialyzerCartridge', occurrence: 1 },
+  { key: 'dialyzerCartridgeExtra', occurrence: 2 },
+  { key: 'dialyzerSurfaceArea', occurrence: 2 },
+  { key: 'electrolyteSodium', occurrence: 2 },
+  { key: 'electrolytePotassium', occurrence: 2 },
+  { key: 'electrolyteCalcium', occurrence: 2 },
+  { key: 'electrolyteGlucose', occurrence: 1 },
+  { key: 'dialysateTemperature', occurrence: 2 },
+  { key: 'anticoagulationType', occurrence: 2 },
+];
+
+/** Modal-scoped text inputs (index among ALL modal <input> elements). */
+const TEXT_INPUTS: ReadonlyArray<{ key: keyof DialysisOrderData; index: number }> = [
+  { key: 'dryWeight', index: INPUT_INDEX.dryWeight },
+  { key: 'dwellVolumeArterial', index: INPUT_INDEX.dwellVolumeArterial },
+  { key: 'dwellVolumeVenous', index: INPUT_INDEX.dwellVolumeVenous },
+  { key: 'dryWeight', index: INPUT_INDEX.dryWeight2 },
+  { key: 'dwellVolumeArterial', index: INPUT_INDEX.dwellVolumeArterial2 },
+  { key: 'dwellVolumeVenous', index: INPUT_INDEX.dwellVolumeVenous2 },
+];
+
 export class PhysicianOrdersPage extends BasePage {
   /** The "Add New Selections" modal — the Dialysis Order creation modal */
   readonly modal: Locator;
@@ -134,8 +205,19 @@ export class PhysicianOrdersPage extends BasePage {
   /**
    * Set a select inside the dialysis modal by OPTION TEXT.
    *
-   * @param optionText   The option text to select (exact match preferred)
-   * @param occurrence   1 = first select containing the option, 2 = second
+   * Matching is EXACT-TEXT-FIRST across the whole modal: a select is only
+   * counted if one of its options has an option text EXACTLY equal to
+   * `optionText`. Only if NO select anywhere has an exact text match do we
+   * fall back to substring matching. This avoids collisions like "35" also
+   * matching "350 mL/min" / "135 mmol/L" (or the option value "35" of
+   * "35 mmol/L"), or "Heparin" also matching "Unfractionated Heparin (UFH)".
+   *
+   * ⚠️ This exact-first matching is DUPLICATED inside the read-back helper of
+   *    verifyDialysisOrderForm() (readSelect) — Playwright evaluates must be
+   *    self-contained, so keep both copies in sync.
+   *
+   * @param optionText   The option text to select
+   * @param occurrence   1 = first select with an exact match, 2 = second
    *                     (used for the duplicated "Additional Information" section)
    */
   private async setModalSelectByOption(
@@ -144,12 +226,34 @@ export class PhysicianOrdersPage extends BasePage {
   ): Promise<void> {
     const result = await this.modal.evaluate((modalEl, { text, occ }) => {
       const selects = Array.from(modalEl.querySelectorAll('select'));
-      let count = 0;
+
+      // Pass 1: exact TEXT matches only. Option VALUES are deliberately NOT
+      // compared — e.g. the bicarbonate option "35 mmol/L" carries value "35",
+      // which would otherwise collide with the picar option text "35".
+      const exactTargets: Array<HTMLSelectElement> = [];
       for (const sel of selects) {
         const options = Array.from(sel.options);
-        let match = options.find((o) => o.textContent?.trim() === text);
-        if (!match) match = options.find((o) => o.value === text);
-        if (!match) match = options.find((o) =>
+        const hasExact = options.some((o) => o.textContent?.trim() === text);
+        if (hasExact) exactTargets.push(sel);
+      }
+      if (exactTargets.length > 0) {
+        const target = exactTargets[occ - 1];
+        if (target) {
+          const match = Array.from(target.options).find((o) => o.textContent?.trim() === text);
+          if (match) {
+            target.value = match.value;
+            target.dispatchEvent(new Event('change', { bubbles: true }));
+            target.dispatchEvent(new Event('input', { bubbles: true }));
+            return { ok: true as const, matched: match.textContent?.trim() ?? '' };
+          }
+        }
+        return { ok: false as const };
+      }
+
+      // Pass 2: substring fallback (only reached when no exact match exists).
+      let count = 0;
+      for (const sel of selects) {
+        const match = Array.from(sel.options).find((o) =>
           o.textContent?.trim().toLowerCase().includes(text.toLowerCase()),
         );
         if (match) {
@@ -238,64 +342,193 @@ export class PhysicianOrdersPage extends BasePage {
    * Section 2 ("Additional Information") duplicates most fields, so those
    * selects are matched by occurrence 2.
    *
+   * The modal is Livewire-driven and re-renders after EVERY change. A re-render
+   * can silently reset a previously-filled field whose server round-trip was
+   * still in flight (Livewire re-renders from server state). This causes a
+   * missing required value at Save → a validation-error SweetAlert instead of
+   * a success one. To defend against that race, fillDialysisOrderFormFields()
+   * is followed by a read-back verification (verifyDialysisOrderForm), and any
+   * field that did not stick is re-filled once.
+   *
    * @param order The dialysis order data (option texts matching the modal)
    */
   async fillDialysisOrderForm(order: DialysisOrderData): Promise<void> {
+    await this.fillDialysisOrderFormFields(order);
+
+    // Read back every control and repair any field lost to a Livewire
+    // re-render race before the test proceeds to Save.
+    const mismatches = await this.verifyDialysisOrderForm(order);
+    if (mismatches.length === 0) {
+      console.log('[DialysisOrder] Form verification: all fields set ✓');
+      return;
+    }
+
+    console.warn(
+      `[DialysisOrder] ${mismatches.length} field(s) lost to Livewire re-render — re-filling them...`,
+    );
+    for (const m of mismatches) console.warn(`[DialysisOrder]   ✗ ${m.description}`);
+
+    // Repair ONLY the mismatched fields (a full re-fill is wasteful and slow).
+    for (const m of mismatches) await m.repair();
+
+    // Let the repaired fields' Livewire round-trips settle before re-reading,
+    // so the re-verify doesn't race an in-flight re-render.
+    await this.waitForAnimation(1000);
+
+    const remaining = await this.verifyDialysisOrderForm(order);
+    if (remaining.length > 0) {
+      throw new Error(
+        `[DialysisOrder] Form fields still missing after re-fill:\n  - ` +
+        remaining.map((r) => r.description).join('\n  - '),
+      );
+    }
+    console.log('[DialysisOrder] Form verification after re-fill: all fields set ✓');
+  }
+
+  /** Perform the raw fill sequence (used by fillDialysisOrderForm + repair). */
+  private async fillDialysisOrderFormFields(order: DialysisOrderData): Promise<void> {
     // --- Section 1: Dialysis Order Type ---
-    await this.setModalSelectByOption(order.orderType, 1);
-    await this.setModalSelectByOption(order.modality, 1);
+    for (const { key, occurrence } of SECTION_1_SELECTS) {
+      await this.setModalSelectByOption(order[key], occurrence);
+    }
     await this.setModalInputByIndex(INPUT_INDEX.dryWeight, order.dryWeight);
     await this.fillUfInputs(order.uf);
-    await this.setModalSelectByOption(order.vascularAccessType, 1);
-    await this.setModalSelectByOption(order.accessSite, 1);
-    await this.setModalSelectByOption(order.needleGauge, 1);
-    await this.setModalSelectByOption(order.dwellType, 1);
     await this.setModalInputByIndex(INPUT_INDEX.dwellVolumeArterial, order.dwellVolumeArterial);
     await this.setModalInputByIndex(INPUT_INDEX.dwellVolumeVenous, order.dwellVolumeVenous);
-    await this.setModalSelectByOption(order.frequency, 1);
-    await this.setModalSelectByOption(order.duration, 1);
-    await this.setModalSelectByOption(order.bloodFlowRate, 1);
-    await this.setModalSelectByOption(order.dialysateType, 1);
-    await this.setModalSelectByOption(order.picar, 1);
-    await this.setModalSelectByOption(order.lactatePercent, 1);
-    await this.setModalSelectByOption(order.dialysateSodium, 1);
-    await this.setModalSelectByOption(order.potassium, 1);
-    await this.setModalSelectByOption(order.bicarbonate, 1);
-    await this.setModalSelectByOption(order.calcium, 1);
-    await this.setModalSelectByOption(order.temperature, 1);
-    await this.setModalSelectByOption(order.anticoagulationType, 1);
-    await this.setModalSelectByOption(order.dialyzerType, 1);
-    await this.setModalSelectByOption(order.dialyzerSurfaceArea, 1);
 
     // --- Section 2: Additional Information ---
-    await this.setModalSelectByOption(order.mode, 2);
-    await this.setModalSelectByOption(order.vascularAccessType, 2);
-    await this.setModalSelectByOption(order.accessSite, 2);
-    await this.setModalSelectByOption(order.needleGauge, 2);
-    await this.setModalSelectByOption(order.dwellType, 2);
-    await this.setModalSelectByOption(order.frequency, 2);
-    await this.setModalSelectByOption(order.duration, 2);
-    await this.setModalSelectByOption(order.bloodFlowRate, 2);
-    await this.setModalSelectByOption(order.dialysateType, 2);
-    await this.setModalSelectByOption(order.picar, 2);
-    await this.setModalSelectByOption(order.lactatePercent, 2);
-    await this.setModalSelectByOption(order.dialysateVolume, 1);
-    await this.setModalSelectByOption(order.dialyzerCartridge, 1);
-    await this.setModalSelectByOption(order.dialyzerCartridgeExtra, 2);
-    await this.setModalSelectByOption(order.dialyzerSurfaceArea, 2);
-    await this.setModalSelectByOption(order.electrolyteSodium, 2);
-    await this.setModalSelectByOption(order.electrolytePotassium, 2);
-    await this.setModalSelectByOption(order.electrolyteCalcium, 2);
-    await this.setModalSelectByOption(order.electrolyteGlucose, 1);
-    await this.setModalSelectByOption(order.dialysateTemperature, 2);
-    await this.setModalSelectByOption(order.anticoagulationType, 2);
-
-    // Section 2 text inputs + free-text
+    for (const { key, occurrence } of SECTION_2_SELECTS) {
+      await this.setModalSelectByOption(order[key], occurrence);
+    }
     await this.setModalInputByIndex(INPUT_INDEX.dryWeight2, order.dryWeight);
     await this.fillUfInputs(order.uf);
     await this.setModalInputByIndex(INPUT_INDEX.dwellVolumeArterial2, order.dwellVolumeArterial);
     await this.setModalInputByIndex(INPUT_INDEX.dwellVolumeVenous2, order.dwellVolumeVenous);
     await this.fillAdditionalInformation(order.additionalInformation);
+  }
+
+  /**
+   * Read back every filled control and report any that don't match the data.
+   *
+   * Selects are read by re-applying the SAME exact-first option-text lookup
+   * used during filling (see setModalSelectByOption), so each check targets
+   * the exact control that was set.
+   *
+   * @returns Array of mismatch records (empty = all set). Each record carries a
+   *          human-readable description plus a `repair()` closure that re-sets
+   *          just that control.
+   */
+  private async verifyDialysisOrderForm(order: DialysisOrderData): Promise<
+    Array<{ description: string; repair: () => Promise<void> }>
+  > {
+    const mismatches: Array<{ description: string; repair: () => Promise<void> }> = [];
+
+    /**
+     * Read the currently-selected option text of the `occurrence`-th select
+     * whose options EXACTLY contain `optionText` (falling back to substring
+     * only when no select has an exact match — mirrors setModalSelectByOption;
+     * keep the two copies in sync).
+     */
+    const readSelect = async (
+      optionText: string,
+      occurrence: number,
+    ): Promise<string> => {
+      return this.modal.evaluate((modalEl, { text, occ }) => {
+        const selects = Array.from(modalEl.querySelectorAll('select'));
+
+        // Pass 1: exact TEXT matches only (mirrors setModalSelectByOption).
+        const exactTargets: Array<HTMLSelectElement> = [];
+        for (const sel of selects) {
+          const options = Array.from(sel.options);
+          const hasExact = options.some((o) => o.textContent?.trim() === text);
+          if (hasExact) exactTargets.push(sel);
+        }
+        if (exactTargets.length > 0) {
+          const target = exactTargets[occ - 1];
+          if (!target) return '';
+          return target.selectedOptions[0]?.textContent?.trim() ?? '';
+        }
+
+        // Pass 2: substring fallback (only when no exact match exists).
+        let count = 0;
+        for (const sel of selects) {
+          const hasSub = Array.from(sel.options).some((o) =>
+            o.textContent?.trim().toLowerCase().includes(text.toLowerCase()),
+          );
+          if (hasSub) {
+            count++;
+            if (count === occ) {
+              return sel.selectedOptions[0]?.textContent?.trim() ?? '';
+            }
+          }
+        }
+        return '';
+      }, { text: optionText, occ: occurrence });
+    };
+
+    const readInput = async (index: number): Promise<string> => {
+      return this.modal.evaluate((modalEl, idx) => {
+        const input = modalEl.querySelectorAll('input')[idx] as HTMLInputElement | null;
+        return input?.value ?? '';
+      }, index);
+    };
+
+    for (const { key, occurrence } of SECTION_1_SELECTS) {
+      const expected = order[key];
+      const actual = await readSelect(expected, occurrence);
+      if (actual.trim().toLowerCase() !== expected.trim().toLowerCase()) {
+        mismatches.push({
+          description: `select "${key}" (occ ${occurrence}): "${actual}" ≠ "${expected}"`,
+          repair: () => this.setModalSelectByOption(expected, occurrence),
+        });
+      }
+    }
+    for (const { key, occurrence } of SECTION_2_SELECTS) {
+      const expected = order[key];
+      const actual = await readSelect(expected, occurrence);
+      if (actual.trim().toLowerCase() !== expected.trim().toLowerCase()) {
+        mismatches.push({
+          description: `select "${key}" (occ ${occurrence}): "${actual}" ≠ "${expected}"`,
+          repair: () => this.setModalSelectByOption(expected, occurrence),
+        });
+      }
+    }
+    for (const { key, index } of TEXT_INPUTS) {
+      const expected = order[key];
+      const actual = await readInput(index);
+      if (actual.trim() !== expected.trim()) {
+        mismatches.push({
+          description: `input #${index} ("${key}"): "${actual}" ≠ "${expected}"`,
+          repair: () => this.setModalInputByIndex(index, expected),
+        });
+      }
+    }
+
+    // UF inputs (id="uf", one per section) + free-text textareas
+    const ufInputs = this.modal.locator('input#uf');
+    const ufCount = await ufInputs.count();
+    for (let i = 0; i < ufCount; i++) {
+      const actual = await ufInputs.nth(i).inputValue().catch(() => '');
+      if (actual.trim() !== order.uf.trim()) {
+        mismatches.push({
+          description: `uf input #${i}: "${actual}" ≠ "${order.uf}"`,
+          repair: () => this.fillUfInputs(order.uf),
+        });
+      }
+    }
+    const textareas = this.modal.locator('textarea');
+    const taCount = await textareas.count();
+    for (let i = 0; i < taCount; i++) {
+      const actual = await textareas.nth(i).inputValue().catch(() => '');
+      if (actual.trim() !== order.additionalInformation.trim()) {
+        mismatches.push({
+          description: `textarea #${i}: "${actual.slice(0, 30)}" ≠ "${order.additionalInformation.slice(0, 30)}"`,
+          repair: () => this.fillAdditionalInformation(order.additionalInformation),
+        });
+      }
+    }
+
+    return mismatches;
   }
 
   // =========================================================================
@@ -306,7 +539,11 @@ export class PhysicianOrdersPage extends BasePage {
    * Click Save in the Dialysis Order modal, wait for the modal to close, and
    * read any success confirmation (SweetAlert2 popup or success toast).
    *
-   * @returns The success message text, or empty string if none was detected
+   * @returns The success message text, or empty string if no popup/toast was
+   *          detected (the modal-closed fallback).
+   * @throws If a non-success (validation/error) SweetAlert2 popup appears — the
+   *         thrown message carries the server's popup text so the test report
+   *         shows exactly which field was rejected.
    */
   async saveDialysisOrder(): Promise<string> {
     const saveButton = this.modal.locator(
@@ -329,9 +566,12 @@ export class PhysicianOrdersPage extends BasePage {
         console.log(`[DialysisOrder] Success popup: "${text}"`);
         return text;
       }
+      // Validation error (or unexpected) popup — fail loudly with the server's
+      // message so the test report shows exactly which field was rejected
+      // instead of a bare `toBeTruthy()` failure.
       console.warn(`[DialysisOrder] SweetAlert2 response: "${text}"`);
       await this.page.screenshot({ path: 'test-results/artifacts/dialysis-order-swal.png' }).catch(() => {});
-      return '';
+      throw new Error(`[DialysisOrder] Save failed — non-success popup: "${text}"`);
     }
 
     // Modal should close after a successful save (Livewire table reload)
@@ -355,22 +595,35 @@ export class PhysicianOrdersPage extends BasePage {
   }
 
   /**
-   * Read the newest row of the dialysis orders table (first visible <tbody>
-   * row of the table carrying the "Acknowledgement Status" header).
+   * Read the newest row of the dialysis orders table.
+   *
+   * Order numbers increase monotonically (1, 2, 3, …), so the "newest" row is
+   * the one whose leading number is the HIGHEST among all data rows — not
+   * merely the first row in DOM order (mirrors getNewestLabOrderRow()). The
+   * table renders its header row inside <tbody>, so rows containing "Order
+   * Date" are excluded.
    */
   async getNewestOrderRow(): Promise<string> {
     const ordersTable = this.ordersCard.locator('table').filter({
       has: this.page.locator('th:has-text("Acknowledgement")'),
     }).first();
 
-    // The orders table renders its header row inside <tbody>, so filter it out
-    // (the header contains "Order Date"; data rows never do).
     const dataRows = ordersTable.locator('tbody tr').filter({ hasNotText: 'Order Date' });
-    const firstRow = dataRows.first();
-    await firstRow.waitFor({ state: 'visible', timeout: 15000 });
-    const text = ((await firstRow.textContent()) ?? '').replace(/\s+/g, ' ').trim();
-    console.log(`[DialysisOrder] Newest order row: "${text}"`);
-    return text;
+    await dataRows.first().waitFor({ state: 'visible', timeout: 15000 });
+
+    const texts = await dataRows.allTextContents();
+    let best: string = '';
+    let bestNumber = -1;
+    for (const raw of texts) {
+      const text = raw.replace(/\s+/g, ' ').trim();
+      const num = parseInt(text, 10);
+      if (!Number.isNaN(num) && num > bestNumber) {
+        bestNumber = num;
+        best = text;
+      }
+    }
+    console.log(`[DialysisOrder] Newest order row: "${best}"`);
+    return best;
   }
 
   // =========================================================================

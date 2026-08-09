@@ -84,6 +84,8 @@ config/
 │   └── morning-appointment.scenario.json
 ├── physician-order-scenarios/
 │   ├── dialysis-order.scenario.json
+│   ├── dynamic-dialysis-order.scenario.json
+│   ├── hdf-dialysis-order.scenario.json
 │   └── lab-order.scenario.json
 └── patient-scenarios/
     ├── full-patient.scenario.json
@@ -494,9 +496,11 @@ Remove unused imports. If a scenario JSON is imported solely for `_config` value
 | `src/pages/appointment-detail.page.ts` | Appointment detail modal — confirm, check-in |
 | `src/pages/physician-orders.page.ts` | Physician Orders → Dialysis Order & Lab Order creation |
 | `src/data/dialysis-order.data.ts` | DialysisOrderData interface |
-| `src/helpers/dialysis-order-data.loader.ts` | Loads `dialysis-order.scenario.json` (`getDialysisOrderData()`) |
-| `config/physician-order-scenarios/dialysis-order.scenario.json` | Dialysis Order form payload |
-| `tests/physician-orders.spec.ts` | E2E test — create a Dialysis Order |
+| `src/helpers/dialysis-order-data.loader.ts` | Loads Dialysis Order scenarios with DYNAMIC generators + templates (`getDialysisOrderData()`) |
+| `config/physician-order-scenarios/dialysis-order.scenario.json` | Dialysis Order form payload (static baseline) |
+| `config/physician-order-scenarios/dynamic-dialysis-order.scenario.json` | Dialysis Order payload — all fields DYNAMIC (random values/choices each run) |
+| `config/physician-order-scenarios/hdf-dialysis-order.scenario.json` | Dialysis Order payload — fixed Portable + HDF, rest DYNAMIC |
+| `tests/physician-orders.spec.ts` | E2E tests — create a Dialysis Order (loops over all 3 scenarios) |
 | `src/data/lab-order.data.ts` | LabOrderData interface |
 | `src/helpers/lab-order-data.loader.ts` | Loads `lab-order.scenario.json` (`getLabOrderData()`) |
 | `config/physician-order-scenarios/lab-order.scenario.json` | Lab Order form payload |

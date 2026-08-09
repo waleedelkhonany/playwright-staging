@@ -1,0 +1,44 @@
+{
+  "_description": "Dialysis Order scenario — fully DYNAMIC. Every _fields value is resolved by the loader's DYNAMIC generators (faker) at load time, so EACH test run fills the 'Add New Selections' modal with different values and different select choices. Select values are drawn from the exact option texts rendered in the staging modal, excluding 'Other' (so no conditional other_* inputs are required).",
+  "_config": {
+    "_comment_targetPatient": "The target patient identifier is NOT stored here — it is read from config/config.json (appointment.targetPatientIdentifier), the single source of truth shared by every appointment/order test."
+  },
+  "_fields": {
+    "orderType":              "DYNAMIC",
+    "modality":               "DYNAMIC",
+    "dryWeight":              "DYNAMIC",
+    "uf":                     "DYNAMIC",
+    "vascularAccessType":     "DYNAMIC",
+    "accessSite":             "DYNAMIC",
+    "needleGauge":            "DYNAMIC",
+    "dwellType":              "DYNAMIC",
+    "dwellVolumeArterial":    "DYNAMIC",
+    "dwellVolumeVenous":      "DYNAMIC",
+    "frequency":              "DYNAMIC",
+    "duration":               "DYNAMIC",
+    "bloodFlowRate":          "DYNAMIC",
+    "dialysateType":          "DYNAMIC",
+    "picar":                  "DYNAMIC",
+    "lactatePercent":         "DYNAMIC",
+    "dialysateSodium":        "DYNAMIC",
+    "potassium":              "DYNAMIC",
+    "bicarbonate":            "DYNAMIC",
+    "calcium":                "DYNAMIC",
+    "temperature":            "DYNAMIC",
+    "anticoagulationType":    "DYNAMIC",
+    "dialyzerType":           "DYNAMIC",
+    "dialyzerSurfaceArea":    "DYNAMIC",
+
+    "mode":                   "DYNAMIC",
+    "dialysateVolume":        "DYNAMIC",
+    "dialyzerCartridge":      "DYNAMIC",
+    "dialyzerCartridgeExtra": "DYNAMIC",
+    "electrolyteSodium":      "DYNAMIC",
+    "electrolytePotassium":   "DYNAMIC",
+    "electrolyteCalcium":     "DYNAMIC",
+    "electrolyteGlucose":     "DYNAMIC",
+    "dialysateTemperature":   "DYNAMIC",
+
+    "additionalInformation":  "DYNAMIC"
+  }
+}
