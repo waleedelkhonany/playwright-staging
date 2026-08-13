@@ -6,7 +6,7 @@
  *
  * Run: npx tsx scripts/inspect-respiratory-triage-form.ts [visitId]
  */
-import 'dotenv/config';
+import '../src/helpers/load-env';
 import { chromium } from 'playwright';
 import * as fs from 'fs';
 import * as path from 'path';

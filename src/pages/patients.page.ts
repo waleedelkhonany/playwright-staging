@@ -200,28 +200,42 @@ export class PatientsPage extends BasePage {
 
   /**
    * Set a select element's value using page.evaluate().
-   * The select is identified by its index among all <select> elements.
-   * @param tag - CSS selector for selects (e.g. 'select')
-   * @param index - DOM index among matched elements (0-based)
+   *
+   * The create-patient form's selects carry no stable `name` attributes, and
+   * new fields get inserted into the form over time (e.g. SAP Project, a new
+   * required "Is Cash" select), which shifts DOM indices and breaks hardcoded
+   * index-based lookups. Each select is therefore located by its unique
+   * placeholder option text ("Choose Gender", "Choose System", "Select
+   * Hospital", ...). The placeholder is matched EXACTLY (case-insensitive) so
+   * a generic placeholder like "Choose" (Is Cash) never collides with
+   * "Choose Blood group" or "Choose Code Status".
+   *
+   * @param placeholderHint - The select's placeholder option text (e.g. "Choose Gender")
    * @param optionText - Option text to select (e.g. "Islam", "Full Code", or value like "1")
    */
-  private async setSelectByOptionText(tag: string, index: number, optionText: string | undefined | null): Promise<void> {
+  private async setSelectByPlaceholderOption(placeholderHint: string, optionText: string | undefined | null): Promise<void> {
     if (optionText === undefined || optionText === null) return;
-    const result = await this.page.evaluate(({ sel, idx, text }) => {
-      const allSelects = document.querySelectorAll(sel);
-      const select = allSelects[idx] as HTMLSelectElement;
-      if (!select) return `Select #${idx} not found`;
+    const result = await this.page.evaluate(({ hint, text }) => {
+      const allSelects = Array.from(document.querySelectorAll('select'));
+      const select = allSelects.find((s) => {
+        const firstOpt = (s as HTMLSelectElement).options[0];
+        return (
+          !!firstOpt &&
+          firstOpt.textContent?.trim().toLowerCase() === hint.toLowerCase()
+        );
+      }) as HTMLSelectElement | undefined;
+      if (!select) return `Select with placeholder "${hint}" not found`;
       const options = Array.from(select.options);
       // Try exact match first, then value match, then partial text match
       let match = options.find(o => o.textContent?.trim() === text);
       if (!match) match = options.find(o => o.value === text);
       if (!match) match = options.find(o => o.textContent?.trim().toLowerCase().includes(text.toLowerCase()));
-      if (!match) return `Option not found: "${text}" in select #${idx}`;
+      if (!match) return `Option not found: "${text}" in select "${hint}"`;
       select.value = match.value;
       select.dispatchEvent(new Event('change', { bubbles: true }));
       select.dispatchEvent(new Event('input', { bubbles: true }));
       return null; // success
-    }, { sel: tag, idx: index, text: optionText });
+    }, { hint: placeholderHint, text: optionText });
     if (result) console.warn(result);
   }
 
@@ -266,24 +280,29 @@ export class PatientsPage extends BasePage {
     await this.fillIfDefined(this.idExpirationDateInput, patient.idExpirationDate);
 
     // --- Selects via JavaScript evaluate for reliability ---
-    // Each select is identified by unique option text we confirmed in diagnostics
-    await this.setSelectByOptionText('select', 5, patient.codeStatus);       // Code Status
-    await this.setSelectByOptionText('select', 6, patient.isolationType);    // Isolation Type
-    await this.setSelectByOptionText('select', 7, patient.referredHospital);  // Referred Hospital (named)
-    await this.setSelectByOptionText('select', 9, patient.gender);          // Gender
-    await this.setSelectByOptionText('select', 10, patient.maritalStatus);   // Marital Status
-    await this.setSelectByOptionText('select', 11, patient.occupation);     // Occupation
-    await this.setSelectByOptionText('select', 12, patient.nationality);    // Nationality
-    await this.setSelectByOptionText('select', 13, patient.isEmployee);     // Is Employee
-    await this.setSelectByOptionText('select', 14, patient.isVisitor);      // Is Visitor
-    await this.setSelectByOptionText('select', 15, patient.patientSystem);  // Patient System
+    // Each select is located by its placeholder option text ("Choose Gender",
+    // "Choose System", ...) rather than a DOM index — new fields get inserted
+    // into the form over time, so indices shift (last confirmed in diagnostics
+    // when the form had 19 selects).
+    await this.setSelectByPlaceholderOption('Choose Code Status', patient.codeStatus);        // Code Status
+    await this.setSelectByPlaceholderOption('Choose Isolation Type', patient.isolationType);  // Isolation Type
+    await this.setSelectByPlaceholderOption('Select Hospital', patient.referredHospital);     // Referred Hospital
+    await this.setSelectByPlaceholderOption('Choose Gender', patient.gender);                 // Gender
+    await this.setSelectByPlaceholderOption('Choose Marital status', patient.maritalStatus);  // Marital Status
+    await this.setSelectByPlaceholderOption('Choose Occupation', patient.occupation);         // Occupation
+    await this.setSelectByPlaceholderOption('Choose Nationality', patient.nationality);       // Nationality
+    // "Is Cash" is a new required field on the staging form (first option "Choose").
+    await this.setSelectByPlaceholderOption('Choose', patient.isCash);                         // Is Cash (required)
+    await this.setSelectByPlaceholderOption('Choose Is Employee', patient.isEmployee);        // Is Employee
+    await this.setSelectByPlaceholderOption('Choose Is Visitor', patient.isVisitor);          // Is Visitor
+    await this.setSelectByPlaceholderOption('Choose System', patient.patientSystem);          // Patient System
     // Ensure Patient System matches the header Location — the server rejects
     // mismatches (e.g., "Home" Patient System with "In Center" header Location).
     // This override handles any data the caller passes, making the form fill
     // robust regardless of the patient data provided.
     await this.syncPatientSystemWithHeaderLocation();
-    await this.setSelectByOptionText('select', 17, patient.religion);       // Religion
-    await this.setSelectByOptionText('select', 18, patient.preferredLanguage); // Language
+    await this.setSelectByPlaceholderOption('Choose Religion', patient.religion);             // Religion
+    await this.setSelectByPlaceholderOption('Choose Language', patient.preferredLanguage);    // Language
 
     // --- Radio (Government ID Type) ---
     await this.setRadioValue('id_type', patient.governmentIdType);
@@ -303,8 +322,14 @@ export class PatientsPage extends BasePage {
    */
   private async syncPatientSystemWithHeaderLocation(): Promise<void> {
     const mappedSystem = await this.page.evaluate(() => {
-      const allSelects = document.querySelectorAll('select');
-      const headerLocation = allSelects[1] as HTMLSelectElement | null;
+      const allSelects = Array.from(document.querySelectorAll('select'));
+      // The header Location select has no name attribute, so locate it by its
+      // option set ("In Center"/"Home Hemodialysis") instead of a DOM index.
+      const headerLocation = allSelects.find((s) =>
+        Array.from((s as HTMLSelectElement).options).some((o) =>
+          ['In Center', 'Home Hemodialysis'].includes(o.textContent?.trim() || ''),
+        ),
+      ) as HTMLSelectElement | null;
       if (!headerLocation) return null;
 
       const selectedText = headerLocation.options[headerLocation.selectedIndex]?.textContent?.trim() || '';
@@ -317,7 +342,7 @@ export class PatientsPage extends BasePage {
 
     if (mappedSystem) {
       console.log(`[PatientSystem] Header Location → "${mappedSystem}" (auto-synced)`);
-      await this.setSelectByOptionText('select', 15, mappedSystem);
+      await this.setSelectByPlaceholderOption('Choose System', mappedSystem);
     }
   }
 

@@ -15,7 +15,7 @@
  *
  * Run: npx tsx scripts/debug-visit-filter-tc01.ts
  */
-import 'dotenv/config';
+import '../src/helpers/load-env';
 import { chromium } from 'playwright';
 import { selectFromSelect2ByLocator } from '../src/helpers/select2.helper';
 

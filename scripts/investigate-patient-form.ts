@@ -5,7 +5,7 @@
  *
  * Run: npx tsx scripts/investigate-patient-form.ts
  */
-import 'dotenv/config';
+import '../src/helpers/load-env';
 import { chromium } from 'playwright';
 
 const BASE_URL = process.env.BASE_URL;

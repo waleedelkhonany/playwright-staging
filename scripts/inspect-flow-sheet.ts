@@ -10,7 +10,7 @@
  *
  * Run: npx tsx scripts/inspect-flow-sheet.ts
  */
-import 'dotenv/config';
+import '../src/helpers/load-env';
 import { chromium } from 'playwright';
 
 const BASE_URL = process.env.BASE_URL;

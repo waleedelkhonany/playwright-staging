@@ -7,7 +7,7 @@
  *
  * Run: npx tsx scripts/probe-employee-create.ts
  */
-import 'dotenv/config';
+import '../src/helpers/load-env';
 import { chromium } from 'playwright';
 
 const BASE_URL = process.env.BASE_URL;

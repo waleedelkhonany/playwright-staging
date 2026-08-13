@@ -3,7 +3,7 @@
  * each step, plus what the Patients page actually renders.
  */
 import { chromium } from '@playwright/test';
-import 'dotenv/config';
+import '../src/helpers/load-env';
 import { loginAsDefaultUser } from '../src/helpers/login.helper';
 import { ensureHeaderContext } from '../src/helpers/header-context.helper';
 import { PatientsPage } from '../src/pages/patients.page';

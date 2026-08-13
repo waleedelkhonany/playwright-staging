@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import './src/helpers/load-env';
 import { defineConfig, devices } from '@playwright/test';
 import path from 'path';
 

@@ -5,7 +5,7 @@
  *
  * Run: npx tsx scripts/diagnose-patient-save.ts
  */
-import 'dotenv/config';
+import '../src/helpers/load-env';
 import { chromium } from 'playwright';
 import { buildPatient } from '../src/data/patient.data';
 
@@ -117,18 +117,21 @@ async function main() {
     if (patient.nationalId) await page.locator('input[name="national_id"]').fill(patient.nationalId);
 
     // Select fields
+    // NOTE: Indices confirmed against the current form (investigate-patient-form.ts).
+    // New fields (a Yes/No select and SAP Project) were inserted between
+    // Nationality and Is Employee, shifting later indices by +1/+2.
     await setSelectByOptionText(page, 'select', 5, patient.codeStatus);
     await setSelectByOptionText(page, 'select', 6, patient.isolationType);
-    await setSelectByOptionText(page, 'select', 9, patient.gender);
-    await setSelectByOptionText(page, 'select', 10, patient.maritalStatus);
-    await setSelectByOptionText(page, 'select', 11, patient.occupation);
-    await setSelectByOptionText(page, 'select', 12, patient.nationality);
-    await setSelectByOptionText(page, 'select', 13, patient.isEmployee);
-    await setSelectByOptionText(page, 'select', 14, patient.isVisitor);
-    await setSelectByOptionText(page, 'select', 15, patient.patientSystem);
+    await setSelectByOptionText(page, 'select', 8, patient.gender);
+    await setSelectByOptionText(page, 'select', 9, patient.maritalStatus);
+    await setSelectByOptionText(page, 'select', 10, patient.occupation);
+    await setSelectByOptionText(page, 'select', 11, patient.nationality);
+    await setSelectByOptionText(page, 'select', 14, patient.isEmployee);
+    await setSelectByOptionText(page, 'select', 15, patient.isVisitor);
+    await setSelectByOptionText(page, 'select', 16, patient.patientSystem);
     await setSelectByOptionText(page, 'select', 7, patient.referredHospital);
-    await setSelectByOptionText(page, 'select', 17, patient.religion);
-    await setSelectByOptionText(page, 'select', 18, patient.preferredLanguage);
+    await setSelectByOptionText(page, 'select', 18, patient.religion);
+    await setSelectByOptionText(page, 'select', 19, patient.preferredLanguage);
 
     // Radio
     if (patient.governmentIdType) {

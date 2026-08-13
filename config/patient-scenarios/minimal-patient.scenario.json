@@ -33,6 +33,7 @@
     "religion":            "Islam",
     "preferredLanguage":   "English",
     "isEmployee":          "0",
-    "isVisitor":           "0"
+    "isVisitor":           "0",
+    "isCash":              ""
   }
 }

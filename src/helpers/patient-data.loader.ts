@@ -137,7 +137,9 @@ const DEFAULT_GENERATORS: Record<string, () => string | undefined> = {
   dateOfHomeSettingsAcceptance: () => undefined,
   dateOfReferral:           () => undefined,
   dateOfFirstHhdTreatment:  () => undefined,
-  isCash:                   () => undefined,
+  // "Is Cash" is a required field on the staging form. "Yes" avoids the
+  // conditional rule that makes SAP Project mandatory when is_cash is "0".
+  isCash:                   () => 'Yes',
   sapProject:               () => undefined,
   idExpirationDate:         () => undefined,
 };

@@ -15,7 +15,7 @@
  * Run: npx tsx scripts/inspect-lab-order.ts
  * Credentials are loaded from .env (see .env.example).
  */
-import 'dotenv/config';
+import '../src/helpers/load-env';
 import { chromium } from 'playwright';
 
 const BASE_URL = process.env.BASE_URL;

@@ -8,7 +8,7 @@
  *
  * Run: npx tsx scripts/inspect-flow-sheet-post-treatment.ts [visitId]
  */
-import 'dotenv/config';
+import '../src/helpers/load-env';
 import { chromium } from 'playwright';
 import config from '../config/config.json';
 import { FlowSheetPage } from '../src/pages/flow-sheet.page';
