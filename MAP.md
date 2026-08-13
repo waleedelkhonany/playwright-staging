@@ -19,6 +19,9 @@
 │   ├── physician-orders.spec.ts              # Create Dialysis Order workflow
 │   ├── lab-order.spec.ts                     # Create Lab Order workflow
 │   ├── flow-sheet.spec.ts                    # Fill the Flow Sheet form of a visit
+│   ├── patient-assessment.spec.ts            # Fill the Patient Assessment form of a visit
+│   ├── discontinuation.spec.ts               # Fill the Discontinue Of Hemodialysis form of a visit
+│   ├── vascular-access.spec.ts               # Fill the Vascular Access Assessment form of a visit
 │   ├── employee-create.spec.ts               # Create employee workflow
 │   ├── visit_filter.spec.ts                  # Data-driven Visit Filter tests
 │   ├── patient_filter.spec.ts                # Data-driven Patient Filter tests
@@ -32,6 +35,9 @@
 │   │   ├── header.page.ts     # Top navigation (Branch/Location selectors)
 │   │   ├── visits.page.ts     # Visit details/edit page verification
 │   │   ├── flow-sheet.page.ts # Flow Sheet form (Visits → edit → Flow Sheet tab)
+│   │   ├── patient-assessment.page.ts # Patient Assessment form (Visits → edit → load/visit-form/{id}/patient-assessment)
+│   │   ├── discontinuation.page.ts # Discontinue Of Hemodialysis form (Visits → edit → load/visit-form/{id}/dis-of-hemodialysis)
+│   │   ├── vascular-access.page.ts # Vascular Access Assessment form (Visits → edit → load/visit-form/{id}/vascular-access-assessment)
 │   │   ├── appointment-detail.page.ts  # Appointment modal confirmation & check-in
 │   │   ├── employees.page.ts  # Employee management (create form aligned to staging DOM)
 │   │   └── filter-list.page.ts  # Shared base for list-page filter specs
@@ -44,6 +50,9 @@
 │   │   ├── employee-data.loader.ts      # Employee data generation from scenarios
 │   │   ├── appointment-data.loader.ts   # Appointment data generation
 │   │   ├── flow-sheet-data.loader.ts    # Flow Sheet form data generation
+│   │   ├── patient-assessment-data.loader.ts # Patient Assessment form data generation
+│   │   ├── discontinuation-data.loader.ts # Discontinue Of Hemodialysis form data generation
+│   │   ├── vascular-access-data.loader.ts # Vascular Access Assessment form data generation
 │   │   ├── header-context.helper.ts     # Branch/Location context management
 │   │   ├── login.helper.ts              # Login automation logic
 │   │   ├── patient-data.loader.ts       # Patient data generator
@@ -66,6 +75,12 @@
 │   │   └── minimal-appointment.scenario.json  # Minimal fields only
 │   ├── flow-sheet-scenarios/        # Flow Sheet form payload
 │   │   └── flow-sheet.scenario.json        # Full Flow Sheet payload (static options + DYNAMIC comments)
+│   ├── patient-assessment-scenarios/ # Patient Assessment form payload
+│   │   └── patient-assessment.scenario.json # Full Patient Assessment payload (static options + DYNAMIC history)
+│   ├── discontinuation-scenarios/  # Discontinue Of Hemodialysis form payload
+│   │   └── discontinuation.scenario.json # Full bilingual (EN+AR) Discontinuation payload
+│   ├── vascular-access-scenarios/  # Vascular Access Assessment form payload
+│   │   └── vascular-access.scenario.json # AVF-branch payload (access select + scoring + post-care + interventions)
 │   ├── physician-order-scenarios/  # Physician order scenario files
 │   │   ├── dialysis-order.scenario.json       # Dialysis Order modal payload (static baseline)
 │   │   ├── dynamic-dialysis-order.scenario.json  # All fields DYNAMIC (random values/choices)
@@ -85,6 +100,15 @@
 │   ├── extract-form-fields.ts         # Extract form field definitions
 │   ├── inspect-visit-filter.ts        # Dump Visit Filter DOM on staging
 │   ├── inspect-flow-sheet.ts          # Dump Flow Sheet workflow DOM (Visits → edit → tab)
+│   ├── inspect-patient-assessment.ts  # Dump Patient Assessment workflow DOM (Visits → edit → load URL)
+│   ├── inspect-discontinuation.ts     # Dump Discontinue Of Hemodialysis tab/workflow DOM (Visits → edit → tabs)
+│   ├── inspect-discontinuation-form.ts # Dump Discontinue Of Hemodialysis form DOM (load URL)
+│   ├── probe-discontinuation-save.ts  # Smoke-test Discontinue Of Hemodialysis save end-to-end
+│   ├── probe-discontinuation-readback.ts # Verify persisted Discontinuation values after save
+│   ├── inspect-vascular-access.ts     # Dump Vascular Access Assessment form DOM (load URL)
+│   ├── diagnose-vascular-access.ts    # Diagnose wire:model vs wire:model.live bindings
+│   ├── probe-vascular-access-save.ts  # Smoke-test Vascular Access save end-to-end
+│   ├── probe-vascular-access-readback.ts # Verify persisted Vascular Access values after save
 │   ├── debug-visit-filter-tc01.ts     # Smoke-test Visit Filter case TC-01
 │   ├── inspect-patient-filter.ts      # Dump Patient Filter DOM on staging
 │   ├── probe-patient-filter.ts        # Probe patient list pagination/empty state
@@ -116,6 +140,9 @@
 | `physician-orders.spec.ts` | Create a Dialysis Order via Physician Orders → Dialysis Order tab (runs 3 scenarios: static baseline, all-DYNAMIC, and HDF-variant) |
 | `lab-order.spec.ts` | Create a Lab Order via Physician Orders → Labs & Imaging → Create Lab Order form |
 | `flow-sheet.spec.ts` | Fill the Flow Sheet form of the target visit (ID from config.json `flowSheet.visitId`, default 981): Visits directory → edit icon under Actions → Flow Sheet tab → fill every section → Save → assert the "Flow sheet saved successfully!" popup and persisted values |
+| `patient-assessment.spec.ts` | Fill the Patient Assessment form of the target visit (ID from config.json `patientAssessment.visitId`, default 1005): Visits directory → edit icon under Actions → Patient Assessment form (`/load/visit-form/{id}/patient-assessment`, opened by the "Patient Assessment" tab) → fill every section → Save (`wire:click="save"`) → assert the URL gains `?row_id={id}` and persisted values |
+| `discontinuation.spec.ts` | Fill the REFUSAL/DISCONTINUATION OF HEMODIALYSIS SESSION/S form of the target visit (ID from config.json `discontinuation.visitId`, default 1005): Visits directory → edit icon under Actions → Discontinue Of Hemodialysis form (`/load/visit-form/{id}/dis-of-hemodialysis`, opened by the "Discontinue Of Hemodialysis" tab) → fill every section in English AND Arabic → Save (`wire:click="save"`) → assert the URL gains `?row_id={id}` and persisted values |
+| `vascular-access.spec.ts` | Fill the VASCULAR ACCESS ASSESSMENT TOOL form of the target visit (ID from config.json `vascularAccess.visitId`, default 1005): Visits directory → edit icon under Actions → Vascular Access Assessment form (`/load/visit-form/{id}/vascular-access-assessment`, opened by the "VASCULAR ACCESS ASSESSMENT TOOL" tab) → fill access type (AVF branch), scoring checkboxes, post-care (dressing/tego), low-risk interventions → Save (`wire:click="save"`) → assert the URL gains `?row_id={id}` and persisted values |
 | `employee-create.spec.ts` | Create an employee via the `/employees/create` Livewire form: fill Main Info (incl. the SCFHS/NPHIES license section for licensed titles), wait for the server-validated "Create" button, assert the success redirect to `/employees/{id}/edit` |
 | `visit_filter.spec.ts` | Data-driven Visit Filter tests (config/visit_filters.json): happy path, single filters, empty state, boundary & reset |
 | `patient_filter.spec.ts` | Data-driven Patient Filter tests (config/patient_filters.json): name/MRN/mobile/email/ID/status filters, empty state, boundary & reset |
@@ -207,6 +234,60 @@ Flow Sheet form on the visit edit page:
 - `saveFlowSheet()` — click Save (`wire:click="save"`), assert the "Flow sheet
   saved successfully!" SweetAlert2 popup (throws with the server message on a
   "Validation failed" popup)
+- `verifySavedValues(data)` — read back representative fields after the save
+  re-render to prove persistence
+
+#### PatientAssessmentPage (`patient-assessment.page.ts`)
+Patient Assessment form on the visit edit page (the "Patient Assessment" tab
+opens `/load/visit-form/{id}/patient-assessment` in a new tab; the POM navigates
+there directly):
+- `openVisitPatientAssessment(visitId)` — open `/visits`, find the row by visit ID,
+  click the edit icon (`fa-pen-to-square` inside `a[title="Edit"]`) under the Actions
+  column, then navigate to the Patient Assessment form
+- `fillPatientAssessmentForm(data)` — fill every section (Patient Information,
+  Assessment, Medical History, Surgical History, Social History, Referral, History
+  Given By) via native value setters + events on `wire:model="data.*"` bindings;
+  empty values are skipped; read-only vitals/pain/height/weight/designation fields
+  (auto-filled from the Flow Sheet) are not mapped
+- `savePatientAssessment()` — click Save (`wire:click="save"`), wait for the URL to
+  gain `?row_id={id}` (the save signal — no SweetAlert on this form), return the row id
+- `verifySavedValues(data)` — read back representative fields after the save
+  re-render to prove persistence
+
+#### DiscontinuationPage (`discontinuation.page.ts`)
+REFUSAL/DISCONTINUATION OF HEMODIALYSIS SESSION/S form on the visit edit page
+(the "Discontinue Of Hemodialysis" tab opens
+`/load/visit-form/{id}/dis-of-hemodialysis` in a new tab; the POM navigates
+there directly):
+- `openVisitDiscontinuation(visitId)` — open `/visits`, find the row by visit ID,
+  click the edit icon (`fa-pen-to-square` inside `a[title="Edit"]`) under the Actions
+  column, then navigate to the Discontinue Of Hemodialysis form
+- `fillDiscontinuationForm(data)` — fill every section in English (`*_en`) AND
+  Arabic (`*_ar`) (Reason/Refusal checkboxes + textareas, Witness Information,
+  Reason unable to sign, Relative Information, Doctor Information, Interpreter
+  Information) via native value setters + events on `wire:model="data.*"` bindings;
+  empty values are skipped; the read-only patient header and the signature-image
+  upload (`uploadFile`) are not mapped
+- `saveDiscontinuation()` — click Save (`wire:click="save"`), wait for the URL to
+  gain `?row_id={id}` (the save signal — no SweetAlert on this form), return the row id
+- `verifySavedValues(data)` — read back representative fields (EN + AR) after the
+  save re-render to prove persistence
+
+#### VascularAccessPage (`vascular-access.page.ts`)
+VASCULAR ACCESS ASSESSMENT TOOL form on the visit edit page (the "VASCULAR
+ACCESS ASSESSMENT TOOL" tab opens `/load/visit-form/{id}/vascular-access-assessment`
+in a new tab; the POM navigates there directly):
+- `openVisitVascularAccess(visitId)` — open `/visits`, find the row by visit ID,
+  click the edit icon (`fa-pen-to-square` inside `a[title="Edit"]`) under the Actions
+  column, then navigate to the Vascular Access Assessment form
+- `fillVascularAccessForm(data)` — fill the Access Type (AVF branch: select + site +
+  date + checkbox), K. Needle Insertion scoring checkboxes (b_*/c_*/d_*/e_*),
+  Post-care (dressing/tego radios + dates) and low-risk Interventions via native
+  value setters + events; locators match BOTH `wire:model` and `wire:model.live`
+  bindings (the form mixes the two); empty values are skipped; the computed total
+  score and the signature upload are not mapped
+- `saveVascularAccess()` — click Save (`wire:click="save"`), wait for the URL to
+  gain `?row_id={id}` (the save signal — no SweetAlert on this form), return the row id
 - `verifySavedValues(data)` — read back representative fields after the save
   re-render to prove persistence
 

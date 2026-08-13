@@ -1,0 +1,29 @@
+{
+  "_description": "VASCULAR ACCESS ASSESSMENT TOOL scenario — form payload for tests/vascular-access.spec.ts. Filled into the Vascular Access Assessment form (load/visit-form/{visitId}/vascular-access-assessment, opened from the visit edit page's 'VASCULAR ACCESS ASSESSMENT TOOL' tab) of the target visit (visitId from config/config.json → vascularAccess.visitId). Static values are chosen from the real option lists / checkbox ids on staging; the access type is Arteriovenous Fistula (AVF) so the AVF branch (site, date, access-type checkbox, needle-insertion scoring checkboxes) applies and the catheter bundle (f_*/g_*) is intentionally absent. Scoring checkbox values are their input ids (no labels exist); intervention checkbox values are their LABEL texts (what the readback returns); select values are the option texts; radio values are Yes/No. The visit ID itself is NOT here — it lives in config/config.json so all tests share one value.",
+  "_config": {
+    "_comment": "No extra test parameters — the scenario is the form payload only."
+  },
+  "_fields": {
+    "accessType": "Arteriovenous Fistula (AVF)",
+    "avfSite": "Right Radiocephalic AVF (Wrist)",
+    "avfDate": "2026-08-13",
+    "accessTypeAvf": "access_type_avf",
+
+    "bRedness": "b_redness_0",
+    "bSwelling": "b_swelling_0",
+    "cThrill": "c_thrill_10",
+    "cTemp": "c_temp_0",
+    "cTenderness": "c_tenderness_0",
+    "dBruit": "d_bruit_20",
+    "eFunction": "e_function_clean_0",
+
+    "dressingApplied": "Yes",
+    "dressingChangeDate": "2026-08-13",
+    "tegoChanged": "No",
+    "tegoChangeDate": "2026-08-13",
+
+    "lowContinueAssessment": "Continue routine HHD assessment",
+    "lowDressingTechnique": "Ensure proper dressing technique",
+    "lowEducateAccessCare": "Educate patient & caregiver on access care"
+  }
+}

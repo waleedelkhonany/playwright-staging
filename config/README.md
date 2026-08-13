@@ -36,6 +36,14 @@ config/
 │   ├── dynamic-dialysis-order.scenario.json
 │   ├── hdf-dialysis-order.scenario.json
 │   └── lab-order.scenario.json
+├── flow-sheet-scenarios/              ← flow sheet form payloads
+│   └── flow-sheet.scenario.json
+├── patient-assessment-scenarios/      ← patient assessment form payloads
+│   └── patient-assessment.scenario.json
+├── discontinuation-scenarios/         ← discontinue of hemodialysis form payloads
+│   └── discontinuation.scenario.json
+├── vascular-access-scenarios/         ← vascular access assessment form payloads
+│   └── vascular-access.scenario.json
 └── patient-scenarios/                 ← patient form payloads + config
     ├── full-patient.scenario.json
     ├── minimal-patient.scenario.json
@@ -189,6 +197,24 @@ Pass the visit type as an override when loading the scenario.
 | `minimal-patient.scenario.json` | Only required fields; empty strings fall to defaults |
 | `female-saudi-patient.scenario.json` | Static gender=Female, nationality=Saudi Arabian, maritalStatus=Married |
 
+### Patient Assessment Scenario (`config/patient-assessment-scenarios/`)
+
+| File | Description |
+|---|---|
+| `patient-assessment.scenario.json` | Patient Assessment form payload — static options matched to the staging radio values/labels + DYNAMIC medical/medication history sentences; loaded via `getPatientAssessmentData()`. Read-only vitals/pain/height/weight/designation fields (auto-filled from the Flow Sheet) are intentionally absent. The target visit ID is NOT here — it lives in `config/config.json` (`patientAssessment.visitId`). |
+
+### Discontinuation Scenario (`config/discontinuation-scenarios/`)
+
+| File | Description |
+|---|---|
+| `discontinuation.scenario.json` | REFUSAL/DISCONTINUATION OF HEMODIALYSIS SESSION/S form payload — bilingual: fills BOTH the English (`*_en`) and Arabic (`*_ar`) sides because the save() handler persists both. Static checkbox ids (`Discontinuation`, `Refusal`, `Hyperkalemia`, `Cardiac`, `Pulmonary`, `Acidosis` + Arabic equivalents), relationship select texts (`Spouse`, `Son`, `زوج/زوجة`, `ابن`), datetime-local signature timestamps, and DYNAMIC English discontinuation reason; loaded via `getDiscontinuationData()`. The read-only patient header and the signature-image upload (`uploadFile`) are intentionally absent. The target visit ID is NOT here — it lives in `config/config.json` (`discontinuation.visitId`). |
+
+### Vascular Access Scenario (`config/vascular-access-scenarios/`)
+
+| File | Description |
+|---|---|
+| `vascular-access.scenario.json` | VASCULAR ACCESS ASSESSMENT TOOL form payload — Arteriovenous Fistula (AVF) branch: access-type select (`Arteriovenous Fistula (AVF)`), AVF site select (`Right Radiocephalic AVF (Wrist)`), creation date, access-type checkbox, K. Needle Insertion scoring checkboxes (b_redness_0, b_swelling_0, c_thrill_10, c_temp_0, c_tenderness_0, d_bruit_20, e_function_clean_0), post-care (dressing applied Yes + date, tego changed No + date) and low-risk interventions (low_continue_assessment, low_dressing_technique, low_educate_access_care); loaded via `getVascularAccessData()`. The catheter bundle (f_*/g_*) is intentionally absent (AVF access). The computed total score and the signature-image upload are NOT part of the model. The target visit ID is NOT here — it lives in `config/config.json` (`vascularAccess.visitId`). |
+
 ---
 
 ## Usage in Tests
@@ -317,7 +343,10 @@ src/helpers/
 ├── appointment-data.loader.ts       ← appointment: getAppointmentData()
 ├── dialysis-order-data.loader.ts    ← dialysis order: getDialysisOrderData() (DYNAMIC + templates)
 ├── lab-order-data.loader.ts         ← lab order: getLabOrderData()
-└── lab-order-data.loader.ts         ← lab order: getLabOrderData()
+├── flow-sheet-data.loader.ts        ← flow sheet: getFlowSheetData()
+├── patient-assessment-data.loader.ts ← patient assessment: getPatientAssessmentData()
+├── discontinuation-data.loader.ts   ← discontinue of hemodialysis: getDiscontinuationData()
+└── vascular-access-data.loader.ts   ← vascular access assessment: getVascularAccessData()
 ```
 
 Each domain loader:

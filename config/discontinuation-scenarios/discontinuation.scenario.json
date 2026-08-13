@@ -1,0 +1,59 @@
+{
+  "_description": "REFUSAL/DISCONTINUATION OF HEMODIALYSIS SESSION/S scenario — form payload for tests/discontinuation.spec.ts. Filled into the Discontinue Of Hemodialysis form (load/visit-form/{visitId}/dis-of-hemodialysis, opened from the visit edit page's 'Discontinue Of Hemodialysis' tab) of the target visit (visitId from config/config.json → discontinuation.visitId). Static values are chosen from the real option lists on staging (relationship selects, checkbox ids); 'DYNAMIC' fields get fresh values per run. The form is bilingual — EN (*_en) and AR (*_ar) sides are both filled because the save() handler persists both. The visit ID itself is NOT here — it lives in config/config.json so all tests share one value.",
+  "_config": {
+    "_comment": "No extra test parameters — the scenario is the form payload only."
+  },
+  "_fields": {
+    "discontinueServicesEn": "Discontinuation",
+    "examinationRefusalEn": "Refusal",
+    "discontinueReasonEn": "DYNAMIC",
+    "hyperkalemiaEn": "Hyperkalemia",
+    "cardiacEn": "Cardiac",
+    "pulmonaryEn": "Pulmonary",
+    "acidosisEn": "Acidosis",
+    "othersEn": "Other clinical reasons documented by the nurse.",
+
+    "witnessNameEn": "Test Witness",
+    "witnessRelationshipEn": "Spouse",
+    "witnessDatetimeEn": "2026-08-13T09:30",
+    "witnessAddressEn": "Riyadh, KSA",
+
+    "inabilityReasonEn": "Patient physically unable to sign.",
+
+    "relativeNameEn": "Test Relative",
+    "relativeRelationEn": "Son",
+    "relativeDatetimeEn": "2026-08-13T09:35",
+
+    "doctorNameEn": "Test Doctor",
+    "doctorDatetimeEn": "2026-08-13T09:40",
+
+    "interpreterNameEn": "Test Interpreter",
+    "interpreterDatetimeEn": "2026-08-13T09:45",
+
+    "discontinueServicesAr": "إيقاف",
+    "examinationRefusalAr": "رفض",
+    "discontinueReasonAr": "أوقف المريض خدمات غسيل الكلى طوعا.",
+    "hyperkalemiaAr": "الدم",
+    "cardiacAr": "القلب",
+    "pulmonaryAr": "رئوية",
+    "acidosisAr": "حموضة",
+    "othersAr": "أسباب سريرية أخرى موثقة من قبل الممرض.",
+
+    "witnessNameAr": "شاهد اختبار",
+    "witnessRelationshipAr": "زوج/زوجة",
+    "witnessDatetimeAr": "2026-08-13T09:30",
+    "witnessAddressAr": "الرياض، السعودية",
+
+    "inabilityReasonAr": "المريض غير قادر جسديا على التوقيع.",
+
+    "relativeNameAr": "قريب اختبار",
+    "relativeRelationAr": "ابن",
+    "relativeDatetimeAr": "2026-08-13T09:35",
+
+    "doctorNameAr": "طبيب اختبار",
+    "doctorDatetimeAr": "2026-08-13T09:40",
+
+    "interpreterNameAr": "مترجم اختبار",
+    "interpreterDatetimeAr": "2026-08-13T09:45"
+  }
+}

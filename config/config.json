@@ -55,8 +55,46 @@
       "column, opens the Flow Sheet tab, fills every section, and saves.",
       "The visit must be of type 'Treatment Nurse Visit' for the Flow Sheet to apply."
     ],
-    "visitId": "995"
-  },
+    "visitId": "1005"
+  },    "patientAssessment": {
+      "_comment_visitId": [
+        "visitId — the visit ID located in the Visits directory (list page /visits)",
+        "whose Patient Assessment form is filled out by tests/patient-assessment.spec.ts.",
+        "The test finds the row in the Visits list, clicks the edit icon under the Actions",
+        "column, then opens the Patient Assessment form (load/visit-form/{id}/patient-assessment)",
+        "fills it, and saves. Like flowSheet.visitId, this is the SINGLE source of truth —",
+        "do NOT duplicate the visit ID in scenario files.",
+        "The visit must be of type 'Treatment Nurse Visit' for the form to apply."
+      ],
+      "visitId": "1005"
+    },
+    "discontinuation": {
+      "_comment_visitId": [
+        "visitId — the visit ID located in the Visits directory (list page /visits)",
+        "whose REFUSAL/DISCONTINUATION OF HEMODIALYSIS SESSION/S form is filled out by",
+        "tests/discontinuation.spec.ts. The test finds the row in the Visits list, clicks",
+        "the edit icon under the Actions column, then opens the Discontinue Of Hemodialysis",
+        "form (load/visit-form/{id}/dis-of-hemodialysis), fills it (EN + AR), and saves.",
+        "Like flowSheet.visitId / patientAssessment.visitId, this is the SINGLE source of",
+        "truth — do NOT duplicate the visit ID in scenario files.",
+        "The visit must be of type 'Treatment Nurse Visit' for the form to apply."
+      ],
+      "visitId": "1005"
+    },
+    "vascularAccess": {
+      "_comment_visitId": [
+        "visitId — the visit ID located in the Visits directory (list page /visits)",
+        "whose VASCULAR ACCESS ASSESSMENT TOOL form is filled out by",
+        "tests/vascular-access.spec.ts. The test finds the row in the Visits list, clicks",
+        "the edit icon under the Actions column, then opens the Vascular Access Assessment",
+        "form (load/visit-form/{id}/vascular-access-assessment), fills it (access type,",
+        "scoring checkboxes, post-care, interventions), and saves.",
+        "Like flowSheet.visitId / patientAssessment.visitId / discontinuation.visitId, this",
+        "is the SINGLE source of truth — do NOT duplicate the visit ID in scenario files.",
+        "The visit must be of type 'Treatment Nurse Visit' for the form to apply."
+      ],
+      "visitId": "1005"
+    },
   "_comment_appointmentConfig": "Appointment test parameters (defaultDurationMinutes, etc.) live in the _config block of each file in config/appointment-scenarios/, and form fields (date, time, notes, etc.) in _fields. targetPatientIdentifier and visitType are the exceptions — they are defined above under \"appointment\" so all tests share one consistent value.",
 
   "headerContext": {
