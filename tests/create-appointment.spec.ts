@@ -23,7 +23,7 @@
  *   Location match config.json headerContext targets. If the current UI state
  *   does not match, the test automatically switches before proceeding.
  *
- * @see config/config.json — appointment.targetPatientIdentifier (target patient)
+ * @see config/config.json — appointment.targetPatientIdentifier, appointment.visitType
  * @see config/config.json — headerContext section
  */
 
@@ -48,17 +48,21 @@ test.describe('E2E: Create Patient Appointment', () => {
     // 1. Load configurable test parameters
     // -----------------------------------------------------------------------
     const targetPatient = config.appointment.targetPatientIdentifier;
+    // Visit type comes from config.json (appointment.visitType) — the single
+    // source of truth shared by every appointment test.
+    const visitType = config.appointment.visitType;
 
     console.log('═══════════════════════════════════════════════');
     console.log('  APPOINTMENT TEST CONFIGURATION');
     console.log(`  Target Patient:  ${targetPatient}`);
+    console.log(`  Visit Type:      ${visitType}`);
     console.log('═══════════════════════════════════════════════');
 
     // -----------------------------------------------------------------------
     // 2. Generate appointment data from scenario file
     //    'DYNAMIC' fields produce fresh random values each run.
     // -----------------------------------------------------------------------
-    const appointment = getAppointmentData('full-appointment.scenario.json');
+    const appointment = getAppointmentData('full-appointment.scenario.json', { visitType });
 
     console.log(`  Visit Type:       ${appointment.visitType}`);
     console.log(`  Appointment Date: ${appointment.appointmentDate}`);
@@ -97,16 +101,19 @@ test.describe('E2E: Create Patient Appointment', () => {
       // 1. Load configurable test parameters
       // -----------------------------------------------------------------------
       const targetPatient = config.appointment.targetPatientIdentifier;
+      // Visit type comes from config.json (appointment.visitType) — the single
+      // source of truth shared by every appointment test.
+      const visitType = config.appointment.visitType;
 
       // -----------------------------------------------------------------------
       // 2. Generate appointment data from the morning-scenario JSON file
-      //    - visitType:     "Initial Visit" (static)
+      //    - visitType:     config.json → appointment.visitType (single source)
       //    - appointmentTime: "09:00" (static morning slot)
       //    - endTime:       "10:00" (static, 1-hour slot)
       //    - appointmentDate: {{future_date}} (dynamic, random future date)
       //    - notes:         DYNAMIC (random sentence each run)
       // -----------------------------------------------------------------------
-      const appointment = getAppointmentData('morning-appointment.scenario.json');
+      const appointment = getAppointmentData('morning-appointment.scenario.json', { visitType });
 
       console.log('═══════════════════════════════════════════════');
       console.log('  MORNING APPOINTMENT SCENARIO');
@@ -140,7 +147,10 @@ test.describe('E2E: Create Patient Appointment', () => {
 
     test('should create an appointment with minimal required fields only', async ({ patientsPage }) => {
       const targetPatient = config.appointment.targetPatientIdentifier;
-      const appointment = getAppointmentData('minimal-appointment.scenario.json');
+      // Visit type comes from config.json (appointment.visitType) — the single
+      // source of truth shared by every appointment test.
+      const visitType = config.appointment.visitType;
+      const appointment = getAppointmentData('minimal-appointment.scenario.json', { visitType });
 
       console.log('═══════════════════════════════════════════════');
       console.log('  MINIMAL APPOINTMENT TEST');

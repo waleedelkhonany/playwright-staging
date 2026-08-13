@@ -1,5 +1,5 @@
 {
-  "_description": "Full appointment scenario — config settings + form payload in one file. _config holds test parameters (duration defaults). The target patient identifier is read from config.json (appointment.targetPatientIdentifier).",
+  "_description": "Full appointment scenario — config settings + form payload in one file. _config holds test parameters (duration defaults). The target patient identifier and visit type are read from config.json (appointment.targetPatientIdentifier, appointment.visitType).",
   "_config": {
     "defaultDurationMinutes": 60,
 
@@ -9,7 +9,6 @@
 
   },
   "_fields": {
-    "visitType":         "Treatment Nurse Visit",
     "appointmentDate":   null,
     "appointmentTime":   null,
     "endTime":           null,

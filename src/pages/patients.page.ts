@@ -164,7 +164,21 @@ export class PatientsPage extends BasePage {
   // =========================================================================
 
   async navigateToPatients(): Promise<void> {
-    await this.click(this.patientsSidebarLink);
+    // The sidebar is a Livewire component that can re-render right after login;
+    // a click landing during that re-render is swallowed (no navigation occurs).
+    // Confirm the URL actually moved to /patients and retry if it didn't.
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      await this.waitForAnimation(300);
+      await this.click(this.patientsSidebarLink);
+      try {
+        await this.page.waitForURL(/\/patients/, { timeout: 10_000 });
+        break;
+      } catch {
+        if (/\/patients/.test(this.page.url())) break;
+        console.warn(`[Patients] Sidebar click did not navigate (attempt ${attempt}/3) — retrying`);
+      }
+    }
+
     await this.waitForPageLoad();
     await this.waitForAnimation(500);
   }
@@ -722,47 +736,47 @@ export class PatientsPage extends BasePage {
 
   /**
    * Navigate from the Patient Details page to the Appointments list
-   * via the Encounters top dropdown tab.
+   * via the Encounters nav section.
+   *
+   * On the patient detail page "Encounters" is a collapsible sidebar section
+   * (Bootstrap collapse — `data-bs-toggle="collapse"` → `#collapse-encounters`),
+   * NOT a dropdown: clicking its toggle expands it and reveals sub-items such
+   * as "Appointments". The section is a Livewire-rendered accordion, so a
+   * re-render can collapse it again right after the click — therefore we
+   * re-open it until the Appointments option is actually visible.
    *
    * Workflow:
-   *   1. Locate the "Encounters" dropdown in the top navigation bar
-   *      (typically a `<a class="dropdown-toggle">` or nav-link)
-   *   2. Click it to expand the dropdown menu
-   *   3. Click the "Appointments" option inside the dropdown
+   *   1. Locate the "Encounters" collapse toggle (data-bs-toggle, nav-link, or tab)
+   *   2. Click it to expand the section (retrying if a re-render closes it)
+   *   3. Click the "Appointments" option inside the OPEN collapse only
+   *      (scoped to `.collapse.show` so a hidden duplicate nav is never matched)
    *   4. Wait for the Appointments page/table to fully load
    */
   async navigateToEncountersAppointments(): Promise<void> {
-    // Locate the Encounters dropdown trigger (nav-link, dropdown-toggle, or tab)
-    const encountersDropdown = this.page.locator(
-      'a:has-text("Encounters"), button:has-text("Encounters"), .nav-item:has-text("Encounters") a, [class*="encounters"]',
+    // Locate the Encounters collapse toggle (patients-toggle / nav-link / tab)
+    const encountersToggle = this.page.locator(
+      '[data-bs-toggle="collapse"]:has-text("Encounters"), a:has-text("Encounters"), button:has-text("Encounters")',
     ).first();
 
-    console.log('[Navigation] Opening Encounters dropdown...');
-
-    // Some dropdowns are hover-triggered, others are click-triggered.
-    // Strategy: try hover first. If the Appointments option appears, skip click.
-    // Otherwise, click to open (covers click-only dropdowns like Bootstrap's default).
-    await encountersDropdown.hover().catch(() => {});
-    await this.waitForAnimation(500);
-
-    // Define the Appointments option locator (reused in both branches)
+    // The Appointments option lives inside the OPEN Encounters collapse. Scope
+    // to `.collapse.show` so the click never lands on a hidden duplicate nav
+    // (e.g. mobile + desktop variants of the same sidebar).
     const appointmentsOption = this.page.locator(
-      'a:has-text("Appointments"), .dropdown-item:has-text("Appointments"), [class*="appointments"]',
+      '.collapse.show a:has-text("Appointments"), .collapse.show .nav-item:has-text("Appointments")',
     ).first();
 
-    // Check if hover already triggered the dropdown
-    const dropdownAppeared = await appointmentsOption.isVisible({ timeout: 1000 }).catch(() => false);
+    console.log('[Navigation] Opening Encounters section...');
 
-    if (!dropdownAppeared) {
-      // Hover didn't work — try clicking (standard Bootstrap behavior)
-      console.log('[Navigation] Hover did not trigger dropdown — clicking instead');
+    // Expand the collapse; Livewire re-renders may collapse it again, so keep
+    // toggling until the Appointments option is actually visible.
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      await this.click(encountersToggle);
+      await this.waitForAnimation(800);
 
-      // Re-query in case a Livewire re-render detached the original locator
-      const reQuery = this.page.locator(
-        'a:has-text("Encounters"), button:has-text("Encounters"), .nav-item:has-text("Encounters") a, [class*="encounters"]',
-      ).first();
-      await this.click(reQuery);
-      await this.waitForAnimation(500);
+      const appeared = await appointmentsOption.isVisible({ timeout: 2000 }).catch(() => false);
+      if (appeared) break;
+
+      console.warn(`[Navigation] Appointments option not visible (attempt ${attempt}/3) — toggling Encounters again`);
     }
 
     console.log('[Navigation] Clicking Appointments option...');
@@ -793,11 +807,15 @@ export class PatientsPage extends BasePage {
    *   Inner Icon:    <i class="ri-eye-line"></i>
    *   Parent Column: <td class="actions-column">
    *
-   * @param targetStatus - The status text to filter by (default: "New")
-   * @param dateFilter   - Optional date text to require in the row
-   *                       (e.g., "2026-07-30" for today's appointments)
+   * @param targetStatus    - The status text to filter by (default: "New")
+   * @param dateFilter      - Optional date text to require in the row
+   *                          (e.g., "2026/07/30" for today's appointments)
+   * @param extraFilterText - Optional additional text the row must contain
+   *                          (e.g., the visit type), so tests can target the
+   *                          exact appointment they created instead of the
+   *                          first status/date match.
    */
-  async openLatestAppointmentByStatus(targetStatus = 'New', dateFilter?: string): Promise<void> {
+  async openLatestAppointmentByStatus(targetStatus = 'New', dateFilter?: string, extraFilterText?: string): Promise<void> {
     const maxPages = 10;
 
     for (let pageIndex = 0; pageIndex < maxPages; pageIndex++) {
@@ -825,6 +843,11 @@ export class PatientsPage extends BasePage {
       if (dateFilter) {
         targetRow = targetRow.filter({ hasText: dateFilter });
         console.log(`[Appointments] Looking for "${targetStatus}" with date "${dateFilter}" on page ${pageIndex + 1}...`);
+      }
+
+      if (extraFilterText) {
+        targetRow = targetRow.filter({ hasText: extraFilterText });
+        console.log(`[Appointments] ... also requiring row text "${extraFilterText}"`);
       }
 
       targetRow = targetRow.first();

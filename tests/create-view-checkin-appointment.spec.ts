@@ -53,7 +53,14 @@ test.describe('E2E: Create → View → Check-In Appointment', () => {
     // 1. Load configurable test parameters and generate appointment data from JSON
     // =========================================================================
     const targetPatient = config.appointment.targetPatientIdentifier;
-    const appointment = getAppointmentData('full-appointment.scenario.json');
+    // Visit type comes from config.json (appointment.visitType) — the single
+    // source of truth shared by every appointment test.
+    const visitType = config.appointment.visitType;
+    const appointment = getAppointmentData('full-appointment.scenario.json', { visitType });
+    // Table display format for the date filter (YYYY/MM/DD) — the row opened
+    // below is filtered by today + visitType so stale "New" appointments from
+    // other test runs are never picked up.
+    const today = new Date().toLocaleDateString('en-CA').replace(/-/g, '/');
 
     console.log('═══════════════════════════════════════════════');
     console.log('  COMBINED APPOINTMENT LIFECYCLE TEST');
@@ -98,10 +105,11 @@ test.describe('E2E: Create → View → Check-In Appointment', () => {
     console.log('[Test] ✅ Encounters → Appointments navigated');
 
     // =========================================================================
-    // 5. Open the latest "New" appointment detail modal
+    // 5. Open the "New" appointment just created (today + visitType, so stale
+    //    appointments left over from other test runs are skipped)
     // =========================================================================
-    console.log('\n📋 Step 4: Open latest "New" appointment...');
-    await patientsPage.openLatestAppointmentByStatus('New');
+    console.log('\n📋 Step 4: Open today\'s "New" appointment...');
+    await patientsPage.openLatestAppointmentByStatus('New', today, visitType);
 
     // =========================================================================
     // 6. Confirm Care Team members in the appointment modal

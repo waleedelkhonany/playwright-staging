@@ -100,7 +100,7 @@ Each field in `_fields` is resolved according to this table:
 | Value in JSON | Behaviour | Example |
 |---|---|---|
 | `""` (empty string) or `null` | Falls back to a sensible default defined in the loader's `DEFAULT_GENERATORS` map | `"mobile": ""` → generates a random Saudi phone |
-| `"DYNAMIC"` | Generates a fresh random value each test run via the loader's `DYNAMIC_GENERATORS` map | `"visitType": "DYNAMIC"` → picks a random visit type |
+| `"DYNAMIC"` | Generates a fresh random value each test run via the loader's `DYNAMIC_GENERATORS` map | `"notes": "DYNAMIC"` → picks a random sentence |
 | `"{{template}}"` | Resolves a named template placeholder from the loader's `TEMPLATE_RESOLVERS` map | `"givenNameEn": "{{random_first_name}}"` → faker first name |
 | any other string | Used verbatim as a static value | `"gender": "Female"` → always "Female" |
 
@@ -112,7 +112,6 @@ Each field in `_fields` is resolved according to this table:
 | `{{future_date}}` | Random future date within 30 days |
 | `{{random_time}}` | Random business-hours time |
 | `{{random_notes}}` | Random lorem-ipsum sentence |
-| `{{random_visit_type}}` | Random visit type from the available options |
 
 **Available templates (patients):**
 | Template | Resolves to |
@@ -165,8 +164,13 @@ Each field in `_fields` is resolved according to this table:
 | File | Description |
 |---|---|
 | `full-appointment.scenario.json` | All fields populated with DYNAMIC values; used for standard create-appointment tests |
-| `minimal-appointment.scenario.json` | Only visitType + appointmentDate; time and notes fall to defaults |
-| `morning-appointment.scenario.json` | Fixed 09:00–10:00 slot with "Initial Visit" type; demonstrates static+dynamic mixing |
+| `minimal-appointment.scenario.json` | Only appointmentDate; time and notes fall to defaults |
+| `morning-appointment.scenario.json` | Fixed 09:00–10:00 slot; demonstrates static+dynamic mixing |
+
+The target patient identifier and visit type are NOT in scenario files — they
+live in `config/config.json` (`appointment.targetPatientIdentifier`,
+`appointment.visitType`) so all appointment tests share one consistent value.
+Pass the visit type as an override when loading the scenario.
 
 ### Physician Order Scenarios (`config/physician-order-scenarios/`)
 
@@ -197,11 +201,12 @@ import { getAppointmentData } from '../src/helpers/appointment-data.loader';
 import config from '../config/config.json';
 
 test('should create an appointment', async ({ patientsPage }) => {
-  // 1. Read the target patient from config.json (single source of truth)
+  // 1. Read shared config from config.json (single source of truth)
   const targetPatient = config.appointment.targetPatientIdentifier;
+  const visitType = config.appointment.visitType;
 
-  // 2. Load resolved form payload via the loader
-  const appointment = getAppointmentData('full-appointment.scenario.json');
+  // 2. Load resolved form payload via the loader (visitType from config.json)
+  const appointment = getAppointmentData('full-appointment.scenario.json', { visitType });
 
   // 3. Execute the workflow
   await patientsPage.navigateToPatients();
@@ -238,12 +243,11 @@ Create a new file `config/appointment-scenarios/afternoon-appointment.scenario.j
 
 ```json
 {
-  "_description": "Afternoon slot scenario — static 14:00 time, specific visit type, dynamic notes.",
+  "_description": "Afternoon slot scenario — static 14:00 time, dynamic notes.",
   "_config": {
     "defaultDurationMinutes": 60
   },
   "_fields": {
-    "visitType":         "Treatment Nurse Visit",
     "appointmentDate":   "{{future_date}}",
     "appointmentTime":   "14:00",
     "endTime":           "15:00",
@@ -253,10 +257,13 @@ Create a new file `config/appointment-scenarios/afternoon-appointment.scenario.j
 }
 ```
 
-Then use it in a test:
+The visit type is not part of the scenario — it comes from `config/config.json`
+(`appointment.visitType`). Then use it in a test:
 
 ```typescript
-const appointment = getAppointmentData('afternoon-appointment.scenario.json');
+const appointment = getAppointmentData('afternoon-appointment.scenario.json', {
+  visitType: config.appointment.visitType,
+});
 // Target patient: config.appointment.targetPatientIdentifier from config.json
 ```
 

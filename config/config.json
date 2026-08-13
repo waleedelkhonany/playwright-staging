@@ -37,7 +37,15 @@
       "by every appointment test — do NOT duplicate it in scenario files.",
       "Other available IDs in staging: [109, 120, 122, 107, 176, 177, 144, 158]"
     ],
-    "targetPatientIdentifier": "222"
+    "targetPatientIdentifier": "222",
+
+    "_comment_visitType": [
+      "visitType — the appointment/visit type used by EVERY appointment test.",
+      "This is the SINGLE source of truth (like targetPatientIdentifier) — do NOT",
+      "duplicate it in scenario files. Must be 'Treatment Nurse Visit' for the",
+      "Flow Sheet form to apply (see tests/flow-sheet-from-appointment.spec.ts)."
+    ],
+    "visitType": "Treatment Nurse Visit"
   },
   "flowSheet": {
     "_comment_visitId": [
@@ -47,9 +55,9 @@
       "column, opens the Flow Sheet tab, fills every section, and saves.",
       "The visit must be of type 'Treatment Nurse Visit' for the Flow Sheet to apply."
     ],
-    "visitId": "981"
+    "visitId": "995"
   },
-  "_comment_appointmentConfig": "Appointment test parameters (defaultDurationMinutes, etc.) live in the _config block of each file in config/appointment-scenarios/, and form fields (visitType, date, etc.) in _fields. targetPatientIdentifier is the exception — it is defined above under \"appointment\" so all tests share one consistent value.",
+  "_comment_appointmentConfig": "Appointment test parameters (defaultDurationMinutes, etc.) live in the _config block of each file in config/appointment-scenarios/, and form fields (date, time, notes, etc.) in _fields. targetPatientIdentifier and visitType are the exceptions — they are defined above under \"appointment\" so all tests share one consistent value.",
 
   "headerContext": {
     "_comment_branchOptions": [

@@ -74,14 +74,21 @@ export class AppointmentDetailPage extends BasePage {
 
     // Bulk "Confirm Appointment" button at the bottom of the modal.
     // When present, clicking it confirms all assigned staff at once.
+    // Based on DOM inspection this is an <a> link, not a <button>.
     this.confirmAppointmentButton = this.modalContainer.locator(
-      'button:has-text("Confirm Appointment"), button:has-text("Confirm All"), .btn-confirm-appointment',
+      'a:has-text("Confirm Appointment"), button:has-text("Confirm Appointment"), ' +
+      'button:has-text("Confirm All"), .btn-confirm-appointment',
     ).first();
 
     // Individual "Confirm" buttons within the Care Team section.
-    // When no bulk button exists, each staff member row has its own button.
+    // When no bulk button exists, each staff member row has its own link
+    // (also an <a> — see DOM inspection), e.g. "Nurse: Test Nurse — Confirm".
+    // Note: this selector also matches the bulk "Confirm Appointment" link,
+    // which is fine — the bulk button is handled first, and this list is only
+    // used when no bulk button is present.
     this.individualConfirmButtons = this.modalContainer.locator(
-      'button:has-text("Confirm"):visible, .btn-confirm:visible, [class*="confirm"]:visible',
+      'a:has-text("Confirm"):visible, button:has-text("Confirm"):visible, ' +
+      '.btn-confirm:visible, [class*="confirm"]:visible',
     );
 
     // Check-In link in the bottom action bar of the modal

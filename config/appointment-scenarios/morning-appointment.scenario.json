@@ -1,5 +1,5 @@
 {
-  "_description": "Morning appointment scenario — fixed early-morning slot (09:00-10:00) with a specific visit type. Config includes the duration defaults. The target patient identifier is read from config.json (appointment.targetPatientIdentifier).",
+  "_description": "Morning appointment scenario — fixed early-morning slot (09:00-10:00). Config includes the duration defaults. The target patient identifier and visit type are read from config.json (appointment.targetPatientIdentifier, appointment.visitType).",
   "_config": {
     "defaultDurationMinutes": 60,
 
@@ -9,7 +9,6 @@
     
   },
   "_fields": {
-    "visitType":         "Initial Visit",
     "appointmentDate":   "{{future_date}}",
     "appointmentTime":   "09:00",
     "endTime":           "10:00",

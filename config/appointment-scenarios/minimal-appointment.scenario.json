@@ -1,5 +1,5 @@
 {
-  "_description": "Minimal appointment scenario — only visit type and date are populated. Config includes the duration defaults. The target patient identifier is read from config.json (appointment.targetPatientIdentifier).",
+  "_description": "Minimal appointment scenario — only the appointment date is populated; time and notes fall to defaults. Config includes the duration defaults. The target patient identifier and visit type are read from config.json (appointment.targetPatientIdentifier, appointment.visitType).",
   "_config": {
     "defaultDurationMinutes": 60,
 
@@ -9,7 +9,6 @@
     
   },
   "_fields": {
-    "visitType":         "{{random_visit_type}}",
     "appointmentDate":   "{{future_date}}",
     "appointmentTime":   "",
     "endTime":           "",

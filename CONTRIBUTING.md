@@ -148,11 +148,12 @@ import { getAppointmentData } from '../src/helpers/appointment-data.loader';
 import config from '../config/config.json';
 
 test('should create an appointment', async ({ patientsPage }) => {
-  // 1. Read the target patient from config.json (single source of truth)
+  // 1. Read shared config from config.json (single source of truth)
   const targetPatient = config.appointment.targetPatientIdentifier;
+  const visitType = config.appointment.visitType;
 
-  // 2. Load resolved form payload
-  const appointment = getAppointmentData('full-appointment.scenario.json');
+  // 2. Load resolved form payload (visitType from config.json)
+  const appointment = getAppointmentData('full-appointment.scenario.json', { visitType });
 
   // 3. Console log the test data
   console.log(`Target: ${targetPatient}, Visit: ${appointment.visitType}`);
@@ -207,7 +208,6 @@ Every scenario file follows this structure:
     "defaultDurationMinutes": 60
   },
   "_fields": {
-    "visitType":         "DYNAMIC",
     "appointmentDate":   "{{future_date}}",
     "appointmentTime":   "09:00",
     "endTime":           "10:00",
@@ -217,9 +217,11 @@ Every scenario file follows this structure:
 }
 ```
 
-The target patient identifier is defined once in `config/config.json`
-(`appointment.targetPatientIdentifier`) so all appointment tests use the same
-patient — do not duplicate it in scenario files.
+The target patient identifier and visit type are defined once in
+`config/config.json` (`appointment.targetPatientIdentifier`,
+`appointment.visitType`) so all appointment tests use the same patient and
+visit type — do not duplicate them in scenario files. Pass the visit type as
+an override when loading the scenario.
 
 ### `_config` Block
 
@@ -256,7 +258,7 @@ Holds the **actual form payload** — the data that gets filled into UI form fie
 | Value in JSON | Behaviour | Example |
 |---|---|---|
 | `""` (empty string) or `null` | Falls back to a sensible default defined in the loader's `DEFAULT_GENERATORS` map | `"mobile": ""` → generates a random Saudi phone |
-| `"DYNAMIC"` | Generates a fresh random value each test run | `"visitType": "DYNAMIC"` → picks a random visit type |
+| `"DYNAMIC"` | Generates a fresh random value each test run | `"notes": "DYNAMIC"` → picks a random sentence |
 | `"{{template}}"` | Resolves a named template placeholder | `"givenNameEn": "{{random_first_name}}"` → faker first name |
 | any other string | Used verbatim as a static value | `"gender": "Female"` → always "Female" |
 
@@ -271,7 +273,6 @@ Holds the **actual form payload** — the data that gets filled into UI form fie
 | `{{future_date}}` | Random future date within 30 days |
 | `{{random_time}}` | Random business-hours time |
 | `{{random_notes}}` | Random lorem-ipsum sentence |
-| `{{random_visit_type}}` | Random visit type |
 
 **Patient templates:**
 

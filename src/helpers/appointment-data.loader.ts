@@ -11,10 +11,10 @@
  *   "{{template}}"     →  resolved template placeholder
  *   anything else      →  used as-is (static hardcoded value)
  *
- * The target patient identifier is NOT read from scenario files — it lives in
- * config/config.json (appointment.targetPatientIdentifier) so every test uses
- * the same value. Scenario _config blocks hold remaining test parameters such
- * as defaultDurationMinutes.
+ * The target patient identifier and visit type are NOT read from scenario
+ * files — they live in config/config.json (appointment.targetPatientIdentifier,
+ * appointment.visitType) so every test uses the same values. Scenario _config
+ * blocks hold remaining test parameters such as defaultDurationMinutes.
  *
  * Usage in tests:
  *
@@ -22,7 +22,8 @@
  *   import { getAppointmentData } from '../helpers/appointment-data.loader';
  *
  *   const targetPatient = config.appointment.targetPatientIdentifier;
- *   const appointment = getAppointmentData('full-appointment.scenario.json');
+ *   const appointment = getAppointmentData('full-appointment.scenario.json',
+ *     { visitType: config.appointment.visitType });
  *   await patientsPage.createAppointment(targetPatient, appointment);
  *
  * @see src/helpers/data.loader.ts — generic base used underneath
@@ -145,8 +146,10 @@ const TEMPLATE_RESOLVERS: Record<string, () => string> = {
  * @param overrides Optional overrides to merge on top of the resolved data.
  *
  * @example
- *   const apt = getAppointmentData('full-appointment.scenario.json');
- *   const apt = getAppointmentData('minimal-appointment.scenario.json');
+ *   const apt = getAppointmentData('full-appointment.scenario.json',
+ *     { visitType: config.appointment.visitType });
+ *   const apt = getAppointmentData('minimal-appointment.scenario.json',
+ *     { visitType: config.appointment.visitType });
  */
 export const getAppointmentData = createDataLoader<AppointmentData>({
   name: 'AppointmentData',

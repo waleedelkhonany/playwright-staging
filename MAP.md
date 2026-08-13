@@ -399,15 +399,15 @@ Structure:
 ```json
 {
   "_config": { "defaultDurationMinutes": 60 },
-  "visitType": "Initial Visit",
   "appointmentDate": "{{future_date}}",
   "appointmentTime": "{{dynamic_time}}",
   "endTime": "{{endTime_60m_later}}",
   "notes": "DYNAMIC"
 }
 ```
-The target patient identifier is read from `config/config.json`
-(`appointment.targetPatientIdentifier`), shared by all appointment tests.
+The target patient identifier and visit type are read from `config/config.json`
+(`appointment.targetPatientIdentifier`, `appointment.visitType`), shared by all
+appointment tests — pass the visit type as a loader override.
 
 **Patient Scenarios (`config/patient-scenarios/*.scenario.json`):**
 Structure:
