@@ -1,0 +1,60 @@
+{
+  "_description": "Patient Assessment scenario — form payload for tests/patient-assessment.spec.ts. Filled into the Patient Assessment form (load/visit-form/{visitId}/patient-assessment, opened from the visit edit page's 'Patient Assessment' tab) of the target visit (visitId from config/config.json → patientAssessment.visitId). Static values are chosen from the real option lists on staging; 'DYNAMIC' fields get fresh values per run. The visit ID itself is NOT here — it lives in config/config.json so all tests share one value. Read-only fields (vitals, pain score, height, weight, designation) are auto-filled from the Flow Sheet and are intentionally absent.",
+  "_config": {
+    "_comment": "No extra test parameters — the scenario is the form payload only."
+  },
+  "_fields": {
+    "allergy": "Penicillin",
+
+    "initialAssessment": "initial",
+    "mentalStatus": "Oriented",
+    "patientAlert": "Never",
+    "caregiver": "yes",
+    "typeOfPain": "Dull",
+    "ambulatoryStatus": "Independent",
+    "distance": "500",
+    "device": "Wheelchair",
+    "lungAuscultation": "Clear",
+    "oxygenUse": "yes",
+    "oxygenUseText": "Nasal cannula",
+    "litPerMinute": "2",
+    "weightLoss": "no",
+    "weightLossAmount": "0",
+    "appetite": "3",
+    "diet": "3",
+
+    "medicalHistory": "DYNAMIC",
+    "motherMedicalHistory": "Diabetes Mellitus",
+    "fatherMedicalHistory": "Hypertension",
+    "medicationHistory": "DYNAMIC",
+    "equipmentG1": "Oxygen",
+    "equipmentG2": "Catheter",
+
+    "surgicalHistory": "Appendectomy",
+    "surgicalPlace": "Riyadh",
+
+    "livingSituation": "yes",
+    "indivWithPatient": "Wife",
+    "dwellingType": "flat",
+    "floor": "2",
+    "room": "3",
+    "elevator": "yes",
+    "primaryCaregiver": "Wife",
+    "avaAssistPatient": "Yes",
+    "caregiverInstructions": "yes",
+    "patientPrimaryLang": "Arabic",
+    "patientSecondaryLang": "English",
+    "religion": "Muslim",
+    "familyPrimaryLang": "Arabic",
+    "familySecondaryLang": "English",
+    "hobbies": "Reading",
+    "occupationHistory": "Retired",
+
+    "referralDisasterPlanning": "disaster_planning",
+    "referralSocialWorker": "social_worker",
+    "referralAlliedHealth": "allied_health_professionals",
+
+    "historyGivenBy": "Test Nurse",
+    "relationshipToPatient": "Nurse"
+  }
+}
