@@ -60,7 +60,7 @@
     "do NOT duplicate the visit ID in scenario files.",
     "The visit must be of type 'Treatment Nurse Visit' for the forms to apply."
   ],
-  "visitId": "1005",
+  "visitId": "1006",
 
   "_comment_appointmentConfig": "Appointment test parameters (defaultDurationMinutes, etc.) live in the _config block of each file in config/appointment-scenarios/, and form fields (date, time, notes, etc.) in _fields. targetPatientIdentifier, visitType and visitId are the exceptions — they are defined above so all tests share one consistent value.",
 
