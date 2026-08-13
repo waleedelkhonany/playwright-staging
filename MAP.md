@@ -22,6 +22,7 @@
 │   ├── patient-assessment.spec.ts            # Fill the Patient Assessment form of a visit
 │   ├── discontinuation.spec.ts               # Fill the Discontinue Of Hemodialysis form of a visit
 │   ├── vascular-access.spec.ts               # Fill the Vascular Access Assessment form of a visit
+│   ├── respiratory-triage.spec.ts            # Create a Respiratory Triage Checklist for a visit
 │   ├── employee-create.spec.ts               # Create employee workflow
 │   ├── visit_filter.spec.ts                  # Data-driven Visit Filter tests
 │   ├── patient_filter.spec.ts                # Data-driven Patient Filter tests
@@ -38,6 +39,7 @@
 │   │   ├── patient-assessment.page.ts # Patient Assessment form (Visits → edit → load/visit-form/{id}/patient-assessment)
 │   │   ├── discontinuation.page.ts # Discontinue Of Hemodialysis form (Visits → edit → load/visit-form/{id}/dis-of-hemodialysis)
 │   │   ├── vascular-access.page.ts # Vascular Access Assessment form (Visits → edit → load/visit-form/{id}/vascular-access-assessment)
+│   │   ├── respiratory-triage.page.ts # Respiratory Triage checklist (Visits → edit → tab → Add New → load/form/{patientId}/respiratory-triage)
 │   │   ├── appointment-detail.page.ts  # Appointment modal confirmation & check-in
 │   │   ├── employees.page.ts  # Employee management (create form aligned to staging DOM)
 │   │   └── filter-list.page.ts  # Shared base for list-page filter specs
@@ -53,6 +55,7 @@
 │   │   ├── patient-assessment-data.loader.ts # Patient Assessment form data generation
 │   │   ├── discontinuation-data.loader.ts # Discontinue Of Hemodialysis form data generation
 │   │   ├── vascular-access-data.loader.ts # Vascular Access Assessment form data generation
+│   │   ├── respiratory-triage-data.loader.ts # Respiratory Triage checklist data generation
 │   │   ├── header-context.helper.ts     # Branch/Location context management
 │   │   ├── login.helper.ts              # Login automation logic
 │   │   ├── patient-data.loader.ts       # Patient data generator
@@ -81,6 +84,8 @@
 │   │   └── discontinuation.scenario.json # Full bilingual (EN+AR) Discontinuation payload
 │   ├── vascular-access-scenarios/  # Vascular Access Assessment form payload
 │   │   └── vascular-access.scenario.json # AVF-branch payload (access select + scoring + post-care + interventions)
+│   ├── respiratory-triage-scenarios/  # Respiratory Triage checklist payload
+│   │   └── respiratory-triage.scenario.json # Full checklist (vitals + symptom scores + signatures + disposition)
 │   ├── physician-order-scenarios/  # Physician order scenario files
 │   │   ├── dialysis-order.scenario.json       # Dialysis Order modal payload (static baseline)
 │   │   ├── dynamic-dialysis-order.scenario.json  # All fields DYNAMIC (random values/choices)
@@ -109,6 +114,12 @@
 │   ├── diagnose-vascular-access.ts    # Diagnose wire:model vs wire:model.live bindings
 │   ├── probe-vascular-access-save.ts  # Smoke-test Vascular Access save end-to-end
 │   ├── probe-vascular-access-readback.ts # Verify persisted Vascular Access values after save
+│   ├── inspect-respiratory-triage.ts  # Dump Respiratory Triage tab/list DOM (Visits → edit → tab)
+│   ├── inspect-respiratory-triage-form.ts # Dump Respiratory Triage create-form DOM (load/form/{id}/respiratory-triage?display=create)
+│   ├── probe-respiratory-triage-save.ts # Smoke-test Respiratory Triage save end-to-end
+│   ├── probe-respiratory-triage-index.ts # Verify saved Respiratory Triage record appears in the index list
+│   ├── probe-respiratory-triage-edit.ts  # Open saved record in edit mode (?display=form&row_id={id})
+│   ├── probe-respiratory-triage-readback.ts # Verify persisted Respiratory Triage values after save
 │   ├── debug-visit-filter-tc01.ts     # Smoke-test Visit Filter case TC-01
 │   ├── inspect-patient-filter.ts      # Dump Patient Filter DOM on staging
 │   ├── probe-patient-filter.ts        # Probe patient list pagination/empty state
@@ -143,6 +154,7 @@
 | `patient-assessment.spec.ts` | Fill the Patient Assessment form of the target visit (ID from config.json `patientAssessment.visitId`, default 1005): Visits directory → edit icon under Actions → Patient Assessment form (`/load/visit-form/{id}/patient-assessment`, opened by the "Patient Assessment" tab) → fill every section → Save (`wire:click="save"`) → assert the URL gains `?row_id={id}` and persisted values |
 | `discontinuation.spec.ts` | Fill the REFUSAL/DISCONTINUATION OF HEMODIALYSIS SESSION/S form of the target visit (ID from config.json `discontinuation.visitId`, default 1005): Visits directory → edit icon under Actions → Discontinue Of Hemodialysis form (`/load/visit-form/{id}/dis-of-hemodialysis`, opened by the "Discontinue Of Hemodialysis" tab) → fill every section in English AND Arabic → Save (`wire:click="save"`) → assert the URL gains `?row_id={id}` and persisted values |
 | `vascular-access.spec.ts` | Fill the VASCULAR ACCESS ASSESSMENT TOOL form of the target visit (ID from config.json `vascularAccess.visitId`, default 1005): Visits directory → edit icon under Actions → Vascular Access Assessment form (`/load/visit-form/{id}/vascular-access-assessment`, opened by the "VASCULAR ACCESS ASSESSMENT TOOL" tab) → fill access type (AVF branch), scoring checkboxes, post-care (dressing/tego), low-risk interventions → Save (`wire:click="save"`) → assert the URL gains `?row_id={id}` and persisted values |
+| `respiratory-triage.spec.ts` | Create a Respiratory Triage Checklist for the target visit (ID from config.json `respiratoryTriage.visitId`, default 1005): Visits directory → edit icon under Actions → Respiratory Triage tab (`/load/visit-form/{id}/respiratory-triage`, a LIST page) → "Add New" (`/load/form/{patientId}/respiratory-triage?display=create`) → fill triage date + vitals, dialysis?, symptom scores (ped/adult), nurse/physician signatures, disposition (iso/er/opd), doctor signature → Save (`wire:click="save"`) → assert the URL changes `?display=create` → `?display=index` → open the saved record in edit mode (`?display=form&row_id={id}`) and verify persisted values |
 | `employee-create.spec.ts` | Create an employee via the `/employees/create` Livewire form: fill Main Info (incl. the SCFHS/NPHIES license section for licensed titles), wait for the server-validated "Create" button, assert the success redirect to `/employees/{id}/edit` |
 | `visit_filter.spec.ts` | Data-driven Visit Filter tests (config/visit_filters.json): happy path, single filters, empty state, boundary & reset |
 | `patient_filter.spec.ts` | Data-driven Patient Filter tests (config/patient_filters.json): name/MRN/mobile/email/ID/status filters, empty state, boundary & reset |
@@ -290,6 +302,28 @@ in a new tab; the POM navigates there directly):
   gain `?row_id={id}` (the save signal — no SweetAlert on this form), return the row id
 - `verifySavedValues(data)` — read back representative fields after the save
   re-render to prove persistence
+
+#### RespiratoryTriagePage (`respiratory-triage.page.ts`)
+Respiratory Triage Checklist — unlike the other visit-form tabs, the
+"Respiratory Triage" tab (`/load/visit-form/{id}/respiratory-triage`) is a LIST
+page; its "Add New" button opens a PATIENT-level create form
+(`/load/form/{patientId}/respiratory-triage?display=create`). The POM follows
+the same path:
+- `openVisitRespiratoryTriage(visitId)` — open `/visits`, find the row by visit ID,
+  click the edit icon (`fa-pen-to-square` inside `a[title="Edit"]`) under the Actions
+  column, navigate to the Respiratory Triage tab, then click "Add New"
+- `fillRespiratoryTriageForm(data)` — fill triage date + vitals (height/weight/temp),
+  dialysis radio, symptom scores (exposure, fever/cough/SOB/headache/nausea/chronic —
+  pediatric + adult), nurse/physician signatures (name + id), disposition radios
+  (iso/er/opd) and doctor signature via native value setters + events on
+  `wire:model="data.*"` bindings; empty values are skipped; the hidden signature
+  signed_by/signed_at fields (set by the signature pad) are not mapped
+- `saveRespiratoryTriage()` — click Save (`wire:click="save"`), wait for the URL to
+  change `?display=create` → `?display=index` (the save signal — no SweetAlert),
+  read the saved record id (newest row) from the list, return it
+- `verifySavedValues(data, rowId)` — open the saved record in edit mode
+  (`wire:click="changeDisplay('form',{id})"` → `?display=form&row_id={id}`) and read
+  back representative fields to prove persistence
 
 #### VisitsPage (`visits.page.ts`)
 Visit details/edit page verification:

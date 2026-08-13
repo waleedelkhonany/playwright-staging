@@ -95,6 +95,20 @@
       ],
       "visitId": "1005"
     },
+    "respiratoryTriage": {
+      "_comment_visitId": [
+        "visitId — the visit ID located in the Visits directory (list page /visits)",
+        "whose Respiratory Triage tab is filled out by tests/respiratory-triage.spec.ts.",
+        "The test finds the row in the Visits list, clicks the edit icon under the Actions",
+        "column, opens the Respiratory Triage tab (load/visit-form/{id}/respiratory-triage —",
+        "a LIST page), clicks 'Add New' (load/form/{patientId}/respiratory-triage?display=create",
+        "where patientId = appointment.targetPatientIdentifier), fills the checklist, and saves",
+        "(?display=create → ?display=index). Like the other visitId keys, this is the SINGLE",
+        "source of truth — do NOT duplicate the visit ID in scenario files.",
+        "The visit must be of type 'Treatment Nurse Visit' for the tab to apply."
+      ],
+      "visitId": "1005"
+    },
   "_comment_appointmentConfig": "Appointment test parameters (defaultDurationMinutes, etc.) live in the _config block of each file in config/appointment-scenarios/, and form fields (date, time, notes, etc.) in _fields. targetPatientIdentifier and visitType are the exceptions — they are defined above under \"appointment\" so all tests share one consistent value.",
 
   "headerContext": {

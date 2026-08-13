@@ -1,0 +1,42 @@
+{
+  "_description": "Respiratory Triage Checklist scenario — form payload for tests/respiratory-triage.spec.ts. Filled into the Respiratory Triage create form (load/form/{patientId}/respiratory-triage?display=create, opened via the 'Add New' button on the Respiratory Triage tab of the visit edit page). The target visit ID is read from config/config.json (respiratoryTriage.visitId) to reach the tab; the patient ID comes from the 'Add New' href itself (appointment.targetPatientIdentifier). Static values are chosen from the real radio values/labels on staging: dialysis radio uses the id-mapped labels 'Yes'/'No', disposition radios (iso/er/opd) use the raw values 'yes'/'no'. The hidden signature signed_by/signed_at fields (set by the signature pad) are intentionally absent.",
+  "_config": {
+    "_comment": "No extra test parameters — the scenario is the form payload only."
+  },
+  "_fields": {
+    "date": "2026-08-13",
+    "height": "170",
+    "weight": "75",
+    "temperature": "36.8",
+
+    "dialysis": "Yes",
+
+    "exposureScore": "1",
+    "feverPed": "0",
+    "feverAdult": "0",
+    "coughPed": "0",
+    "coughAdult": "0",
+    "sobPed": "0",
+    "sobAdult": "1",
+    "headachePed": "0",
+    "headacheAdult": "0",
+    "nauseaPed": "0",
+    "nauseaAdult": "0",
+    "chronicPed": "0",
+    "chronicAdult": "0",
+    "totalScore": "2",
+
+    "nurseName": "Test Nurse",
+    "nurseId": "1",
+
+    "physicianName": "Test Physician",
+    "physicianId": "1",
+
+    "iso": "yes",
+    "er": "no",
+    "opd": "no",
+
+    "doctorName": "Test Doctor",
+    "doctorId": "1"
+  }
+}
