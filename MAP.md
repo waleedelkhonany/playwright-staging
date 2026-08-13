@@ -23,6 +23,7 @@
 │   ├── discontinuation.spec.ts               # Fill the Discontinue Of Hemodialysis form of a visit
 │   ├── vascular-access.spec.ts               # Fill the Vascular Access Assessment form of a visit
 │   ├── respiratory-triage.spec.ts            # Create a Respiratory Triage Checklist for a visit
+│   ├── referral.spec.ts                      # Create a Referral for a visit
 │   ├── employee-create.spec.ts               # Create employee workflow
 │   ├── visit_filter.spec.ts                  # Data-driven Visit Filter tests
 │   ├── patient_filter.spec.ts                # Data-driven Patient Filter tests
@@ -40,6 +41,7 @@
 │   │   ├── discontinuation.page.ts # Discontinue Of Hemodialysis form (Visits → edit → load/visit-form/{id}/dis-of-hemodialysis)
 │   │   ├── vascular-access.page.ts # Vascular Access Assessment form (Visits → edit → load/visit-form/{id}/vascular-access-assessment)
 │   │   ├── respiratory-triage.page.ts # Respiratory Triage checklist (Visits → edit → tab → Add New → load/form/{patientId}/respiratory-triage)
+│   │   ├── referral.page.ts           # Referral form (Visits → edit → load/visit-form/{id}/referrals)
 │   │   ├── appointment-detail.page.ts  # Appointment modal confirmation & check-in
 │   │   ├── employees.page.ts  # Employee management (create form aligned to staging DOM)
 │   │   └── filter-list.page.ts  # Shared base for list-page filter specs
@@ -56,6 +58,7 @@
 │   │   ├── discontinuation-data.loader.ts # Discontinue Of Hemodialysis form data generation
 │   │   ├── vascular-access-data.loader.ts # Vascular Access Assessment form data generation
 │   │   ├── respiratory-triage-data.loader.ts # Respiratory Triage checklist data generation
+│   │   ├── referral-data.loader.ts     # Referral form data generation
 │   │   ├── header-context.helper.ts     # Branch/Location context management
 │   │   ├── login.helper.ts              # Login automation logic
 │   │   ├── patient-data.loader.ts       # Patient data generator
@@ -86,8 +89,11 @@
 │   │   └── vascular-access.scenario.json # AVF-branch payload (access select + scoring + post-care + interventions)
 │   ├── respiratory-triage-scenarios/  # Respiratory Triage checklist payload
 │   │   └── respiratory-triage.scenario.json # Full checklist (vitals + symptom scores + signatures + disposition)
+│   ├── referral-scenarios/          # Referral form payload
+│   │   └── referral.scenario.json   # Full Referral payload (date, type, hospital, print docs, reason, comments)
 │   ├── physician-order-scenarios/  # Physician order scenario files
-│   │   ├── dialysis-order.scenario.json       # Dialysis Order modal payload (static baseline)
+│   │   ├── dialysis-order.scenario.json       # Dialysis Order modal payload (static baseline, Conventional Dialysis)
+│   │   ├── portable-dialysis-order.scenario.json # Static payload for the OTHER orderType (Portable Low Dialysate Dialysis)
 │   │   ├── dynamic-dialysis-order.scenario.json  # All fields DYNAMIC (random values/choices)
 │   │   ├── hdf-dialysis-order.scenario.json   # Fixed Portable + HDF, rest DYNAMIC
 │   │   └── lab-order.scenario.json            # Lab Order form payload
@@ -148,13 +154,14 @@
 | `patients.spec.ts` | Patient CRUD operations: create full patient, create minimal patient, create Saudi female patient with specific constraints |
 | `create-view-checkin-appointment.spec.ts` | Combined workflow: create appointment within test → view it → confirm care team → check-in → verify redirect |
 | `create-appointment.spec.ts` | Create appointments for existing patients (full, minimal, morning-time slot scenarios) |
-| `physician-orders.spec.ts` | Create a Dialysis Order via Physician Orders → Dialysis Order tab (runs 3 scenarios: static baseline, all-DYNAMIC, and HDF-variant) |
+| `physician-orders.spec.ts` | Create a Dialysis Order via Physician Orders → Dialysis Order tab (runs 4 scenarios: static Conventional baseline, static Portable Low Dialysate Dialysis, all-DYNAMIC, and HDF-variant) |
 | `lab-order.spec.ts` | Create a Lab Order via Physician Orders → Labs & Imaging → Create Lab Order form |
 | `flow-sheet.spec.ts` | Fill the Flow Sheet form of the target visit (ID from config.json `visitId`, default 1005): Visits directory → edit icon under Actions → Flow Sheet tab → fill every section → Save → assert the "Flow sheet saved successfully!" popup and persisted values |
 | `patient-assessment.spec.ts` | Fill the Patient Assessment form of the target visit (ID from config.json `visitId`, default 1005): Visits directory → edit icon under Actions → Patient Assessment form (`/load/visit-form/{id}/patient-assessment`, opened by the "Patient Assessment" tab) → fill every section → Save (`wire:click="save"`) → assert the URL gains `?row_id={id}` and persisted values |
 | `discontinuation.spec.ts` | Fill the REFUSAL/DISCONTINUATION OF HEMODIALYSIS SESSION/S form of the target visit (ID from config.json `visitId`, default 1005): Visits directory → edit icon under Actions → Discontinue Of Hemodialysis form (`/load/visit-form/{id}/dis-of-hemodialysis`, opened by the "Discontinue Of Hemodialysis" tab) → fill every section in English AND Arabic → Save (`wire:click="save"`) → assert the URL gains `?row_id={id}` and persisted values |
 | `vascular-access.spec.ts` | Fill the VASCULAR ACCESS ASSESSMENT TOOL form of the target visit (ID from config.json `visitId`, default 1005): Visits directory → edit icon under Actions → Vascular Access Assessment form (`/load/visit-form/{id}/vascular-access-assessment`, opened by the "VASCULAR ACCESS ASSESSMENT TOOL" tab) → fill access type (AVF branch), scoring checkboxes, post-care (dressing/tego), low-risk interventions → Save (`wire:click="save"`) → assert the URL gains `?row_id={id}` and persisted values |
 | `respiratory-triage.spec.ts` | Create a Respiratory Triage Checklist for the target visit (ID from config.json `visitId`, default 1005): Visits directory → edit icon under Actions → Respiratory Triage tab (`/load/visit-form/{id}/respiratory-triage`, a LIST page) → "Add New" (`/load/form/{patientId}/respiratory-triage?display=create`) → fill triage date + vitals, dialysis?, symptom scores (ped/adult), nurse/physician signatures, disposition (iso/er/opd), doctor signature → Save (`wire:click="save"`) → assert the URL changes `?display=create` → `?display=index` → open the saved record in edit mode (`?display=form&row_id={id}`) and verify persisted values |
+| `referral.spec.ts` | Create a Referral for the target visit (ID from config.json `visitId`, default 1005): Visits directory → edit icon under Actions → Referral form (`/load/visit-form/{id}/referrals`, opened by the "Referrals" tab) → fill referral date, referral type (Emergency/Elective/Other), referred hospital, documents-to-print checkboxes, referral reason, completion date and comments → Save (`wire:click="save"`) → assert the URL gains `?row_id={id}` and persisted values |
 | `employee-create.spec.ts` | Create an employee via the `/employees/create` Livewire form: fill Main Info (incl. the SCFHS/NPHIES license section for licensed titles), wait for the server-validated "Create" button, assert the success redirect to `/employees/{id}/edit` |
 | `visit_filter.spec.ts` | Data-driven Visit Filter tests (config/visit_filters.json): happy path, single filters, empty state, boundary & reset |
 | `patient_filter.spec.ts` | Data-driven Patient Filter tests (config/patient_filters.json): name/MRN/mobile/email/ID/status filters, empty state, boundary & reset |
@@ -300,6 +307,22 @@ in a new tab; the POM navigates there directly):
   score and the signature upload are not mapped
 - `saveVascularAccess()` — click Save (`wire:click="save"`), wait for the URL to
   gain `?row_id={id}` (the save signal — no SweetAlert on this form), return the row id
+- `verifySavedValues(data)` — read back representative fields after the save
+  re-render to prove persistence
+
+#### ReferralPage (`referral.page.ts`)
+Referral form on the visit edit page (the "Referrals" tab opens
+`/load/visit-form/{id}/referrals` in a new tab; the POM navigates there directly):
+- `openVisitReferral(visitId)` — open `/visits`, find the row by visit ID, click the
+  edit icon (`fa-pen-to-square` inside `a[title="Edit"]`) under the Actions column,
+  then navigate to the Referral form
+- `fillReferralForm(data)` — fill referral date, referral type select, referred
+  hospital select, documents-to-print checkboxes, referral reason, completion date
+  and comments via native value setters + events on `wire:model="data.*"` bindings;
+  empty values are skipped; the signature/attachment file uploads (`uploadFile`,
+  `inputGroupFileImage`) and the hidden `uploaded_media_ids` input are not mapped
+- `saveReferral()` — click Save (`wire:click="save"`), wait for the URL to gain
+  `?row_id={id}` (the save signal — no SweetAlert on this form), return the row id
 - `verifySavedValues(data)` — read back representative fields after the save
   re-render to prove persistence
 

@@ -1,0 +1,45 @@
+{
+  "_description": "Dialysis Order scenario — Portable Low Dialysate Dialysis variant, fully static. orderType is pinned to 'Portable Low Dialysate Dialysis' (the SECOND — and 'different' — value of the Dialysis Order Type select; the static baseline dialysis-order.scenario.json uses 'Conventional Dialysis') with modality 'Hemodialysis (HD)'. Every other field is a concrete option text from the staging modal, so this exercises the OTHER order-type branch deterministically (unlike hdf-dialysis-order.scenario.json, which pins the same order type but fills everything else DYNAMIC). Select values are the exact option texts rendered in the modal (e.g. 'AV-Fistula', '36.0°C', '1.6 m²'); concrete values are used (never 'Other') so no conditional other_* inputs are required.",
+  "_config": {
+    "_comment_targetPatient": "The target patient identifier is NOT stored here — it is read from config/config.json (appointment.targetPatientIdentifier), the single source of truth shared by every appointment/order test.",
+    "_comment_orderType": "orderType = 'Portable Low Dialysate Dialysis' — the other branch of the Dialysis Order Type select (the baseline scenario uses 'Conventional Dialysis'). The Portable branch renders its own field set (Mode, TPA, Dialysate Volume, Dialyzer Cartridge, electrolytes); the remaining fields exist as hidden controls in the modal DOM and are filled by option-text occurrence like the other scenarios."
+  },
+  "_fields": {
+    "orderType":              "Portable Low Dialysate Dialysis",
+    "modality":               "Hemodialysis (HD)",
+    "dryWeight":              "70",
+    "uf":                     "2.0",
+    "vascularAccessType":     "AV-Fistula",
+    "accessSite":             "Right",
+    "needleGauge":            "16G",
+    "dwellType":              "Heparin",
+    "dwellVolumeArterial":    "150",
+    "dwellVolumeVenous":      "150",
+    "frequency":              "Three times per week",
+    "duration":               "4 hours",
+    "bloodFlowRate":          "300 mL/min",
+    "dialysateType":          "Bicarbonate",
+    "picar":                  "35",
+    "lactatePercent":         "40%",
+    "dialysateSodium":        "138 mmol/L",
+    "potassium":              "2 mmol/L",
+    "bicarbonate":            "35 mmol/L",
+    "calcium":                "1.5 mmol/L",
+    "temperature":            "36.0°C",
+    "anticoagulationType":    "Unfractionated Heparin (UFH)",
+    "dialyzerType":           "High Flux",
+    "dialyzerSurfaceArea":    "1.6 m²",
+
+    "mode":                   "Hemodialysis (HD)",
+    "dialysateVolume":        "30L",
+    "dialyzerCartridge":      "Cartridge 172",
+    "dialyzerCartridgeExtra": "High Flux",
+    "electrolyteSodium":      "140 mmol/L",
+    "electrolytePotassium":   "2 mmol/L",
+    "electrolyteCalcium":     "1.5 mmol/L",
+    "electrolyteGlucose":     "1 g",
+    "dialysateTemperature":   "36.0°C",
+
+    "additionalInformation":  "E2E test portable dialysis order — created by Playwright."
+  }
+}

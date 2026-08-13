@@ -1,0 +1,21 @@
+{
+  "_description": "Referral scenario — form payload for tests/referral.spec.ts. Filled into the Referral form (load/visit-form/{visitId}/referrals, opened from the visit edit page's 'Referrals' tab) of the target visit (visitId from config/config.json → visitId). Static values are chosen from the real option lists / checkbox labels on staging: referral_type uses the option text 'Elective', referral_hospital_id the option text 'Dr. Soliman Fakeeh Hospital', print checkboxes their LABEL texts (what the readback returns), dates 'YYYY-MM-DD', and reason/comments are free-text. The signature/attachment file uploads (uploadFile, inputGroupFileImage) are intentionally absent. The visit ID itself is NOT here — it lives in config/config.json so all tests share one value.",
+  "_config": {
+    "_comment": "No extra test parameters — the scenario is the form payload only."
+  },
+  "_fields": {
+    "referralDate": "2026-08-13",
+    "referralType": "Elective",
+    "referralHospitalId": "Dr. Soliman Fakeeh Hospital",
+
+    "printMonthlyMedicalReport": "Monthly Medical Report",
+    "printSystemMedicalReport": "System Medical Report",
+    "printLabResult": "Lab Result",
+    "printLast3Flowsheets": "Last 3 Flow Sheets",
+
+    "referralReason": "Patient referred for elective specialist follow-up.",
+
+    "completionDate": "2026-08-13",
+    "comments": "Referral record created by the E2E test."
+  }
+}

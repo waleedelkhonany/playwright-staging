@@ -19,7 +19,12 @@
  * every appointment/order test.
  *
  * The suite loops over DIALYSIS_SCENARIOS, creating one order per scenario:
- *   - dialysis-order.scenario.json          → static baseline (concrete values)
+ *   - dialysis-order.scenario.json          → static baseline (concrete values,
+ *                                             orderType = Conventional Dialysis)
+ *   - portable-dialysis-order.scenario.json → static values with the OTHER
+ *                                             orderType (Portable Low Dialysate
+ *                                             Dialysis) — a deterministic test of
+ *                                             the second order-type branch
  *   - dynamic-dialysis-order.scenario.json  → all fields DYNAMIC (different
  *                                             values + select choices each run)
  *   - hdf-dialysis-order.scenario.json      → fixed Portable + HDF, rest DYNAMIC
@@ -37,6 +42,7 @@ import { getDialysisOrderData } from '../src/helpers/dialysis-order-data.loader'
 
 const DIALYSIS_SCENARIOS = [
   'dialysis-order.scenario.json',
+  'portable-dialysis-order.scenario.json',
   'dynamic-dialysis-order.scenario.json',
   'hdf-dialysis-order.scenario.json',
 ] as const;

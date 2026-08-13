@@ -12,7 +12,10 @@
  *   anything else      →  used as-is (static hardcoded value)
  *
  * Scenarios:
- *   - dialysis-order.scenario.json            → static baseline (concrete option texts)
+ *   - dialysis-order.scenario.json            → static baseline (concrete option texts,
+ *                                               orderType = Conventional Dialysis)
+ *   - portable-dialysis-order.scenario.json   → static values with the OTHER orderType
+ *                                               (Portable Low Dialysate Dialysis)
  *   - dynamic-dialysis-order.scenario.json    → every field DYNAMIC (different values
  *                                               and different select choices each run)
  *   - hdf-dialysis-order.scenario.json        → fixed Portable Low Dialysate Dialysis +

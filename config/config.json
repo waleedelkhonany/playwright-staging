@@ -51,11 +51,11 @@
   "_comment_visitId": [
     "visitId — the target visit ID located in the Visits directory (list page /visits)",
     "whose visit-form tabs (Flow Sheet, Patient Assessment, Discontinue Of Hemodialysis,",
-    "Vascular Access Assessment, Respiratory Triage) are filled out by the visit-form",
-    "tests (tests/flow-sheet.spec.ts, tests/patient-assessment.spec.ts,",
+    "Vascular Access Assessment, Respiratory Triage, Referrals) are filled out by the",
+    "visit-form tests (tests/flow-sheet.spec.ts, tests/patient-assessment.spec.ts,",
     "tests/discontinuation.spec.ts, tests/vascular-access.spec.ts,",
-    "tests/respiratory-triage.spec.ts). Each test/script finds the row in the Visits",
-    "list and opens the corresponding form/tab for this visit.",
+    "tests/respiratory-triage.spec.ts, tests/referral.spec.ts). Each test/script finds",
+    "the row in the Visits list and opens the corresponding form/tab for this visit.",
     "This is the SINGLE source of truth shared by ALL visit-form tests and scripts —",
     "do NOT duplicate the visit ID in scenario files.",
     "The visit must be of type 'Treatment Nurse Visit' for the forms to apply."
