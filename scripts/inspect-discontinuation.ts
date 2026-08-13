@@ -3,7 +3,7 @@
  *
  * 1. Login
  * 2. Navigate to /visits (Visits directory)
- * 3. Locate the row for the visit ID (default: config patientAssessment.visitId,
+ * 3. Locate the row for the visit ID (default: config visitId,
  *    or pass a visit ID as the first CLI arg) and click its edit icon
  * 4. Dump ALL tabs on the visit edit page (text, href, id) — the
  *    "Discontinuation of Hemodialysis Session" tab lives here
@@ -24,11 +24,11 @@ const BASE_URL = process.env.BASE_URL;
 const USERNAME = process.env.APP_USERNAME;
 const PASSWORD = process.env.APP_PASSWORD;
 
-// Default visit ID: read from config/config.json (patientAssessment.visitId)
+// Default visit ID: read from config/config.json (visitId)
 const config = JSON.parse(
   fs.readFileSync(path.resolve(__dirname, '..', 'config', 'config.json'), 'utf-8'),
 );
-const VISIT_ID = process.argv[2] ?? config.patientAssessment?.visitId ?? '1005';
+const VISIT_ID = process.argv[2] ?? config.visitId ?? '1005';
 
 if (!BASE_URL || !USERNAME || !PASSWORD) {
   throw new Error('Set BASE_URL, APP_USERNAME, APP_PASSWORD in .env');

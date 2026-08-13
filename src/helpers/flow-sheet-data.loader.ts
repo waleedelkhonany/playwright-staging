@@ -12,14 +12,14 @@
  *   anything else      →  used as-is (static value, must match a real option)
  *
  * The target visit ID is NOT read from scenario files — it lives in
- * config/config.json (flowSheet.visitId) so every test uses the same value.
+ * config/config.json (visitId) so every test uses the same value.
  *
  * Usage in tests:
  *
  *   import config from '../../config/config.json';
  *   import { getFlowSheetData } from '../helpers/flow-sheet-data.loader';
  *
- *   const visitId = config.flowSheet.visitId;
+ *   const visitId = config.visitId;
  *   const flowSheet = getFlowSheetData('flow-sheet.scenario.json');
  *   await flowSheetPage.openVisitFlowSheet(visitId);
  *   await flowSheetPage.fillFlowSheetForm(flowSheet);

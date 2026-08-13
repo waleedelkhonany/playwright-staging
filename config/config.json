@@ -47,69 +47,22 @@
     ],
     "visitType": "Treatment Nurse Visit"
   },
-  "flowSheet": {
-    "_comment_visitId": [
-      "visitId — the visit ID located in the Visits directory (list page /visits)",
-      "whose Flow Sheet form is filled out by tests/flow-sheet.spec.ts. The test",
-      "finds the row in the Visits list, clicks the edit icon under the Actions",
-      "column, opens the Flow Sheet tab, fills every section, and saves.",
-      "The visit must be of type 'Treatment Nurse Visit' for the Flow Sheet to apply."
-    ],
-    "visitId": "1005"
-  },    "patientAssessment": {
-      "_comment_visitId": [
-        "visitId — the visit ID located in the Visits directory (list page /visits)",
-        "whose Patient Assessment form is filled out by tests/patient-assessment.spec.ts.",
-        "The test finds the row in the Visits list, clicks the edit icon under the Actions",
-        "column, then opens the Patient Assessment form (load/visit-form/{id}/patient-assessment)",
-        "fills it, and saves. Like flowSheet.visitId, this is the SINGLE source of truth —",
-        "do NOT duplicate the visit ID in scenario files.",
-        "The visit must be of type 'Treatment Nurse Visit' for the form to apply."
-      ],
-      "visitId": "1005"
-    },
-    "discontinuation": {
-      "_comment_visitId": [
-        "visitId — the visit ID located in the Visits directory (list page /visits)",
-        "whose REFUSAL/DISCONTINUATION OF HEMODIALYSIS SESSION/S form is filled out by",
-        "tests/discontinuation.spec.ts. The test finds the row in the Visits list, clicks",
-        "the edit icon under the Actions column, then opens the Discontinue Of Hemodialysis",
-        "form (load/visit-form/{id}/dis-of-hemodialysis), fills it (EN + AR), and saves.",
-        "Like flowSheet.visitId / patientAssessment.visitId, this is the SINGLE source of",
-        "truth — do NOT duplicate the visit ID in scenario files.",
-        "The visit must be of type 'Treatment Nurse Visit' for the form to apply."
-      ],
-      "visitId": "1005"
-    },
-    "vascularAccess": {
-      "_comment_visitId": [
-        "visitId — the visit ID located in the Visits directory (list page /visits)",
-        "whose VASCULAR ACCESS ASSESSMENT TOOL form is filled out by",
-        "tests/vascular-access.spec.ts. The test finds the row in the Visits list, clicks",
-        "the edit icon under the Actions column, then opens the Vascular Access Assessment",
-        "form (load/visit-form/{id}/vascular-access-assessment), fills it (access type,",
-        "scoring checkboxes, post-care, interventions), and saves.",
-        "Like flowSheet.visitId / patientAssessment.visitId / discontinuation.visitId, this",
-        "is the SINGLE source of truth — do NOT duplicate the visit ID in scenario files.",
-        "The visit must be of type 'Treatment Nurse Visit' for the form to apply."
-      ],
-      "visitId": "1005"
-    },
-    "respiratoryTriage": {
-      "_comment_visitId": [
-        "visitId — the visit ID located in the Visits directory (list page /visits)",
-        "whose Respiratory Triage tab is filled out by tests/respiratory-triage.spec.ts.",
-        "The test finds the row in the Visits list, clicks the edit icon under the Actions",
-        "column, opens the Respiratory Triage tab (load/visit-form/{id}/respiratory-triage —",
-        "a LIST page), clicks 'Add New' (load/form/{patientId}/respiratory-triage?display=create",
-        "where patientId = appointment.targetPatientIdentifier), fills the checklist, and saves",
-        "(?display=create → ?display=index). Like the other visitId keys, this is the SINGLE",
-        "source of truth — do NOT duplicate the visit ID in scenario files.",
-        "The visit must be of type 'Treatment Nurse Visit' for the tab to apply."
-      ],
-      "visitId": "1005"
-    },
-  "_comment_appointmentConfig": "Appointment test parameters (defaultDurationMinutes, etc.) live in the _config block of each file in config/appointment-scenarios/, and form fields (date, time, notes, etc.) in _fields. targetPatientIdentifier and visitType are the exceptions — they are defined above under \"appointment\" so all tests share one consistent value.",
+
+  "_comment_visitId": [
+    "visitId — the target visit ID located in the Visits directory (list page /visits)",
+    "whose visit-form tabs (Flow Sheet, Patient Assessment, Discontinue Of Hemodialysis,",
+    "Vascular Access Assessment, Respiratory Triage) are filled out by the visit-form",
+    "tests (tests/flow-sheet.spec.ts, tests/patient-assessment.spec.ts,",
+    "tests/discontinuation.spec.ts, tests/vascular-access.spec.ts,",
+    "tests/respiratory-triage.spec.ts). Each test/script finds the row in the Visits",
+    "list and opens the corresponding form/tab for this visit.",
+    "This is the SINGLE source of truth shared by ALL visit-form tests and scripts —",
+    "do NOT duplicate the visit ID in scenario files.",
+    "The visit must be of type 'Treatment Nurse Visit' for the forms to apply."
+  ],
+  "visitId": "1005",
+
+  "_comment_appointmentConfig": "Appointment test parameters (defaultDurationMinutes, etc.) live in the _config block of each file in config/appointment-scenarios/, and form fields (date, time, notes, etc.) in _fields. targetPatientIdentifier, visitType and visitId are the exceptions — they are defined above so all tests share one consistent value.",
 
   "headerContext": {
     "_comment_branchOptions": [

@@ -13,15 +13,14 @@
  *   anything else      →  used as-is (static value, must match a real option)
  *
  * The target visit ID is NOT read from scenario files — it lives in
- * config/config.json (discontinuation.visitId) so every test uses the same
- * value (mirrors flowSheet.visitId / patientAssessment.visitId).
+ * config/config.json (visitId) so every test uses the same value.
  *
  * Usage in tests:
  *
  *   import config from '../../config/config.json';
  *   import { getDiscontinuationData } from '../helpers/discontinuation-data.loader';
  *
- *   const visitId = config.discontinuation.visitId;
+ *   const visitId = config.visitId;
  *   const data = getDiscontinuationData('discontinuation.scenario.json');
  *   await discontinuationPage.openVisitDiscontinuation(visitId);
  *   await discontinuationPage.fillDiscontinuationForm(data);

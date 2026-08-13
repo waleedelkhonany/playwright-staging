@@ -6,8 +6,8 @@
  * Full end-to-end workflow:
  *   1. Auto-login (via auth fixture)
  *   2. Open the Visits directory (/visits) and locate the row whose first
- *      column equals the target visit ID (config/config.json →
- *      flowSheet.visitId, default "981")
+ *      column equals the target visit ID (config/config.json → visitId,
+ *      default "1005")
  *   3. Click the edit icon (`fa-pen-to-square`) under the Actions column
  *      → redirect to /visits/{id}/edit
  *   4. Open the "Flow Sheet" tab (Livewire component `patients::flowsheet`)
@@ -21,12 +21,12 @@
  *   8. Verify representative values persisted (the Livewire re-render after
  *      save reflects server state)
  *
- * The target visit ID is read from config/config.json (flowSheet.visitId) —
- * the single source of truth, mirroring appointment.targetPatientIdentifier.
- * The visit must be a "Treatment Nurse Visit" (visit 981 is) for the Flow
+ * The target visit ID is read from config/config.json (visitId) — the
+ * single source of truth shared by all visit-form tests.
+ * The visit must be a "Treatment Nurse Visit" (visit 1005 is) for the Flow
  * Sheet form to apply.
  *
- * @see config/config.json — flowSheet.visitId (target visit)
+ * @see config/config.json — visitId (target visit)
  * @see config/flow-sheet-scenarios/flow-sheet.scenario.json — form payload
  * @see src/pages/flow-sheet.page.ts — Flow Sheet page object
  */
@@ -52,7 +52,7 @@ test.describe('E2E: Fill Flow Sheet Form (Treatment Nurse Visit)', () => {
     // =========================================================================
     // 1. Load configurable test parameters
     // =========================================================================
-    const visitId = config.flowSheet.visitId;
+    const visitId = config.visitId;
     // Form payload from the scenario JSON (config/flow-sheet-scenarios/)
     const flowSheet = getFlowSheetData('flow-sheet.scenario.json');
 

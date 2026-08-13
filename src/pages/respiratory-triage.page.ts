@@ -43,7 +43,7 @@ import type { RespiratoryTriageData } from '../data/respiratory-triage.data';
  *   const rowId = await rtPage.saveRespiratoryTriage(); // ?display=create → ?display=index
  *   await rtPage.verifySavedValues(data, rowId);     // edit mode readback
  *
- * @see config/config.json — respiratoryTriage.visitId (target visit)
+ * @see config/config.json — visitId (target visit)
  * @see config/respiratory-triage-scenarios/respiratory-triage.scenario.json — form payload
  */
 

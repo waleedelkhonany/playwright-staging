@@ -6,8 +6,8 @@
  * Full end-to-end workflow:
  *   1. Auto-login (via auth fixture)
  *   2. Open the Visits directory (/visits) and locate the row whose first
- *      column equals the target visit ID (config/config.json →
- *      respiratoryTriage.visitId, default "1005")
+ *      column equals the target visit ID (config/config.json → visitId,
+ *      default "1005")
  *   3. Click the edit icon (`fa-pen-to-square`) under the Actions column
  *      → redirect to /visits/{id}/edit
  *   4. Open the Respiratory Triage tab (`/load/visit-form/{id}/respiratory-triage`)
@@ -25,14 +25,14 @@
  *   9. Read the saved record id from the list and verify representative
  *      values persisted by opening the record in edit mode (`?display=form&row_id={id}`)
  *
- * The target visit ID is read from config/config.json
- * (respiratoryTriage.visitId) — the single source of truth, mirroring the
- * other visit-form visitIds. The patient ID comes from the "Add New" href
- * itself (load/form/{patientId}/respiratory-triage), i.e.
+ * The target visit ID is read from config/config.json (visitId) — the
+ * single source of truth shared by all visit-form tests. The patient ID
+ * comes from the "Add New" href itself
+ * (load/form/{patientId}/respiratory-triage), i.e.
  * appointment.targetPatientIdentifier. The visit must be a "Treatment Nurse
  * Visit" for the tab to apply.
  *
- * @see config/config.json — respiratoryTriage.visitId (target visit)
+ * @see config/config.json — visitId (target visit)
  * @see config/respiratory-triage-scenarios/respiratory-triage.scenario.json — form payload
  * @see src/pages/respiratory-triage.page.ts — Respiratory Triage page object
  */
@@ -57,7 +57,7 @@ test.describe('E2E: Create Respiratory Triage Checklist (Treatment Nurse Visit)'
     // =========================================================================
     // 1. Load configurable test parameters
     // =========================================================================
-    const visitId = config.respiratoryTriage.visitId;
+    const visitId = config.visitId;
     // Form payload from the scenario JSON (config/respiratory-triage-scenarios/)
     const data = getRespiratoryTriageData('respiratory-triage.scenario.json');
 

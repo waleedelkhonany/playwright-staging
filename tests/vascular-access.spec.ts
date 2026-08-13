@@ -6,8 +6,8 @@
  * Full end-to-end workflow:
  *   1. Auto-login (via auth fixture)
  *   2. Open the Visits directory (/visits) and locate the row whose first
- *      column equals the target visit ID (config/config.json →
- *      vascularAccess.visitId, default "1005")
+ *      column equals the target visit ID (config/config.json → visitId,
+ *      default "1005")
  *   3. Click the edit icon (`fa-pen-to-square`) under the Actions column
  *      → redirect to /visits/{id}/edit
  *   4. Open the Vascular Access Assessment form — the "VASCULAR ACCESS
@@ -25,12 +25,11 @@
  *   8. Verify representative values persisted (the Livewire re-render after
  *      save reflects server state)
  *
- * The target visit ID is read from config/config.json
- * (vascularAccess.visitId) — the single source of truth, mirroring
- * flowSheet.visitId / patientAssessment.visitId / discontinuation.visitId.
- * The visit must be a "Treatment Nurse Visit" for the form to apply.
+ * The target visit ID is read from config/config.json (visitId) — the
+ * single source of truth shared by all visit-form tests. The visit must be
+ * a "Treatment Nurse Visit" for the form to apply.
  *
- * @see config/config.json — vascularAccess.visitId (target visit)
+ * @see config/config.json — visitId (target visit)
  * @see config/vascular-access-scenarios/vascular-access.scenario.json — form payload
  * @see src/pages/vascular-access.page.ts — Vascular Access page object
  */
@@ -55,7 +54,7 @@ test.describe('E2E: Fill Vascular Access Assessment Form (Treatment Nurse Visit)
     // =========================================================================
     // 1. Load configurable test parameters
     // =========================================================================
-    const visitId = config.vascularAccess.visitId;
+    const visitId = config.visitId;
     // Form payload from the scenario JSON (config/vascular-access-scenarios/)
     const data = getVascularAccessData('vascular-access.scenario.json');
 

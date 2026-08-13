@@ -13,16 +13,14 @@
  *   anything else      →  used as-is (static value, must match a real option)
  *
  * The target visit ID is NOT read from scenario files — it lives in
- * config/config.json (vascularAccess.visitId) so every test uses the same
- * value (mirrors flowSheet.visitId / patientAssessment.visitId /
- * discontinuation.visitId).
+ * config/config.json (visitId) so every test uses the same value.
  *
  * Usage in tests:
  *
  *   import config from '../../config/config.json';
  *   import { getVascularAccessData } from '../helpers/vascular-access-data.loader';
  *
- *   const visitId = config.vascularAccess.visitId;
+ *   const visitId = config.visitId;
  *   const data = getVascularAccessData('vascular-access.scenario.json');
  *   await vascularAccessPage.openVisitVascularAccess(visitId);
  *   await vascularAccessPage.fillVascularAccessForm(data);

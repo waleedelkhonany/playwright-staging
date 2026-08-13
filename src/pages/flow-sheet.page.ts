@@ -39,7 +39,7 @@ import type { FlowSheetData } from '../data/flow-sheet.data';
  *   await flowSheetPage.fillFlowSheetForm(data);     // section by section
  *   const result = await flowSheetPage.saveFlowSheet();
  *
- * @see config/config.json — flowSheet.visitId (target visit)
+ * @see config/config.json — visitId (target visit)
  * @see config/flow-sheet-scenarios/flow-sheet.scenario.json — form payload
  */
 
@@ -238,7 +238,7 @@ export class FlowSheetPage extends BasePage {
    *      under the Actions column → `/visits/{id}/edit`
    *   3. Click the "Flow Sheet" tab (`#flowsheet`)
    *
-   * @param visitId The visit ID shown in the Visits directory (e.g. "981")
+   * @param visitId The visit ID shown in the Visits directory (e.g. "1005")
    */
   async openVisitFlowSheet(visitId: string): Promise<void> {
     // 1. Visits directory

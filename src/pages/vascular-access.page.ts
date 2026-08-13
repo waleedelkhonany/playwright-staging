@@ -46,7 +46,7 @@ import type { VascularAccessData } from '../data/vascular-access.data';
  *   await vaPage.fillVascularAccessForm(data);    // access type + scoring + post-care
  *   const rowId = await vaPage.saveVascularAccess();
  *
- * @see config/config.json — vascularAccess.visitId (target visit)
+ * @see config/config.json — visitId (target visit)
  * @see config/vascular-access-scenarios/vascular-access.scenario.json — form payload
  */
 

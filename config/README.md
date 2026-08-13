@@ -203,25 +203,25 @@ Pass the visit type as an override when loading the scenario.
 
 | File | Description |
 |---|---|
-| `patient-assessment.scenario.json` | Patient Assessment form payload — static options matched to the staging radio values/labels + DYNAMIC medical/medication history sentences; loaded via `getPatientAssessmentData()`. Read-only vitals/pain/height/weight/designation fields (auto-filled from the Flow Sheet) are intentionally absent. The target visit ID is NOT here — it lives in `config/config.json` (`patientAssessment.visitId`). |
+| `patient-assessment.scenario.json` | Patient Assessment form payload — static options matched to the staging radio values/labels + DYNAMIC medical/medication history sentences; loaded via `getPatientAssessmentData()`. Read-only vitals/pain/height/weight/designation fields (auto-filled from the Flow Sheet) are intentionally absent. The target visit ID is NOT here — it lives in `config/config.json` (`visitId`). |
 
 ### Discontinuation Scenario (`config/discontinuation-scenarios/`)
 
 | File | Description |
 |---|---|
-| `discontinuation.scenario.json` | REFUSAL/DISCONTINUATION OF HEMODIALYSIS SESSION/S form payload — bilingual: fills BOTH the English (`*_en`) and Arabic (`*_ar`) sides because the save() handler persists both. Static checkbox ids (`Discontinuation`, `Refusal`, `Hyperkalemia`, `Cardiac`, `Pulmonary`, `Acidosis` + Arabic equivalents), relationship select texts (`Spouse`, `Son`, `زوج/زوجة`, `ابن`), datetime-local signature timestamps, and DYNAMIC English discontinuation reason; loaded via `getDiscontinuationData()`. The read-only patient header and the signature-image upload (`uploadFile`) are intentionally absent. The target visit ID is NOT here — it lives in `config/config.json` (`discontinuation.visitId`). |
+| `discontinuation.scenario.json` | REFUSAL/DISCONTINUATION OF HEMODIALYSIS SESSION/S form payload — bilingual: fills BOTH the English (`*_en`) and Arabic (`*_ar`) sides because the save() handler persists both. Static checkbox ids (`Discontinuation`, `Refusal`, `Hyperkalemia`, `Cardiac`, `Pulmonary`, `Acidosis` + Arabic equivalents), relationship select texts (`Spouse`, `Son`, `زوج/زوجة`, `ابن`), datetime-local signature timestamps, and DYNAMIC English discontinuation reason; loaded via `getDiscontinuationData()`. The read-only patient header and the signature-image upload (`uploadFile`) are intentionally absent. The target visit ID is NOT here — it lives in `config/config.json` (`visitId`). |
 
 ### Vascular Access Scenario (`config/vascular-access-scenarios/`)
 
 | File | Description |
 |---|---|
-| `vascular-access.scenario.json` | VASCULAR ACCESS ASSESSMENT TOOL form payload — Arteriovenous Fistula (AVF) branch: access-type select (`Arteriovenous Fistula (AVF)`), AVF site select (`Right Radiocephalic AVF (Wrist)`), creation date, access-type checkbox, K. Needle Insertion scoring checkboxes (b_redness_0, b_swelling_0, c_thrill_10, c_temp_0, c_tenderness_0, d_bruit_20, e_function_clean_0), post-care (dressing applied Yes + date, tego changed No + date) and low-risk interventions (low_continue_assessment, low_dressing_technique, low_educate_access_care); loaded via `getVascularAccessData()`. The catheter bundle (f_*/g_*) is intentionally absent (AVF access). The computed total score and the signature-image upload are NOT part of the model. The target visit ID is NOT here — it lives in `config/config.json` (`vascularAccess.visitId`). |
+| `vascular-access.scenario.json` | VASCULAR ACCESS ASSESSMENT TOOL form payload — Arteriovenous Fistula (AVF) branch: access-type select (`Arteriovenous Fistula (AVF)`), AVF site select (`Right Radiocephalic AVF (Wrist)`), creation date, access-type checkbox, K. Needle Insertion scoring checkboxes (b_redness_0, b_swelling_0, c_thrill_10, c_temp_0, c_tenderness_0, d_bruit_20, e_function_clean_0), post-care (dressing applied Yes + date, tego changed No + date) and low-risk interventions (low_continue_assessment, low_dressing_technique, low_educate_access_care); loaded via `getVascularAccessData()`. The catheter bundle (f_*/g_*) is intentionally absent (AVF access). The computed total score and the signature-image upload are NOT part of the model. The target visit ID is NOT here — it lives in `config/config.json` (`visitId`). |
 
 ### Respiratory Triage Scenario (`config/respiratory-triage-scenarios/`)
 
 | File | Description |
 |---|---|
-| `respiratory-triage.scenario.json` | Respiratory Triage Checklist payload — triage date + vitals (height/weight/temperature), dialysis radio (`Yes` via id-mapped label), symptom scores (exposure, fever/cough/SOB/headache/nausea/chronic — pediatric + adult), nurse/physician/doctor signature names + ids, and disposition radios (`iso`/`er`/`opd` with raw values `yes`/`no`); loaded via `getRespiratoryTriageData()`. The hidden signature signed_by/signed_at fields (set by the signature pad) are intentionally absent. The target visit ID is NOT here — it lives in `config/config.json` (`respiratoryTriage.visitId`); the patient ID comes from the "Add New" href (`load/form/{patientId}/respiratory-triage?display=create`, i.e. `appointment.targetPatientIdentifier`). |
+| `respiratory-triage.scenario.json` | Respiratory Triage Checklist payload — triage date + vitals (height/weight/temperature), dialysis radio (`Yes` via id-mapped label), symptom scores (exposure, fever/cough/SOB/headache/nausea/chronic — pediatric + adult), nurse/physician/doctor signature names + ids, and disposition radios (`iso`/`er`/`opd` with raw values `yes`/`no`); loaded via `getRespiratoryTriageData()`. The hidden signature signed_by/signed_at fields (set by the signature pad) are intentionally absent. The target visit ID is NOT here — it lives in `config/config.json` (`visitId`); the patient ID comes from the "Add New" href (`load/form/{patientId}/respiratory-triage?display=create`, i.e. `appointment.targetPatientIdentifier`). |
 
 ---
 

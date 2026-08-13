@@ -13,8 +13,8 @@
  *   anything else      →  used as-is (static value, must match a real option)
  *
  * The target visit ID is NOT read from scenario files — it lives in
- * config/config.json (respiratoryTriage.visitId) so every test uses the same
- * value (mirrors the other visit-form visitIds). The patient ID comes from
+ * config/config.json (visitId) so every test uses the same value. The
+ * patient ID comes from
  * the "Add New" href on the Respiratory Triage tab
  * (load/form/{patientId}/respiratory-triage?display=create).
  *
@@ -23,7 +23,7 @@
  *   import config from '../../config/config.json';
  *   import { getRespiratoryTriageData } from '../helpers/respiratory-triage-data.loader';
  *
- *   const visitId = config.respiratoryTriage.visitId;
+ *   const visitId = config.visitId;
  *   const data = getRespiratoryTriageData('respiratory-triage.scenario.json');
  *   await respiratoryTriagePage.openVisitRespiratoryTriage(visitId);
  *   await respiratoryTriagePage.fillRespiratoryTriageForm(data);

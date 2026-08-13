@@ -1,5 +1,5 @@
 {
-  "_description": "Flow Sheet scenario — form payload for tests/flow-sheet.spec.ts. Filled into the Flow Sheet tab (Livewire component 'patients::flowsheet') of the target visit (visitId from config/config.json → flowSheet.visitId). Static values are chosen from the real option lists on staging; 'DYNAMIC' fields get fresh values per run. The visit ID itself is NOT here — it lives in config/config.json so all tests share one value.",
+  "_description": "Flow Sheet scenario — form payload for tests/flow-sheet.spec.ts. Filled into the Flow Sheet tab (Livewire component 'patients::flowsheet') of the target visit (visitId from config/config.json → visitId). Static values are chosen from the real option lists on staging; 'DYNAMIC' fields get fresh values per run. The visit ID itself is NOT here — it lives in config/config.json so all tests share one value.",
   "_config": {
     "_comment": "No extra test parameters — the scenario is the form payload only."
   },

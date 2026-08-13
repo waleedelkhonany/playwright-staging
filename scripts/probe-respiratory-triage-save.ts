@@ -25,7 +25,7 @@ const PASSWORD = process.env.APP_PASSWORD;
 const config = JSON.parse(
   fs.readFileSync(path.resolve(__dirname, '..', 'config', 'config.json'), 'utf-8'),
 );
-const VISIT_ID = process.argv[2] ?? config.patientAssessment?.visitId ?? '1005';
+const VISIT_ID = process.argv[2] ?? config.visitId ?? '1005';
 const PATIENT_ID = config.appointment?.targetPatientIdentifier ?? '222';
 
 if (!BASE_URL || !USERNAME || !PASSWORD) {

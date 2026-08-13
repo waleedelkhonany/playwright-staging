@@ -3,7 +3,7 @@
  *
  * 1. Login
  * 2. Navigate to /visits (Visits directory)
- * 3. Locate the row for the visit ID (default: config flowSheet.visitId, or
+ * 3. Locate the row for the visit ID (default: config visitId, or
  *    pass a visit ID as the first CLI arg) and dump its Actions column
  * 4. Click the edit icon in that row
  * 5. Dump all tabs on the visit edit page
@@ -23,11 +23,11 @@ const BASE_URL = process.env.BASE_URL;
 const USERNAME = process.env.APP_USERNAME;
 const PASSWORD = process.env.APP_PASSWORD;
 
-// Default visit ID: read from config/config.json (flowSheet.visitId)
+// Default visit ID: read from config/config.json (visitId)
 const config = JSON.parse(
   fs.readFileSync(path.resolve(__dirname, '..', 'config', 'config.json'), 'utf-8'),
 );
-const VISIT_ID = process.argv[2] ?? config.flowSheet?.visitId ?? '981';
+const VISIT_ID = process.argv[2] ?? config.visitId ?? '1005';
 
 if (!BASE_URL || !USERNAME || !PASSWORD) {
   throw new Error('Set BASE_URL, APP_USERNAME, APP_PASSWORD in .env');

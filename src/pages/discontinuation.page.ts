@@ -35,7 +35,7 @@ import type { DiscontinuationData } from '../data/discontinuation.data';
  *   await discPage.fillDiscontinuationForm(data);    // every section, EN + AR
  *   const rowId = await discPage.saveDiscontinuation();
  *
- * @see config/config.json — discontinuation.visitId (target visit)
+ * @see config/config.json — visitId (target visit)
  * @see config/discontinuation-scenarios/discontinuation.scenario.json — form payload
  */
 

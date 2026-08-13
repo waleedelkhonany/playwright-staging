@@ -13,15 +13,14 @@
  *   anything else      →  used as-is (static value, must match a real option)
  *
  * The target visit ID is NOT read from scenario files — it lives in
- * config/config.json (patientAssessment.visitId) so every test uses the same
- * value (mirrors flowSheet.visitId).
+ * config/config.json (visitId) so every test uses the same value.
  *
  * Usage in tests:
  *
  *   import config from '../../config/config.json';
  *   import { getPatientAssessmentData } from '../helpers/patient-assessment-data.loader';
  *
- *   const visitId = config.patientAssessment.visitId;
+ *   const visitId = config.visitId;
  *   const assessment = getPatientAssessmentData('patient-assessment.scenario.json');
  *   await patientAssessmentPage.openVisitPatientAssessment(visitId);
  *   await patientAssessmentPage.fillPatientAssessmentForm(assessment);

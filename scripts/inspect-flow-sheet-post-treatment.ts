@@ -2,7 +2,7 @@
  * Inspect the Flow Sheet "Post Treatment Assessment" section on staging.
  *
  * Read-only: logs in, opens the Flow Sheet tab for the target visit
- * (config/config.json → flowSheet.visitId), then dumps the outer HTML of the
+ * (config/config.json → visitId), then dumps the outer HTML of the
  * editable "Post Treatment Assessment" table (class `table-compact`) plus its
  * enclosing card.
  *
@@ -16,7 +16,7 @@ import { FlowSheetPage } from '../src/pages/flow-sheet.page';
 const BASE_URL = process.env.BASE_URL;
 const USERNAME = process.env.APP_USERNAME;
 const PASSWORD = process.env.APP_PASSWORD;
-const VISIT_ID = process.argv[2] ?? config.flowSheet.visitId;
+const VISIT_ID = process.argv[2] ?? config.visitId;
 
 if (!BASE_URL || !USERNAME || !PASSWORD) {
   throw new Error('Set BASE_URL, APP_USERNAME, APP_PASSWORD in .env');

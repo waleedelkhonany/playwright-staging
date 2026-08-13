@@ -6,8 +6,8 @@
  * Full end-to-end workflow:
  *   1. Auto-login (via auth fixture)
  *   2. Open the Visits directory (/visits) and locate the row whose first
- *      column equals the target visit ID (config/config.json →
- *      patientAssessment.visitId, default "1005")
+ *      column equals the target visit ID (config/config.json → visitId,
+ *      default "1005")
  *   3. Click the edit icon (`fa-pen-to-square`) under the Actions column
  *      → redirect to /visits/{id}/edit
  *   4. Open the Patient Assessment form — the "Patient Assessment" tab on the
@@ -23,11 +23,11 @@
  *   8. Verify representative values persisted (the Livewire re-render after
  *      save reflects server state)
  *
- * The target visit ID is read from config/config.json (patientAssessment.visitId) —
- * the single source of truth, mirroring flowSheet.visitId. The visit must be
+ * The target visit ID is read from config/config.json (visitId) — the
+ * single source of truth shared by all visit-form tests. The visit must be
  * a "Treatment Nurse Visit" for the form to apply.
  *
- * @see config/config.json — patientAssessment.visitId (target visit)
+ * @see config/config.json — visitId (target visit)
  * @see config/patient-assessment-scenarios/patient-assessment.scenario.json — form payload
  * @see src/pages/patient-assessment.page.ts — Patient Assessment page object
  */
@@ -52,7 +52,7 @@ test.describe('E2E: Fill Patient Assessment Form (Treatment Nurse Visit)', () =>
     // =========================================================================
     // 1. Load configurable test parameters
     // =========================================================================
-    const visitId = config.patientAssessment.visitId;
+    const visitId = config.visitId;
     // Form payload from the scenario JSON (config/patient-assessment-scenarios/)
     const assessment = getPatientAssessmentData('patient-assessment.scenario.json');
 

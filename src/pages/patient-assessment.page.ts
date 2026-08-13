@@ -33,7 +33,7 @@ import type { PatientAssessmentData } from '../data/patient-assessment.data';
  *   await paPage.fillPatientAssessmentForm(data);    // section by section
  *   const rowId = await paPage.savePatientAssessment();
  *
- * @see config/config.json — patientAssessment.visitId (target visit)
+ * @see config/config.json — visitId (target visit)
  * @see config/patient-assessment-scenarios/patient-assessment.scenario.json — form payload
  */
 
