@@ -13,6 +13,7 @@
  *   7. Nursing Action (row 0)
  *   8. Dialysis Parameters (row 0)
  *   9. Post-Treatment Vascular Access Assessment
+ *  10. Post Treatment Assessment
  *
  * Every field is optional — an empty string / undefined means "do not touch
  * this field" (the page object skips it). Field values must match the real
@@ -194,4 +195,59 @@ export interface FlowSheetData {
   vasAccessPostNurseComments?: string;
   /** Textarea — physician notification */
   vasAccessPostPhysicianNotification?: string;
+
+  // --- Post Treatment Assessment ---
+  // This section is an editable table (class `table-compact`) whose controls
+  // have NO `name` attribute — they are bound via `wire:model.defer` on
+  // `data.post_assessment.*` (see FIELD_MAP in flow-sheet.page.ts).
+  /** Number — BP sitting systolic (placeholder 120) */
+  postAssessBpSystolic?: string;
+  /** Number — BP sitting diastolic (placeholder 80) */
+  postAssessBpDiastolic?: string;
+  /** Select — BP site (e.g. "Right Upper Arm") */
+  postAssessBpSite?: string;
+  /** Number — pulse (bpm) */
+  postAssessPulse?: string;
+  /** Number — temperature (°C) */
+  postAssessTemp?: string;
+  /** Select — "Oral" | "Axilla" | "Tympanic" | "Temponal" */
+  postAssessTempMethod?: string;
+  /** Number — SpO2 (%) */
+  postAssessSpo2?: string;
+  /** Number — respiratory rate (cpm) */
+  postAssessRr?: string;
+  /** Number — RBS (mg/dl) */
+  postAssessRbs?: string;
+  /** Number — weight (Kg) */
+  postAssessWeight?: string;
+  /** Number — treatment time hours */
+  postAssessTxTimeHr?: string;
+  /** Number — treatment time minutes */
+  postAssessTxTimeMin?: string;
+  /** Number — treatment time liters */
+  postAssessTxTimeL?: string;
+  /** Number — dialysate (L) */
+  postAssessDialysateL?: string;
+  /** Text — UF */
+  postAssessUf?: string;
+  /** Text — BLP */
+  postAssessBlp?: string;
+  /** Text — catheter lock used */
+  postAssessCatheterLock?: string;
+  /** Text — arterial access */
+  postAssessArterialAccess?: string;
+  /** Text — venous access */
+  postAssessVenousAccess?: string;
+  /** Radio — "YES" | "NO" (machine disinfected) */
+  postAssessMachineDisinfected?: string;
+  /** Textarea — access/bleeding problems */
+  postAssessAccessProblems?: string;
+  /** Text — needle sites held */
+  postAssessNeedleSitesHeld?: string;
+  /** Textarea — medical complaints */
+  postAssessMedicalComplaints?: string;
+  /** Textarea — non-medical incidence */
+  postAssessNonMedicalIncidence?: string;
+  /** Text — initials */
+  postAssessInitials?: string;
 }

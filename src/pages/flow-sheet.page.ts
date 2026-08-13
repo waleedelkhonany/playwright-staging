@@ -46,10 +46,19 @@ import type { FlowSheetData } from '../data/flow-sheet.data';
 /** How a Flow Sheet field is filled. */
 type FieldKind = 'text' | 'select' | 'radio' | 'textarea';
 
-/** Map of FlowSheetData key → DOM field (`name="meta[...]"`) + fill kind. */
+/**
+ * Map of FlowSheetData key → DOM field + fill kind.
+ *
+ * Every field is located by its `name` attribute (e.g. `meta[pain_assessment][location]`)
+ * EXCEPT the Post Treatment Assessment table (`table-compact`), whose controls have
+ * NO `name` attribute — they are bound via `wire:model.defer="data.post_assessment.*"`
+ * instead. Those entries set `wire` (the binding value) and leave `name` empty.
+ */
 interface FieldSpec {
   /** The `name` attribute of the form control (e.g. `meta[pain_assessment][location]`) */
-  name: string;
+  name?: string;
+  /** The `wire:model.defer` binding value for controls without a name attribute (e.g. `data.post_assessment.pulse`) */
+  wire?: string;
   kind: FieldKind;
 }
 
@@ -163,6 +172,36 @@ const FIELD_MAP: Record<keyof FlowSheetData, FieldSpec> = {
   vasAccessPostDischargeStatus: { name: 'meta[vascular_access_post][access_status_discharge]', kind: 'select' },
   vasAccessPostNurseComments: { name: 'meta[vascular_access_post][nurse_comments]', kind: 'textarea' },
   vasAccessPostPhysicianNotification: { name: 'meta[vascular_access_post][physician_notification]', kind: 'textarea' },
+
+  // Post Treatment Assessment (table-compact — no `name` attrs, wired via
+  // `wire:model.defer="data.post_assessment.*"`). UF Net (`uf_goal_2`) is a
+  // read-only computed field and the signature buttons open modals, so both
+  // are intentionally NOT mapped.
+  postAssessBpSystolic:      { wire: 'data.post_assessment.bp_sitting_systolic', kind: 'text' },
+  postAssessBpDiastolic:     { wire: 'data.post_assessment.bp_sitting_diastolic', kind: 'text' },
+  postAssessBpSite:          { wire: 'data.post_assessment.bp_sitting_site', kind: 'select' },
+  postAssessPulse:           { wire: 'data.post_assessment.pulse', kind: 'text' },
+  postAssessTemp:            { wire: 'data.post_assessment.temp', kind: 'text' },
+  postAssessTempMethod:      { wire: 'data.post_assessment.temp_method', kind: 'select' },
+  postAssessSpo2:            { wire: 'data.post_assessment.spo2', kind: 'text' },
+  postAssessRr:              { wire: 'data.post_assessment.rr', kind: 'text' },
+  postAssessRbs:             { wire: 'data.post_assessment.rbs', kind: 'text' },
+  postAssessWeight:          { wire: 'data.post_assessment.weight', kind: 'text' },
+  postAssessTxTimeHr:        { wire: 'data.post_assessment.tx_time_hr', kind: 'text' },
+  postAssessTxTimeMin:       { wire: 'data.post_assessment.tx_time_min', kind: 'text' },
+  postAssessTxTimeL:         { wire: 'data.post_assessment.tx_time_l', kind: 'text' },
+  postAssessDialysateL:      { wire: 'data.post_assessment.dialysate_l', kind: 'text' },
+  postAssessUf:              { wire: 'data.post_assessment.uf', kind: 'text' },
+  postAssessBlp:             { wire: 'data.post_assessment.blp', kind: 'text' },
+  postAssessCatheterLock:    { wire: 'data.post_assessment.catheter_lock', kind: 'text' },
+  postAssessArterialAccess:  { wire: 'data.post_assessment.arterial_access', kind: 'text' },
+  postAssessVenousAccess:    { wire: 'data.post_assessment.venous_access', kind: 'text' },
+  postAssessMachineDisinfected: { wire: 'data.post_assessment.machine_disinfected', kind: 'radio' },
+  postAssessAccessProblems:  { wire: 'data.post_assessment.access_problems', kind: 'textarea' },
+  postAssessNeedleSitesHeld: { wire: 'data.post_assessment.needle_sites_held', kind: 'text' },
+  postAssessMedicalComplaints: { wire: 'data.post_assessment.medical_complaints', kind: 'textarea' },
+  postAssessNonMedicalIncidence: { wire: 'data.post_assessment.non_medical_incidence', kind: 'textarea' },
+  postAssessInitials:        { wire: 'data.post_assessment.initials', kind: 'text' },
 };
 
 export class FlowSheetPage extends BasePage {
@@ -260,7 +299,24 @@ export class FlowSheetPage extends BasePage {
   // =========================================================================
 
   /**
-   * Set a single Flow Sheet field identified by its `name` attribute.
+   * Build the CSS selector for a Flow Sheet control. Fields are located by
+   * their `name` attribute, except the Post Treatment Assessment table whose
+   * controls have no `name` — those are located by their
+   * `wire:model.defer="data.post_assessment.*"` binding instead.
+   */
+  private fieldSelector(spec: FieldSpec): string {
+    if (spec.wire) {
+      // Escape the colon/dot in the attribute name for a CSS attribute selector.
+      // Source `\\:` / `\\.` → single backslash at runtime (verified against
+      // the real DOM: double backslashes are rejected by the CSS parser).
+      return `[wire\\:model\\.defer="${spec.wire}"]`;
+    }
+    return `[name="${spec.name}"]`;
+  }
+
+  /**
+   * Set a single Flow Sheet field identified by its `name` attribute (or its
+   * `wire:model.defer` binding for the Post Treatment Assessment table).
    *
    * Uses page.evaluate with native value setters + input/change events — the
    * same pattern proven for Livewire forms elsewhere in this project. It works
@@ -273,15 +329,18 @@ export class FlowSheetPage extends BasePage {
    * @throws Error if the control or the value cannot be found, so failures
    *               point at the exact field rather than a later assertion.
    */
-  private async setField(name: string, value: string, kind: FieldKind): Promise<void> {
-    const ok = await this.page.evaluate(({ n, v, k }) => {
+  private async setField(spec: FieldSpec, value: string): Promise<void> {
+    const selector = this.fieldSelector(spec);
+    const ok = await this.page.evaluate(({ sel, v, k }) => {
       const root = document.querySelector('#flowsheet') || document;
-      const el = root.querySelector<HTMLElement>(`[name="${n}"]`);
+      const el = root.querySelector<HTMLElement>(sel);
       if (!el) return false;
 
       if (k === 'radio') {
+        // Match the group by the same selector, picking the radio whose value
+        // or label text equals the scenario value.
         const radios = Array.from(
-          root.querySelectorAll<HTMLInputElement>(`input[type="radio"][name="${n}"]`),
+          root.querySelectorAll<HTMLInputElement>(`input[type="radio"]${sel}`),
         );
         const target = radios.find((r) => r.value.toLowerCase() === v.toLowerCase())
           || radios.find((r) => {
@@ -296,15 +355,15 @@ export class FlowSheetPage extends BasePage {
       }
 
       if (el.tagName === 'SELECT') {
-        const sel = el as HTMLSelectElement;
-        const match = Array.from(sel.options).find((o) => o.textContent?.trim() === v)
-          || Array.from(sel.options).find((o) =>
+        const selEl = el as HTMLSelectElement;
+        const match = Array.from(selEl.options).find((o) => o.textContent?.trim() === v)
+          || Array.from(selEl.options).find((o) =>
             o.textContent?.trim().toLowerCase().includes(v.toLowerCase()),
           );
         if (!match) return false;
-        sel.value = match.value;
-        sel.dispatchEvent(new Event('change', { bubbles: true }));
-        sel.dispatchEvent(new Event('input', { bubbles: true }));
+        selEl.value = match.value;
+        selEl.dispatchEvent(new Event('change', { bubbles: true }));
+        selEl.dispatchEvent(new Event('input', { bubbles: true }));
         return true;
       }
 
@@ -317,10 +376,10 @@ export class FlowSheetPage extends BasePage {
       el.dispatchEvent(new Event('input', { bubbles: true }));
       el.dispatchEvent(new Event('change', { bubbles: true }));
       return true;
-    }, { n: name, v: value, k: kind });
+    }, { sel: selector, v: value, k: spec.kind });
 
     if (!ok) {
-      throw new Error(`[FlowSheet] Could not set field "${name}" = "${value}"`);
+      throw new Error(`[FlowSheet] Could not set field "${spec.wire ?? spec.name}" = "${value}"`);
     }
     // Small settle wait per field — Livewire `wire:model` live fields sync
     // on input, and the page is heavy (hundreds of controls).
@@ -343,7 +402,7 @@ export class FlowSheetPage extends BasePage {
     for (const [key, spec] of entries) {
       const value = data[key];
       if (value === undefined || value === null || value === '') continue;
-      await this.setField(spec.name, value, spec.kind);
+      await this.setField(spec, value);
       filled++;
     }
 
@@ -403,13 +462,15 @@ export class FlowSheetPage extends BasePage {
   }
 
   /**
-   * Read back the current value of a Flow Sheet field (by `name`).
+   * Read back the current value of a Flow Sheet field (by `name`, or by its
+   * `wire:model.defer` binding for the Post Treatment Assessment table).
    * Used to verify a saved value survived the Livewire re-render.
    */
-  async getFieldValue(name: string): Promise<string> {
-    return this.page.evaluate((n) => {
+  async getFieldValue(spec: FieldSpec): Promise<string> {
+    const selector = this.fieldSelector(spec);
+    return this.page.evaluate(({ sel }) => {
       const root = document.querySelector('#flowsheet') || document;
-      const el = root.querySelector<HTMLElement>(`[name="${n}"]`);
+      const el = root.querySelector<HTMLElement>(sel);
       if (!el) return '';
       if (el.tagName === 'SELECT') {
         return (el as HTMLSelectElement).selectedOptions[0]?.textContent?.trim() ?? '';
@@ -417,13 +478,13 @@ export class FlowSheetPage extends BasePage {
       if ((el as HTMLInputElement).type === 'radio') {
         // Prefer the checked radio's LABEL text (matches scenario values like
         // "Yes"/"No") and fall back to its value (e.g. av_fistula).
-        const checked = root.querySelector<HTMLInputElement>(`input[type="radio"][name="${n}"]:checked`);
+        const checked = root.querySelector<HTMLInputElement>(`input[type="radio"]${sel}:checked`);
         if (!checked) return '';
         const lbl = checked.id ? document.querySelector(`label[for="${checked.id}"]`) : null;
         return (lbl?.textContent || '').trim() || checked.value || '';
       }
       return (el as HTMLInputElement).value || '';
-    }, name);
+    }, { sel: selector });
   }
 
   /**
@@ -437,18 +498,21 @@ export class FlowSheetPage extends BasePage {
   async verifySavedValues(data: FlowSheetData): Promise<void> {
     // Representative fields: the server-required textarea, a name-only
     // select, a wire:model.defer radio, and a live wire:model input.
-    const checks: Array<{ key: keyof FlowSheetData; name: string }> = [
-      { key: 'vasAccessPostNurseComments', name: FIELD_MAP.vasAccessPostNurseComments.name },
-      { key: 'vasAccessPreType', name: FIELD_MAP.vasAccessPreType.name },
-      { key: 'outsideDialysis', name: FIELD_MAP.outsideDialysis.name },
-      { key: 'preVitalHeight', name: FIELD_MAP.preVitalHeight.name },
+    const checks: Array<{ key: keyof FlowSheetData; spec: FieldSpec }> = [
+      { key: 'vasAccessPostNurseComments', spec: FIELD_MAP.vasAccessPostNurseComments },
+      { key: 'vasAccessPreType', spec: FIELD_MAP.vasAccessPreType },
+      { key: 'outsideDialysis', spec: FIELD_MAP.outsideDialysis },
+      { key: 'preVitalHeight', spec: FIELD_MAP.preVitalHeight },
+      // Post Treatment Assessment — the previously-unfilled section.
+      { key: 'postAssessPulse', spec: FIELD_MAP.postAssessPulse },
+      { key: 'postAssessMachineDisinfected', spec: FIELD_MAP.postAssessMachineDisinfected },
     ];
 
     const missing: string[] = [];
-    for (const { key, name } of checks) {
+    for (const { key, spec } of checks) {
       const expected = data[key];
       if (expected === undefined || expected === null || expected === '') continue;
-      const actual = (await this.getFieldValue(name)).trim().toLowerCase();
+      const actual = (await this.getFieldValue(spec)).trim().toLowerCase();
       const want = expected.trim().toLowerCase();
       if (!actual || !actual.includes(want)) {
         missing.push(`"${key}": expected "${expected}", got "${actual || '<empty>'}"`);

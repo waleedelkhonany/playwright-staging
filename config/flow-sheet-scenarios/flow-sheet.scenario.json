@@ -99,6 +99,32 @@
     "vasAccessPostComplications": "None",
     "vasAccessPostDischargeStatus": "Stable",
     "vasAccessPostNurseComments": "DYNAMIC",
-    "vasAccessPostPhysicianNotification": ""
+    "vasAccessPostPhysicianNotification": "",
+
+    "postAssessBpSystolic": "120",
+    "postAssessBpDiastolic": "80",
+    "postAssessBpSite": "Right Upper Arm",
+    "postAssessPulse": "72",
+    "postAssessTemp": "36.7",
+    "postAssessTempMethod": "Oral",
+    "postAssessSpo2": "98",
+    "postAssessRr": "16",
+    "postAssessRbs": "110",
+    "postAssessWeight": "74.5",
+    "postAssessTxTimeHr": "4",
+    "postAssessTxTimeMin": "0",
+    "postAssessTxTimeL": "2.5",
+    "postAssessDialysateL": "120",
+    "postAssessUf": "2.0",
+    "postAssessBlp": "150",
+    "postAssessCatheterLock": "Heparin",
+    "postAssessArterialAccess": "150",
+    "postAssessVenousAccess": "140",
+    "postAssessMachineDisinfected": "YES",
+    "postAssessAccessProblems": "None",
+    "postAssessNeedleSitesHeld": "2",
+    "postAssessMedicalComplaints": "None",
+    "postAssessNonMedicalIncidence": "None",
+    "postAssessInitials": "TN"
   }
 }
