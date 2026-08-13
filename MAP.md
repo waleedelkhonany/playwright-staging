@@ -18,6 +18,7 @@
 │   ├── create-appointment.spec.ts            # Create appointment workflows
 │   ├── physician-orders.spec.ts              # Create Dialysis Order workflow
 │   ├── lab-order.spec.ts                     # Create Lab Order workflow
+│   ├── flow-sheet.spec.ts                    # Fill the Flow Sheet form of a visit
 │   ├── employee-create.spec.ts               # Create employee workflow
 │   ├── visit_filter.spec.ts                  # Data-driven Visit Filter tests
 │   ├── patient_filter.spec.ts                # Data-driven Patient Filter tests
@@ -30,6 +31,7 @@
 │   │   ├── patients.page.ts   # Patients module (search, create, appointments)
 │   │   ├── header.page.ts     # Top navigation (Branch/Location selectors)
 │   │   ├── visits.page.ts     # Visit details/edit page verification
+│   │   ├── flow-sheet.page.ts # Flow Sheet form (Visits → edit → Flow Sheet tab)
 │   │   ├── appointment-detail.page.ts  # Appointment modal confirmation & check-in
 │   │   ├── employees.page.ts  # Employee management (create form aligned to staging DOM)
 │   │   └── filter-list.page.ts  # Shared base for list-page filter specs
@@ -41,6 +43,7 @@
 │   │   ├── patient-data.loader.ts       # Patient data generation from scenarios
 │   │   ├── employee-data.loader.ts      # Employee data generation from scenarios
 │   │   ├── appointment-data.loader.ts   # Appointment data generation
+│   │   ├── flow-sheet-data.loader.ts    # Flow Sheet form data generation
 │   │   ├── header-context.helper.ts     # Branch/Location context management
 │   │   ├── login.helper.ts              # Login automation logic
 │   │   ├── patient-data.loader.ts       # Patient data generator
@@ -61,6 +64,8 @@
 │   │   ├── full-appointment.scenario.json     # Full appointment test data
 │   │   ├── morning-appointment.scenario.json  # Morning slot appointment
 │   │   └── minimal-appointment.scenario.json  # Minimal fields only
+│   ├── flow-sheet-scenarios/        # Flow Sheet form payload
+│   │   └── flow-sheet.scenario.json        # Full Flow Sheet payload (static options + DYNAMIC comments)
 │   ├── physician-order-scenarios/  # Physician order scenario files
 │   │   ├── dialysis-order.scenario.json       # Dialysis Order modal payload (static baseline)
 │   │   ├── dynamic-dialysis-order.scenario.json  # All fields DYNAMIC (random values/choices)
@@ -79,6 +84,7 @@
 │   ├── investigate-patient-form.ts    # Investigate form structure
 │   ├── extract-form-fields.ts         # Extract form field definitions
 │   ├── inspect-visit-filter.ts        # Dump Visit Filter DOM on staging
+│   ├── inspect-flow-sheet.ts          # Dump Flow Sheet workflow DOM (Visits → edit → tab)
 │   ├── debug-visit-filter-tc01.ts     # Smoke-test Visit Filter case TC-01
 │   ├── inspect-patient-filter.ts      # Dump Patient Filter DOM on staging
 │   ├── probe-patient-filter.ts        # Probe patient list pagination/empty state
@@ -109,6 +115,7 @@
 | `create-appointment.spec.ts` | Create appointments for existing patients (full, minimal, morning-time slot scenarios) |
 | `physician-orders.spec.ts` | Create a Dialysis Order via Physician Orders → Dialysis Order tab (runs 3 scenarios: static baseline, all-DYNAMIC, and HDF-variant) |
 | `lab-order.spec.ts` | Create a Lab Order via Physician Orders → Labs & Imaging → Create Lab Order form |
+| `flow-sheet.spec.ts` | Fill the Flow Sheet form of the target visit (ID from config.json `flowSheet.visitId`, default 981): Visits directory → edit icon under Actions → Flow Sheet tab → fill every section → Save → assert the "Flow sheet saved successfully!" popup and persisted values |
 | `employee-create.spec.ts` | Create an employee via the `/employees/create` Livewire form: fill Main Info (incl. the SCFHS/NPHIES license section for licensed titles), wait for the server-validated "Create" button, assert the success redirect to `/employees/{id}/edit` |
 | `visit_filter.spec.ts` | Data-driven Visit Filter tests (config/visit_filters.json): happy path, single filters, empty state, boundary & reset |
 | `patient_filter.spec.ts` | Data-driven Patient Filter tests (config/patient_filters.json): name/MRN/mobile/email/ID/status filters, empty state, boundary & reset |
@@ -187,6 +194,21 @@ Shared utilities:
 **Readers:**
 - `getAvailableBranchOptions()` - List all available branches
 - `getAvailableLocationOptions()` - List all locations
+
+#### FlowSheetPage (`flow-sheet.page.ts`)
+Flow Sheet form on the visit edit page:
+- `openVisitFlowSheet(visitId)` — open `/visits`, find the row by visit ID, click the
+  edit icon (`fa-pen-to-square` inside `a[title="Edit"]`) under the Actions column,
+  then click the "Flow Sheet" tab (`#flowsheet`)
+- `fillFlowSheetForm(data)` — fill every section (Outside Dialysis, Pain Assessment,
+  Fall Risk, Pre/Post Vascular Access, Alarms Test, Vitals, Nursing Action, Dialysis
+  Parameters) via native value setters + events (works for `wire:model`, `wire:model.defer`
+  and name-only `meta[...]` fields); empty values are skipped
+- `saveFlowSheet()` — click Save (`wire:click="save"`), assert the "Flow sheet
+  saved successfully!" SweetAlert2 popup (throws with the server message on a
+  "Validation failed" popup)
+- `verifySavedValues(data)` — read back representative fields after the save
+  re-render to prove persistence
 
 #### VisitsPage (`visits.page.ts`)
 Visit details/edit page verification:

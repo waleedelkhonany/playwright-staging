@@ -13,7 +13,7 @@
     "  \"headless\": false  →  Visible (Headed) mode — watch tests run in real time",
     "  \"headless\": true   →  Background (Headless) mode — runs silently, no UI"
   ],
-  "headless": false,
+  "headless": true,
 
   "saudiPhone": {
     "prefixes": ["055", "056", "057", "058", "059", "053", "054", "050"],
@@ -38,6 +38,16 @@
       "Other available IDs in staging: [109, 120, 122, 107, 176, 177, 144, 158]"
     ],
     "targetPatientIdentifier": "222"
+  },
+  "flowSheet": {
+    "_comment_visitId": [
+      "visitId — the visit ID located in the Visits directory (list page /visits)",
+      "whose Flow Sheet form is filled out by tests/flow-sheet.spec.ts. The test",
+      "finds the row in the Visits list, clicks the edit icon under the Actions",
+      "column, opens the Flow Sheet tab, fills every section, and saves.",
+      "The visit must be of type 'Treatment Nurse Visit' for the Flow Sheet to apply."
+    ],
+    "visitId": "981"
   },
   "_comment_appointmentConfig": "Appointment test parameters (defaultDurationMinutes, etc.) live in the _config block of each file in config/appointment-scenarios/, and form fields (visitType, date, etc.) in _fields. targetPatientIdentifier is the exception — it is defined above under \"appointment\" so all tests share one consistent value.",
 

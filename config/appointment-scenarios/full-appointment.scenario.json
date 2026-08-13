@@ -9,7 +9,7 @@
 
   },
   "_fields": {
-    "visitType":         "DYNAMIC",
+    "visitType":         "Treatment Nurse Visit",
     "appointmentDate":   null,
     "appointmentTime":   null,
     "endTime":           null,
