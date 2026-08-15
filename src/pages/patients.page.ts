@@ -2,6 +2,7 @@ import { type Locator, type Page } from '@playwright/test';
 import { BasePage } from './base.page';
 import type { PatientData } from '../data/patient.data';
 import type { AppointmentData } from '../data/appointment.data';
+import type { AddressData } from '../data/address.data';
 
 /**
  * PatientsPage — Page Object Model for the CareConnect KSA Patient module.
@@ -61,6 +62,16 @@ export class PatientsPage extends BasePage {
   readonly patientTable: Locator;
   readonly patientTableRows: Locator;
   readonly successToast: Locator;
+
+  // Addresses — patient detail page → Profile section → Addresses tab
+  readonly addressesTabLink: Locator;
+  readonly addAddressLink: Locator;
+  readonly addressTextarea: Locator;
+  readonly isDefaultCheckbox: Locator;
+  readonly areaSelect: Locator;
+  readonly cityInput: Locator;
+  readonly mapAddressInput: Locator;
+  readonly saveAddressButton: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -156,6 +167,24 @@ export class PatientsPage extends BasePage {
     this.patientTableRows = page.locator('table tbody tr, table tr[data-patient-id]');
     this.successToast = page.locator(
       '.alert-success, .toast-success, .success-message, [class*="success"]',
+    ).first();
+
+    // Addresses — patient detail page → Profile section → Addresses tab.
+    // The form is a Livewire component (`patients::addresses`) rendered inside
+    // the #addresses tab pane (see scripts/inspect-patient-address.ts).
+    this.addressesTabLink = page.locator('#addresses-tab');
+    this.addAddressLink = page.locator(
+      'a[href*="tab=addresses"][href*="view=create"]',
+    ).first();
+    this.addressTextarea = page.locator('textarea[wire\\:model="data.address"]');
+    this.isDefaultCheckbox = page.locator(
+      'input[type="checkbox"][wire\\:model="data.is_default"]',
+    );
+    this.areaSelect = page.locator('select[wire\\:model="data.area_id"]');
+    this.cityInput = page.locator('input[wire\\:model="data.city"]');
+    this.mapAddressInput = page.locator('input[wire\\:model="data.map_address"]');
+    this.saveAddressButton = page.locator(
+      'input[type="button"][wire\\:click="save"]',
     ).first();
   }
 
@@ -1158,5 +1187,148 @@ export class PatientsPage extends BasePage {
     await this.clickCreateAppointment();
     await this.fillAppointmentForm(appointment);
     return this.saveAppointment();
+  }
+
+  // =========================================================================
+  // Patient Addresses — Profile section → Addresses tab → Add New
+  // =========================================================================
+
+  /**
+   * Navigate to the patient's Addresses tab.
+   *
+   * On the patient detail page the Addresses tab is a sub-item of the
+   * collapsible "Profile" sidebar section (Bootstrap collapse
+   * `#collapse-profile`) — it is hidden until that section is expanded. So we
+   * first click the "Profile" toggle, then the `#addresses-tab` pill link
+   * (the URL updates to …?tab=addresses).
+   */
+  async navigateToPatientAddresses(): Promise<void> {
+    // Expand the Profile sidebar section so the Addresses tab becomes visible
+    const profileToggle = this.page.locator(
+      '[data-bs-toggle="collapse"][data-bs-target="#collapse-profile"], a[data-bs-target="#collapse-profile"]',
+    ).first();
+    await this.click(profileToggle);
+    await this.waitForAnimation(800);
+
+    await this.click(this.addressesTabLink);
+    await this.waitForAnimation(1500);
+    // The tab link updates the URL via Livewire (…?tab=addresses)
+    try {
+      await this.page.waitForURL(/tab=addresses/, { timeout: 10_000 });
+    } catch {
+      console.warn('[Addresses] URL did not gain tab=addresses');
+    }
+    await this.waitForAnimation(1000);
+  }
+
+  /**
+   * Open the address creation form ("Add New" → ?tab=addresses&view=create).
+   *
+   * The page embeds a Google Maps search component whose initialization
+   * re-renders the form — typing into the Address textarea while it loads can
+   * truncate the value. So we wait for the map to settle before filling.
+   */
+  async openAddAddressForm(): Promise<void> {
+    await this.click(this.addAddressLink);
+    await this.waitForAnimation(1000);
+    await this.waitForElementVisible(this.addressTextarea, 15_000);
+    await this.waitForMapToSettle();
+  }
+
+  /**
+   * Wait for the embedded Google Map to finish initialising (a signal that the
+   * Livewire form is stable) before typing into the form.
+   */
+  private async waitForMapToSettle(): Promise<void> {
+    try {
+      await this.page.locator('.google-map .gm-style, .google-map iframe').first()
+        .waitFor({ state: 'attached', timeout: 20_000 });
+    } catch {
+      console.warn('[Addresses] Google Map did not initialise — continuing');
+    }
+    await this.waitForAnimation(1000);
+  }
+
+  /**
+   * Fill the address creation form.
+   *
+   * The Address and City fields are typed with real keystrokes
+   * (pressSequentially) because this Livewire component's plain wire:model
+   * bindings do not pick up values set in a single synthetic fill().
+   *
+   * @param address - AddressData with address, area and city (isDefault optional)
+   */
+  async fillAddressForm(address: AddressData): Promise<void> {
+    if (address.address) {
+      await this.click(this.addressTextarea);
+      await this.addressTextarea.pressSequentially(address.address, { delay: 40 });
+    }
+    if (address.city) {
+      await this.click(this.cityInput);
+      await this.cityInput.pressSequentially(address.city, { delay: 40 });
+    }
+    if (address.area) {
+      await this.selectByLabel(this.areaSelect, address.area);
+    }
+    if (address.isDefault === true) {
+      await this.isDefaultCheckbox.check({ force: true });
+    }
+    // Give Livewire a moment to register the last keystrokes
+    await this.waitForAnimation(1000);
+  }
+
+  /**
+   * Click Save on the address form and wait for the Livewire round-trip.
+   * A successful save keeps the form open (no toast/redirect), so the caller
+   * verifies persistence by inspecting the Addresses list.
+   */
+  async saveAddress(): Promise<void> {
+    await this.waitForElementVisible(this.saveAddressButton, 10_000);
+    await this.saveAddressButton.click();
+    await this.waitForAnimation(4000);
+  }
+
+  /**
+   * Open the Addresses list (without view=create) — full page load via the
+   * "Back" link — to verify a saved address row.
+   */
+  async openAddressesList(): Promise<void> {
+    const backLink = this.page.locator(
+      '#addresses a[href*="tab=addresses"]:not([href*="view=create"])',
+    ).first();
+    await this.waitForElementVisible(backLink, 10_000);
+    await backLink.click();
+    await this.waitForPageLoad();
+    await this.waitForAnimation(1500);
+  }
+
+  /**
+   * Check whether the given address appears in the Addresses list.
+   * The list table shows Area / City / Address columns, so we match on the
+   * full address text plus the city.
+   */
+  async isAddressVisibleInList(address: AddressData): Promise<boolean> {
+    if (!address.address) return false;
+    const paneText = await this.page.locator('#addresses').textContent().catch(() => '');
+    const normalized = (paneText || '').replace(/\s+/g, ' ');
+    const addressOk = normalized.includes(address.address.replace(/\s+/g, ' '));
+    const cityOk = address.city ? normalized.includes(address.city) : true;
+    return addressOk && cityOk;
+  }
+
+  /**
+   * Complete end-to-end flow: search & open the target patient, go to the
+   * Addresses tab (Profile section), open Add New, fill and save.
+   *
+   * @param patientId - Patient ID from config.json (appointment.targetPatientIdentifier)
+   * @param address - Address data to add
+   */
+  async addAddress(patientId: string, address: AddressData): Promise<void> {
+    await this.navigateToPatients();
+    await this.searchAndSelectPatient(patientId);
+    await this.navigateToPatientAddresses();
+    await this.openAddAddressForm();
+    await this.fillAddressForm(address);
+    await this.saveAddress();
   }
 }

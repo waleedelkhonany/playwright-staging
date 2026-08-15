@@ -1,0 +1,10 @@
+{
+  "_description": "Full address scenario — payload for tests/add-patient-address.spec.ts. Filled into the patient address create form (patient detail page → Profile → Addresses tab → Add New, ?tab=addresses&view=create). 'DYNAMIC' fields produce fresh random values each run. The target patient identifier is NOT here — it lives in config/config.json (appointment.targetPatientIdentifier), the single source of truth shared by every patient test.",
+  "_fields": {
+    "address":   "DYNAMIC",
+    "area":      "Riyadh",
+    "city":      "{{random_city}}",
+    "isDefault": "",
+    "mapAddress": ""
+  }
+}

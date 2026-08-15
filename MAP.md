@@ -14,6 +14,7 @@
 ├── tests/                     # E2E test specifications (.ts files)
 │   ├── view-and-checkin-appointment.spec.ts  # View & Check-in appointment workflow
 │   ├── patients.spec.ts                      # Patient CRUD operations
+│   ├── add-patient-address.spec.ts           # Add an address (Profile → Addresses tab)
 │   ├── create-view-checkin-appointment.spec.ts  # Combined create/view/check-in flow
 │   ├── create-appointment.spec.ts            # Create appointment workflows
 │   ├── physician-orders.spec.ts              # Create Dialysis Order workflow
@@ -152,6 +153,7 @@
 |------|-------------|
 | `view-and-checkin-appointment.spec.ts` | Full appointment lifecycle: select patient → navigate to appointments → open latest "New" appointment → confirm care team → check-in → redirect to visit page |
 | `patients.spec.ts` | Patient CRUD operations: create full patient, create minimal patient, create Saudi female patient with specific constraints |
+| `add-patient-address.spec.ts` | Add an address for the target patient (config.json `appointment.targetPatientIdentifier`): Patients → search & open patient → Addresses tab (Profile section) → "Add New" (`?tab=addresses&view=create`) → fill Address/Area/City via the Livewire `patients::addresses` component → Save (silent re-render) → open the Addresses list and assert the new row. Fields are typed with real keystrokes (plain `wire:model` ignores synthetic `fill()`), and the page object waits for the embedded Google Map to settle before typing to avoid Livewire re-render truncation |
 | `create-view-checkin-appointment.spec.ts` | Combined workflow: create appointment within test → view it → confirm care team → check-in → verify redirect |
 | `create-appointment.spec.ts` | Create appointments for existing patients (full, minimal, morning-time slot scenarios) |
 | `physician-orders.spec.ts` | Create a Dialysis Order via Physician Orders → Dialysis Order tab (runs 4 scenarios: static Conventional baseline, static Portable Low Dialysate Dialysis, all-DYNAMIC, and HDF-variant) |
@@ -212,6 +214,15 @@ Shared utilities:
 - Save appointment
 - Navigate to Encounters → Appointments tab
 - Open latest appointment by status ("New")
+
+**Address Management (Profile → Addresses tab):**
+- Expand the collapsible "Profile" sidebar section (`#collapse-profile` — the Addresses tab is hidden until then), then click the Addresses tab (`#addresses-tab` → `?tab=addresses`)
+- Open the address create form ("Add New" link → `?tab=addresses&view=create`)
+- Fill Address (textarea), Area (select), City (input), Is Default (checkbox) — typed with real keystrokes via `pressSequentially` (plain `wire:model` ignores synthetic `fill()`)
+- Wait for the embedded Google Map to settle before typing (its init re-renders the form and truncates the Address textarea)
+- Save address (silent re-render, no toast)
+- Open the Addresses list and verify the saved row (`isAddressVisibleInList`)
+- `addAddress(patientId, address)` runs the whole flow
 
 **Utility Methods:**
 - `fillIfDefined(locator, value)` - Fill only if value is not null/undefined
