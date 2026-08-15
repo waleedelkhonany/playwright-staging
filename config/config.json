@@ -15,6 +15,40 @@
   ],
   "headless": true,
 
+  "_comment_video": [
+    "Video recording — records a video of each test run.",
+    "  mode — when to record/keep videos:",
+    "    \"on\"                  → record and keep a video for EVERY test",
+    "    \"off\"                 → do not record video",
+    "    \"retain-on-failure\"   → record for every run, keep only failures",
+    "    \"on-first-retry\"      → record only on the first retry of a test",
+    "  quality — resolution of the recorded video (higher = better quality):",
+    "    \"low\"      → 800x450",
+    "    \"medium\"   → 1280x720",
+    "    \"high\"     → 1366x768 (matches the test viewport — sharpest)",
+    "Both settings can be overridden via the VIDEO_MODE / VIDEO_QUALITY",
+    "environment variables (e.g. in .env) — they take precedence over config.json."
+  ],
+  "video": {
+    "mode": "on",
+    "quality": "high"
+  },
+
+  "_comment_trace": [
+    "Trace recording — records a detailed execution trace (actions, network requests,",
+    "DOM snapshots) that can be inspected in the Playwright Trace Viewer",
+    "(npx playwright show-trace <file.zip>).",
+    "  mode — when to collect/keep traces:",
+    "    \"on-first-retry\"      → collect a trace when retrying a failed test (default)",
+    "    \"on\"                  → collect a trace for EVERY test",
+    "    \"off\"                 → do not collect traces",
+    "    \"retain-on-failure\"   → collect for every run, keep only failures",
+    "Can be overridden via the TRACE_MODE environment variable (takes precedence)."
+  ],
+  "trace": {
+    "mode": "on-first-retry"
+  },
+
   "saudiPhone": {
     "prefixes": ["055", "056", "057", "058", "059", "053", "054", "050"],
     "landlinePrefixes": ["011", "012", "013", "014", "016", "017"],
