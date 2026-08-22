@@ -1,0 +1,23 @@
+{
+  "_description": "Custom Reports scenario — PATIENTS subject with the WEEKLY preset range (dates come from the preset and stay DISABLED — the page object must not touch them). Patients columns live in different checkbox groups than sessions (field-patient-info-*, field-care-team-*, field-activity-in-range-*, ...); keys below are id suffixes matched by suffix. No saveReport → the flow stops after Preview assertions (read-only variant).",
+  "_config": {
+    "_configNote": "rangeMode=weekly — date inputs disabled; dateFrom/dateTo left empty so the page object skips them."
+  },
+  "_fields": {
+    "subject": "patients",
+    "rangeMode": "weekly",
+    "dateFrom": "",
+    "dateTo": "",
+
+    "branchFilter": "",
+    "systemFilter": "",
+    "visitStatusFilter": "",
+
+    "fields": "patientId,mrn,name,gender,sessionsTotal",
+
+    "saveReport": "",
+    "frequency": "",
+    "visibility": "",
+    "recipients": ""
+  }
+}

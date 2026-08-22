@@ -1,0 +1,87 @@
+{
+  "_description": "Catalog of ALL 'Choose Fields' checkboxes available on the Custom Reports BUILDER for the SESSIONS subject (verified against staging DOM via scripts/inspect-custom-reports.ts). Each entry maps a scenario KEY (the id suffix you write in a scenario's 'fields' list) to its real checkbox ID and LABEL. Scenarios reference these keys; the page object matches them by id suffix, and the preview table renders the LABELS as column headers (in DOM order). Groups follow the builder's own section order.",
+  "_usage": {
+    "how_to_choose": "In your scenario file set \"fields\" to a comma-separated list of keys from this catalog (e.g. \"patientId,hgb,apptDate\"), or to \"ALL\" to select every field below.",
+    "order_note": "The preview always renders columns in PAGE order, not JSON order — the spec compares against the labels collected by fillBuilderForm() so any JSON order works."
+  },
+  "_fields": {
+    "patient-info": [
+      { "key": "patientId",        "id": "field-patient-info-patientId",        "label": "Patient ID" },
+      { "key": "mrn",              "id": "field-patient-info-mrn",              "label": "MRN" },
+      { "key": "name",             "id": "field-patient-info-name",             "label": "Name" },
+      { "key": "dob",              "id": "field-patient-info-dob",              "label": "Date of Birth" },
+      { "key": "age",              "id": "field-patient-info-age",              "label": "Age" },
+      { "key": "gender",           "id": "field-patient-info-gender",           "label": "Gender" },
+      { "key": "patientStatus",    "id": "field-patient-info-patientStatus",    "label": "Patient Status" },
+      { "key": "physician",        "id": "field-patient-info-physician",        "label": "Primary Physician" },
+      { "key": "primaryNurse",     "id": "field-patient-info-primaryNurse",     "label": "Primary Nurse" },
+      { "key": "socialWorker",     "id": "field-patient-info-socialWorker",     "label": "Primary Social Worker" },
+      { "key": "nurseTeamLeader",  "id": "field-patient-info-nurseTeamLeader",  "label": "Nurse Team Leader" },
+      { "key": "referredHospital", "id": "field-patient-info-referredHospital", "label": "Referred Hospital" }
+    ],
+    "session-details": [
+      { "key": "sessionDate",         "id": "field-session-details-sessionDate",         "label": "Session Date" },
+      { "key": "visitStatus",         "id": "field-session-details-visitStatus",         "label": "Visit Status" },
+      { "key": "visitSystem",         "id": "field-session-details-visitSystem",         "label": "Visit System" },
+      { "key": "visitBranch",         "id": "field-session-details-visitBranch",         "label": "Branch" },
+      { "key": "visitTypeName",       "id": "field-session-details-visitTypeName",       "label": "Visit Type" },
+      { "key": "station",             "id": "field-session-details-station",             "label": "Station / Machine" },
+      { "key": "checkIn",             "id": "field-session-details-checkIn",             "label": "Check-in Time" },
+      { "key": "checkOut",            "id": "field-session-details-checkOut",            "label": "Check-out Time" },
+      { "key": "procedureStart",      "id": "field-session-details-procedureStart",      "label": "Procedure Start" },
+      { "key": "procedureEnd",        "id": "field-session-details-procedureEnd",        "label": "Procedure End" },
+      { "key": "visitDuration",       "id": "field-session-details-visitDuration",       "label": "Visit Duration" },
+      { "key": "procedureDuration",   "id": "field-session-details-procedureDuration",   "label": "Procedure Duration" },
+      { "key": "sessionNurse",        "id": "field-session-details-sessionNurse",        "label": "Session Nurse" },
+      { "key": "sessionDoctor",       "id": "field-session-details-sessionDoctor",       "label": "Session Doctor" },
+      { "key": "sessionSocialWorker", "id": "field-session-details-sessionSocialWorker", "label": "Session Social Worker" }
+    ],
+    "treatment-data": [
+      { "key": "treatmentDuration",   "id": "field-treatment-data-treatmentDuration",   "label": "Treatment Time" },
+      { "key": "ufVolume",            "id": "field-treatment-data-ufVolume",            "label": "UF Volume (L)" },
+      { "key": "ufGoal",              "id": "field-treatment-data-ufGoal",              "label": "UF Goal (L)" },
+      { "key": "bfrActual",           "id": "field-treatment-data-bfrActual",           "label": "Blood Flow Rate (actual)" },
+      { "key": "preWeight",           "id": "field-treatment-data-preWeight",           "label": "Pre-treatment Weight (kg)" },
+      { "key": "postWeight",          "id": "field-treatment-data-postWeight",          "label": "Post-treatment Weight (kg)" },
+      { "key": "dryWeight",           "id": "field-treatment-data-dryWeight",           "label": "Dry Weight (kg)" },
+      { "key": "flowsheetCompleted",  "id": "field-treatment-data-flowsheetCompleted",  "label": "Flowsheet Recorded" }
+    ],
+    "dialysis-prescription": [
+      { "key": "dialyzer",               "id": "field-dialysis-prescription-dialyzer",               "label": "Dialyzer Type" },
+      { "key": "dialyzerArea",           "id": "field-dialysis-prescription-dialyzerArea",           "label": "Dialyzer Surface Area" },
+      { "key": "bfrPrescribed",          "id": "field-dialysis-prescription-bfrPrescribed",          "label": "Blood Flow Rate (prescribed)" },
+      { "key": "prescribedDuration",     "id": "field-dialysis-prescription-prescribedDuration",     "label": "Prescribed Duration" },
+      { "key": "prescribedFrequency",    "id": "field-dialysis-prescription-prescribedFrequency",    "label": "Prescribed Frequency" },
+      { "key": "modality",               "id": "field-dialysis-prescription-modality",               "label": "Modality" },
+      { "key": "vascularAccess",         "id": "field-dialysis-prescription-vascularAccess",         "label": "Vascular Access" },
+      { "key": "accessSite",             "id": "field-dialysis-prescription-accessSite",             "label": "Access Site" },
+      { "key": "dialysateType",          "id": "field-dialysis-prescription-dialysateType",          "label": "Dialysate Type" },
+      { "key": "anticoagulation",        "id": "field-dialysis-prescription-anticoagulation",        "label": "Anticoagulation" },
+      { "key": "prescribedDryWeight",    "id": "field-dialysis-prescription-prescribedDryWeight",    "label": "Prescribed Dry Weight (kg)" }
+    ],
+    "labs": [
+      { "key": "hgb",          "id": "field-labs-hgb",          "label": "Hemoglobin" },
+      { "key": "potassium",    "id": "field-labs-potassium",    "label": "Potassium" },
+      { "key": "phosphorus",   "id": "field-labs-phosphorus",   "label": "Phosphorus" },
+      { "key": "albumin",      "id": "field-labs-albumin",      "label": "Albumin" },
+      { "key": "calcium",      "id": "field-labs-calcium",      "label": "Calcium" },
+      { "key": "pth",          "id": "field-labs-pth",          "label": "PTH (Parathyroid Hormone)" },
+      { "key": "ferritin",     "id": "field-labs-ferritin",     "label": "Ferritin" },
+      { "key": "tsat",         "id": "field-labs-tsat",         "label": "TSAT %" },
+      { "key": "creatinine",   "id": "field-labs-creatinine",   "label": "Creatinine" },
+      { "key": "bicarbonate",  "id": "field-labs-bicarbonate",  "label": "Bicarbonate" },
+      { "key": "bunPre",       "id": "field-labs-bunPre",       "label": "Urea (Pre Treatment)" },
+      { "key": "labCompany",   "id": "field-labs-labCompany",   "label": "Lab Company" }
+    ],
+    "appointment-details": [
+      { "key": "apptDate",             "id": "field-appointment-details-apptDate",             "label": "Appointment Date" },
+      { "key": "apptTime",             "id": "field-appointment-details-apptTime",             "label": "Appointment Time" },
+      { "key": "apptEndTime",          "id": "field-appointment-details-apptEndTime",          "label": "Appointment End" },
+      { "key": "apptType",             "id": "field-appointment-details-apptType",             "label": "Appointment Type" },
+      { "key": "scheduledDuration",    "id": "field-appointment-details-scheduledDuration",    "label": "Scheduled Duration" },
+      { "key": "confirmationStatus",   "id": "field-appointment-details-confirmationStatus",   "label": "Confirmation Status" },
+      { "key": "apptStatus",           "id": "field-appointment-details-apptStatus",           "label": "Appointment Status" },
+      { "key": "noShowReason",         "id": "field-appointment-details-noShowReason",         "label": "No-show / Cancel Reason" }
+    ]
+  }
+}

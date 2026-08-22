@@ -1,0 +1,28 @@
+{
+  "_description": "Custom Reports scenario — build + preview + save a SESSIONS report over a CUSTOM date range. The builder is a plain form whose state rides in query params (?subject=sessions&filters[rangeMode]=custom&...) — preset range modes disable the date inputs, so custom mode is used whenever the test must control dates. Columns are checkbox ids field-{group}-{key}; keys below are the id suffixes, matched by suffix so they stay stable if a group name changes. Filters are SELECT OPTION TEXTS from staging. saveReport uses DYNAMIC for a unique-per-run name; recipients is required by the server form. Cleanup: the spec deletes the saved report afterwards via its row Delete button (native confirm()).",
+  "_config": {
+    "_comment": "No extra test parameters — the scenario is the form payload only.",
+    "_comment_systemFilter": [
+      "Available systemFilter options in the Custom Reports form (SELECT OPTION TEXTS):",
+      "  - In Center",
+      "  - Home Hemodialysis"
+    ]
+  },
+  "_fields": {
+    "subject": "sessions",
+    "rangeMode": "custom",
+    "dateFrom": "{{today_minus_7}}",
+    "dateTo": "{{today_plus_30}}",
+
+    "branchFilter": "",
+    "systemFilter": "In Center",
+    "visitStatusFilter": "",
+
+    "fields": "patientId,mrn,name,sessionDate,visitStatus,ufVolume",
+
+    "saveReport": "DYNAMIC",
+    "frequency": "one_time",
+    "visibility": "private",
+    "recipients": "e2e-custom-reports@careconnect.example"
+  }
+}

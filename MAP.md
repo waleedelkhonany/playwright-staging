@@ -28,7 +28,9 @@
 │   ├── employee-create.spec.ts               # Create employee workflow
 │   ├── visit_filter.spec.ts                  # Data-driven Visit Filter tests
 │   ├── patient_filter.spec.ts                # Data-driven Patient Filter tests
-│   └── employee_filter.spec.ts               # Data-driven Employee Filter tests
+│   ├── employee_filter.spec.ts               # Data-driven Employee Filter tests
+│   └── custom-reports.spec.ts                # Custom Reports: build → preview → save → delete
+│                                              # (+ patients/weekly read-only variant)
 │
 ├── src/
 │   ├── pages/                 # Page Object Models (POM)
@@ -45,7 +47,8 @@
 │   │   ├── referral.page.ts           # Referral form (Visits → edit → load/visit-form/{id}/referrals)
 │   │   ├── appointment-detail.page.ts  # Appointment modal confirmation & check-in
 │   │   ├── employees.page.ts  # Employee management (create form aligned to staging DOM)
-│   │   └── filter-list.page.ts  # Shared base for list-page filter specs
+│   │   ├── filter-list.page.ts  # Shared base for list-page filter specs
+│   │   └── custom-reports.page.ts  # Custom Reports: My Reports list, Builder, Preview, Save, Delete
 │   │
 │   ├── fixtures/              # Test fixtures and shared state
 │   │   └── auth.fixture.ts    # Auto-login + page object injection
@@ -59,15 +62,17 @@
 │   │   ├── discontinuation-data.loader.ts # Discontinue Of Hemodialysis form data generation
 │   │   ├── vascular-access-data.loader.ts # Vascular Access Assessment form data generation
 │   │   ├── respiratory-triage-data.loader.ts # Respiratory Triage checklist data generation
-│   │   ├── referral-data.loader.ts     # Referral form data generation
-│   │   ├── header-context.helper.ts     # Branch/Location context management
-│   │   ├── login.helper.ts              # Login automation logic
-│   │   ├── patient-data.loader.ts       # Patient data generator
-│   │   └── appointment-data.loader.ts   # Appointment data generator
+│   ├── referral-data.loader.ts     # Referral form data generation
+│   ├── custom-report-data.loader.ts # Custom Report scenario generation (unique saved names)
+│   ├── header-context.helper.ts     # Branch/Location context management
+│   ├── login.helper.ts              # Login automation logic
+│   ├── patient-data.loader.ts       # Patient data generator
+│   └── appointment-data.loader.ts   # Appointment data generator
 │   │
 │   └── data/                  # Test data definitions
 │       ├── patient.data.ts    # Patient data type definitions
 │       ├── employee.data.ts   # Employee data type + buildEmployee factory
+│       ├── custom-report.data.ts  # CustomReportData type (subject/range/filters/fields/save form)
 │       └── appointment.data.ts  # Appointment data type definitions
 │
 ├── config/
@@ -92,6 +97,11 @@
 │   │   └── respiratory-triage.scenario.json # Full checklist (vitals + symptom scores + signatures + disposition)
 │   ├── referral-scenarios/          # Referral form payload
 │   │   └── referral.scenario.json   # Full Referral payload (date, type, hospital, print docs, reason, comments)
+│   ├── custom-report-scenarios/     # Custom Reports payloads (NEW feature)
+│   │   ├── choose-fields.catalog.json # Catalog of ALL 66 "Choose Fields" (key → id → label, 6 groups); scenarios pick keys or "ALL"
+│   │   ├── sessions-custom-range.scenario.json # Sessions subject, custom date range, 6 columns, save+cleanup
+│   │   ├── patients-weekly-preset.scenario.json # Patients subject, WEEKLY preset (dates disabled), read-only
+│   │   └── sessions-saved-report.scenario.json # FULLY JSON-editable kept report — fields = catalog keys or "ALL" — saved and NOT deleted
 │   ├── physician-order-scenarios/  # Physician order scenario files
 │   │   ├── dialysis-order.scenario.json       # Dialysis Order modal payload (static baseline, Conventional Dialysis)
 │   │   ├── portable-dialysis-order.scenario.json # Static payload for the OTHER orderType (Portable Low Dialysate Dialysis)
@@ -136,7 +146,10 @@
 │   ├── probe-employee-create.ts       # Smoke-test employee creation end-to-end
 │   ├── probe-employee-filter.ts       # Probe employee search behavior
 │   ├── probe-employee-filter-2.ts     # Verify employee filter values
-│   └── probe-employee-filter-3.ts     # Verify employee combos + pagination
+│   ├── probe-employee-filter-3.ts     # Verify employee combos + pagination
+│   ├── inspect-custom-reports.ts      # Dump Custom Reports pages DOM (My Reports / Builder, optional path arg)
+│   ├── probe-custom-reports-preview.ts # Smoke-test builder → preview (headers + exports)
+│   └── probe-custom-reports-save.ts   # Smoke-test save → list → delete lifecycle
 │
 ├── .env.example               # Environment template (BASE_URL required)
 ├── package.json               # Project dependencies & scripts
@@ -168,6 +181,8 @@
 | `visit_filter.spec.ts` | Data-driven Visit Filter tests (config/visit_filters.json): happy path, single filters, empty state, boundary & reset |
 | `patient_filter.spec.ts` | Data-driven Patient Filter tests (config/patient_filters.json): name/MRN/mobile/email/ID/status filters, empty state, boundary & reset |
 | `employee_filter.spec.ts` | Data-driven Employee Filter tests (config/employee_filters.json): live name/email/mobile + username searches, empty state, boundary & reset |
+| `custom-reports.spec.ts` | NEW FEATURE — Custom Reports (`/reports/custom-reports`): (1) sessions report over a CUSTOM date range → preview asserts the table headers EQUAL the selected columns' labels → CSV export link carries subject/rangeMode/fields → Save Report (unique DYNAMIC name, one_time, private) → success toast on My Reports → row asserted (type + visibility) → cleanup deletes the report through its native-confirm() Delete button; (2) read-only patients variant on the WEEKLY preset (disabled dates are never touched), headers + exports asserted |
+| `custom-reports-keep.spec.ts` | NEW FEATURE — creates a report from the FULLY JSON-editable scenario (config/custom-report-scenarios/sessions-saved-report.scenario.json: dates/branch/system/visitStatus filters + name/frequency/visibility/recipients all from the file). Column selection comes from `choose-fields.catalog.json` — set "fields" to any list of catalog keys OR to `"ALL"` to select all 66; keys are validated against the catalog with helpful errors. The report is KEPT on staging (no delete step); re-runs accumulate uniquely-named rows (DYNAMIC names) |
 
 ### 2. Page Object Models (`src/pages/*.ts`)
 
@@ -416,6 +431,37 @@ Shared base class for the list-page filter specs (Visit / Patient / Employee):
 Subclasses supply the list URL and the page-specific filter interaction
 (`setField` / `applyFilters`), and may override `resetFilters()` (the Visits
 spec does — its reset is the modal's "Clear" link, not a plain navigation).
+
+#### CustomReportsPage (`custom-reports.page.ts`)
+NEW FEATURE — Custom Reports (`/reports/custom-reports`), three plain
+server-rendered screens (NO Livewire on these pages):
+
+- `openMyReports()` — My Reports list; asserts URL + "My Reports" heading.
+  Rows carry Download / Edit / Toggle-Visibility / Delete actions; Delete
+  uses a NATIVE `confirm()` dialog.
+- `openBuilder(subject, rangeMode)` — opens `/reports/custom-reports/builder`
+  with query params (the subject cards / preset chips are links that only set
+  these params). Builder state rides entirely in the query string:
+  `?subject=sessions&filters[rangeMode]=weekly&...`
+- `fillBuilderForm(data)` → returns the checked columns' LABEL texts in
+  selection order. Fills custom dates (preset modes keep them DISABLED),
+  branch/system/visitStatus selects by option text, then unchecks ALL
+  `fields[]` boxes and checks exactly the scenario keys — matched by ID
+  SUFFIX against stable ids like `field-patient-info-patientId`.
+- `submitBuilderAndPreview()` — clicks "Preview Report (N fields)", waits for
+  `/preview`, returns the results-table headers (they render the checkbox
+  labels verbatim, so specs assert headers === returned labels).
+- `verifyExportLinks(expectParams)` — CSV link carries subject/rangeMode/fields.
+- `saveReport(data)` — Save form on the preview page (name*, recipients*,
+  frequency radio [one_time default], visibility radio [private default];
+  the built report rides in hidden inputs) → redirect to My Reports.
+- `isSuccessToastVisible(name)` — toast `"{name}" has been saved.`
+- `findSavedReportId(name)` / `verifySavedReportRow(name, type, visibility)` —
+  list assertions.
+- `deleteSavedReport(name)` — registers a `page.on('dialog')` accept handler
+  BEFORE clicking the row's `button[title="Delete"]` (the delete form uses
+  `onsubmit="return confirm('Delete this report?')"` — without the handler
+  Playwright auto-dismisses the dialog and silently cancels the delete).
 
 ---
 
@@ -749,3 +795,5 @@ VIDEO_MODE=retain-on-failure                  # Video recording policy (default:
 5. **Select Indexes Are Unstable:** Flatpickr adds new selects on date picker open. Always use name-based or JS evaluation for select targeting, never DOM indices.
 
 6. **Header Context Persistence:** Once set after login, persists across tests in same session via auth fixture. No need to re-sync unless branching to different config targets.
+
+7. **Custom Reports (NEW feature):** The builder/preview/save screens are plain forms — builder state lives in QUERY PARAMS (`?subject=sessions&filters[rangeMode]=...`), so navigate directly instead of clicking cards. Preset range modes (daily/weekly/monthly) DISABLE `filters[dateFrom]`/`[dateTo]` — only `rangeMode=custom` makes them editable; filling a disabled input hangs until timeout. Preview table headers render the column checkboxes' LABEL texts verbatim ("Patient ID", not "patientId") — assert against the labels returned by `fillBuilderForm()`. Save requires BOTH name and recipients (HTML5 required) or the POST is silently swallowed by browser validation with NO error UI. Row Delete uses a NATIVE confirm() — register the dialog handler BEFORE the click or Playwright auto-dismisses it and the delete silently never happens.

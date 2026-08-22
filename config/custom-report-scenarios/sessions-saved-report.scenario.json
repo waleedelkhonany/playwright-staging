@@ -1,0 +1,24 @@
+{
+  "_description": "Custom Reports KEPT-REPORT scenario (v2) — builds a SESSIONS report over a CUSTOM date range, saves it, and INTENTIONALLY does NOT delete it. Column selection now comes from the CATALOG file (choose-fields.catalog.json): 'fields' lists catalog keys, or use \"ALL\" to select every available field. EVERY value below is editable from this file alone: dateFrom/dateTo (YYYY-MM-DD or {{today_minus_N}}/{{today_plus_N}} templates), branchFilter/systemFilter/visitStatusFilter (SELECT OPTION TEXTS), fields (catalog keys or ALL), saveReport (DYNAMIC = unique name per run), frequency (one_time|weekly|monthly|quarterly), visibility (private|public), recipients (required by the server form).",
+  "_config": {
+    "_configNote": "rangeMode=custom keeps the date inputs EDITABLE (preset modes disable them). Column keys are matched by checkbox-ID SUFFIX; ambiguous keys fail fast with the matching ids. Preview columns always render in PAGE order regardless of JSON order."
+  },
+  "_fields": {
+    "subject": "sessions",
+    "rangeMode": "custom",
+    "dateFrom": "{{today_minus_7}}",
+    "dateTo": "{{today_plus_30}}",
+
+    "branchFilter": "Jeddah",
+    "systemFilter": "In Center",
+    "visitStatusFilter": "",
+
+    "fields": "patientId,mrn,name,sessionDate,visitStatus,ufVolume,hgb,potassium,apptDate,apptStatus",
+    "_fields_note": "Keys come from choose-fields.catalog.json (66 fields, 6 groups). Use \"ALL\" to select every field, or list any subset of catalog keys.",
+
+    "saveReport": "DYNAMIC",
+    "frequency": "one_time",
+    "visibility": "public",
+    "recipients": "reports-team@careconnect.example"
+  }
+}
