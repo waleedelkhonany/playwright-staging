@@ -35,6 +35,7 @@
 import { test, expect } from '../src/fixtures/auth.fixture';
 import { CustomReportsPage } from '../src/pages/custom-reports.page';
 import { getCustomReportData } from '../src/helpers/custom-report-data.loader';
+import { resolveColumnsFromChecklist } from '../src/helpers/custom-report-columns.helper';
 import catalog from '../config/custom-report-scenarios/choose-fields.catalog.json';
 import scenario from '../config/custom-report-scenarios/sessions-saved-report.scenario.json';
 
@@ -61,39 +62,13 @@ test.describe('E2E: Custom Reports — kept saved report (no delete)', () => {
     //     Every catalog key must appear exactly once in scenario.columns;
     //     true → include the column, false → leave it out.
     //     "selectAll": true short-circuits the checklist into "ALL".
+    //     Validation lives in custom-report-columns.helper.ts (shared with
+    //     the sessions-custom-range spec): unknown/missing keys fail fast.
     // =========================================================================
-    const catalogKeys: string[] = Object.values(catalog._fields)
-      .flat()
-      .map((entry: any) => entry.key as string);
-
-    let selectedFields: string;
-    if (scenario.selectAll === true) {
-      selectedFields = 'ALL';
-      console.log(`[Columns] selectAll=true → ALL ${catalogKeys.length} choose-fields will be included`);
-    } else {
-      const checklistKeys = Object.values(scenario.columns ?? {})
-        .flatMap((group: any) => Object.keys(group));
-      const selected = Object.values(scenario.columns ?? {})
-        .flatMap((group: any) => Object.entries(group))
-        .filter(([, on]) => on === true)
-        .map(([key]) => key);
-
-      const unknown = checklistKeys.filter((k) => !catalogKeys.includes(k));
-      const missing = catalogKeys.filter((k) => !checklistKeys.includes(k));
-      expect(
-        unknown,
-        `Scenario checklist has key(s) NOT in choose-fields.catalog.json: ${JSON.stringify(unknown)}. ` +
-        'Fix the typo or update the catalog.',
-      ).toEqual([]);
-      expect(
-        missing,
-        `Scenario checklist is MISSING catalog key(s): ${JSON.stringify(missing)}. ` +
-        'Add them (the developer likely added new Choose Fields) so every option stays visible.',
-      ).toEqual([]);
-
-      selectedFields = selected.join(',');
-      console.log(`[Columns] ${selected.length}/${catalogKeys.length} chosen: ${selectedFields || '(none)'}`);
-    }
+    const selectedFields = resolveColumnsFromChecklist(
+      catalog,
+      scenario as unknown as Parameters<typeof resolveColumnsFromChecklist>[1],
+    );
 
     const data = getCustomReportData('sessions-saved-report.scenario.json', {
       ...(reportName ? { saveReport: reportName } : {}),

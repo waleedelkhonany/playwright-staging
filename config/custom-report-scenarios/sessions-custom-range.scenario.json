@@ -1,12 +1,7 @@
 {
-  "_description": "Custom Reports scenario — build + preview + save a SESSIONS report over a CUSTOM date range. The builder is a plain form whose state rides in query params (?subject=sessions&filters[rangeMode]=custom&...) — preset range modes disable the date inputs, so custom mode is used whenever the test must control dates. Columns are checkbox ids field-{group}-{key}; keys below are the id suffixes, matched by suffix so they stay stable if a group name changes. Filters are SELECT OPTION TEXTS from staging. saveReport uses DYNAMIC for a unique-per-run name; recipients is required by the server form. Cleanup: the spec deletes the saved report afterwards via its row Delete button (native confirm()).",
+  "_description": "Custom Reports scenario — build + preview + SAVE a SESSIONS report over a CUSTOM date range, then DELETE it in the same test (staging stays clean). Column selection uses the CHECKLIST below: every key from choose-fields.catalog.json is listed with true/false — true puts the column in the report, false leaves it out. Set \"selectAll\": true at the top level to include EVERY field and skip the checklist. Other editable values: dateFrom/dateTo (YYYY-MM-DD or {{today_minus_N}}/{{today_plus_N}} templates), branchFilter/systemFilter/visitStatusFilter (SELECT OPTION TEXTS), saveReport (DYNAMIC = unique name per run; the report is deleted at the end so a fixed name also works), frequency, visibility, recipients (required by the server form).",
   "_config": {
-    "_comment": "No extra test parameters — the scenario is the form payload only.",
-    "_comment_systemFilter": [
-      "Available systemFilter options in the Custom Reports form (SELECT OPTION TEXTS):",
-      "  - In Center",
-      "  - Home Hemodialysis"
-    ]
+    "_configNote": "rangeMode=custom keeps the date inputs EDITABLE (preset modes disable them). Preview columns always render in PAGE order regardless of the checklist order."
   },
   "_fields": {
     "subject": "sessions",
@@ -18,11 +13,90 @@
     "systemFilter": "In Center",
     "visitStatusFilter": "",
 
-    "fields": "patientId,mrn,name,sessionDate,visitStatus,ufVolume",
-
     "saveReport": "DYNAMIC",
     "frequency": "one_time",
     "visibility": "private",
     "recipients": "e2e-custom-reports@careconnect.example"
+  },
+
+  "columns": {
+    "patient-info": {
+      "patientId": true,
+      "mrn": true,
+      "name": true,
+      "dob": false,
+      "age": false,
+      "gender": false,
+      "patientStatus": false,
+      "physician": false,
+      "primaryNurse": false,
+      "socialWorker": false,
+      "nurseTeamLeader": false,
+      "referredHospital": false
+    },
+    "session-details": {
+      "sessionDate": true,
+      "visitStatus": true,
+      "visitSystem": false,
+      "visitBranch": false,
+      "visitTypeName": false,
+      "station": false,
+      "checkIn": false,
+      "checkOut": false,
+      "procedureStart": false,
+      "procedureEnd": false,
+      "visitDuration": false,
+      "procedureDuration": false,
+      "sessionNurse": false,
+      "sessionDoctor": false,
+      "sessionSocialWorker": false
+    },
+    "treatment-data": {
+      "treatmentDuration": false,
+      "ufVolume": true,
+      "ufGoal": false,
+      "bfrActual": false,
+      "preWeight": false,
+      "postWeight": false,
+      "dryWeight": false,
+      "flowsheetCompleted": false
+    },
+    "dialysis-prescription": {
+      "dialyzer": false,
+      "dialyzerArea": false,
+      "bfrPrescribed": false,
+      "prescribedDuration": false,
+      "prescribedFrequency": false,
+      "modality": false,
+      "vascularAccess": false,
+      "accessSite": false,
+      "dialysateType": false,
+      "anticoagulation": false,
+      "prescribedDryWeight": false
+    },
+    "labs": {
+      "hgb": true,
+      "potassium": false,
+      "phosphorus": false,
+      "albumin": false,
+      "calcium": false,
+      "pth": false,
+      "ferritin": false,
+      "tsat": false,
+      "creatinine": false,
+      "bicarbonate": false,
+      "bunPre": false,
+      "labCompany": false
+    },
+    "appointment-details": {
+      "apptDate": true,
+      "apptTime": false,
+      "apptEndTime": false,
+      "apptType": false,
+      "scheduledDuration": false,
+      "confirmationStatus": false,
+      "apptStatus": false,
+      "noShowReason": false
+    }
   }
 }

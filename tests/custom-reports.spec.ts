@@ -32,6 +32,9 @@
 import { test, expect } from '../src/fixtures/auth.fixture';
 import { CustomReportsPage } from '../src/pages/custom-reports.page';
 import { getCustomReportData } from '../src/helpers/custom-report-data.loader';
+import { resolveColumnsFromChecklist } from '../src/helpers/custom-report-columns.helper';
+import catalog from '../config/custom-report-scenarios/choose-fields.catalog.json';
+import sessionsScenario from '../config/custom-report-scenarios/sessions-custom-range.scenario.json';
 
 test.describe('E2E: Custom Reports (build → preview → save → manage)', () => {
 
@@ -47,9 +50,15 @@ test.describe('E2E: Custom Reports (build → preview → save → manage)', () 
 
   test('should build a sessions report with a custom range, preview it, save it and delete it', async ({ page }) => {
     // =========================================================================
-    // 1. Load configurable test parameters
+    // 1. Load configurable test parameters (columns via the CHECKLIST)
     // =========================================================================
-    const data = getCustomReportData('sessions-custom-range.scenario.json');
+    const selectedFields = resolveColumnsFromChecklist(
+      catalog,
+      sessionsScenario as unknown as Parameters<typeof resolveColumnsFromChecklist>[1],
+    );
+    const data = getCustomReportData('sessions-custom-range.scenario.json', {
+      fields: selectedFields,
+    });
     const expectedFields = data.fields!.split(',').map((f) => f.trim());
     const reportName = data.saveReport!;
 

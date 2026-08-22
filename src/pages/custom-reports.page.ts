@@ -42,9 +42,11 @@ export class CustomReportsPage extends BasePage {
   /** Open the "My Reports" list. */
   async openMyReports(): Promise<void> {
     await this.page.goto(this.listPath, { waitUntil: 'domcontentloaded' });
-    await this.waitForPageLoad();
+    // Concrete elements instead of networkidle — the dashboard keeps
+    // polling (alerts/Livewire) so network silence never reliably happens.
     await expect(this.page).toHaveURL(/\/reports\/custom-reports$/);
     await expect(this.page.getByRole('heading', { name: 'My Reports' })).toBeVisible();
+    await expect(this.page.locator('table tbody tr').first()).toBeVisible();
   }
 
   /**
@@ -57,8 +59,9 @@ export class CustomReportsPage extends BasePage {
       `${this.builderPath}?subject=${encodeURIComponent(subject)}` +
       `&filters%5BrangeMode%5D=${encodeURIComponent(rangeMode)}`;
     await this.page.goto(url, { waitUntil: 'domcontentloaded' });
-    await this.waitForPageLoad();
     await expect(this.page).toHaveURL(new RegExp(`subject=${subject}`));
+    // The builder form defines readiness for every fill action below.
+    await expect(this.page.locator('form[action*="/preview"]')).toBeVisible();
   }
 
   // =========================================================================
@@ -187,7 +190,8 @@ export class CustomReportsPage extends BasePage {
       }),
       this.page.getByRole('button', { name: /Preview Report/i }).click(),
     ]);
-    await this.waitForPageLoad();
+    // Concrete readiness signals instead of networkidle (dashboard polling).
+    await expect(this.page.locator('table thead th').first()).toBeVisible();
     await this.waitForAnimation(1000); // table render settle
     return this.getPreviewHeaders();
   }
@@ -236,7 +240,8 @@ export class CustomReportsPage extends BasePage {
       this.page.waitForURL(/\/reports\/custom-reports$/, { timeout: this.navigationTimeout }),
       this.page.getByRole('button', { name: /Save Report/i }).click(),
     ]);
-    await this.waitForPageLoad();
+    // Concrete readiness signal instead of networkidle (dashboard polling).
+    await expect(this.page.getByRole('heading', { name: 'My Reports' })).toBeVisible();
   }
 
   /** True when a toast containing `"{name}" has been saved.` is visible. */

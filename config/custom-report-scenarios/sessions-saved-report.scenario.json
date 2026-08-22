@@ -1,7 +1,19 @@
 {
-  "_description": "Custom Reports KEPT-REPORT scenario (v3, checklist style) — builds a SESSIONS report over a CUSTOM date range, saves it, and INTENTIONALLY does NOT delete it. Column selection uses the CHECKLIST below: every key from choose-fields.catalog.json is listed with true/false — true puts the column in the report, false leaves it out. Keys are validated against the catalog at runtime (unknown/stale keys fail fast with suggestions). Set \"selectAll\": true at the top level to include EVERY field and skip the checklist. Other editable values: dateFrom/dateTo (YYYY-MM-DD or {{today_minus_N}}/{{today_plus_N}} templates), branchFilter/systemFilter/visitStatusFilter (SELECT OPTION TEXTS), saveReport (DYNAMIC = unique name per run), frequency (one_time|weekly|monthly|quarterly), visibility (private|public), recipients (required by the server form).",
+  "_description": "Custom Reports KEPT-REPORT scenario (v3, checklist style) — builds a SESSIONS report over a CUSTOM date range, saves it, and INTENTIONALLY does NOT delete it. Column selection uses the CHECKLIST below: every key from choose-fields.catalog.json is listed with true/false — true puts the column in the report, false leaves it out. Keys are validated against the catalog at runtime (unknown/stale keys fail fast with suggestions). Set \"selectAll\": true at the top level to include EVERY field and skip the checklist.",
   "_config": {
-    "_configNote": "rangeMode=custom keeps the date inputs EDITABLE (preset modes disable them). Preview columns always render in PAGE order regardless of the checklist order."
+    "_configNote": "rangeMode=custom keeps the date inputs EDITABLE (preset modes disable them). Preview columns always render in PAGE order regardless of the checklist order.",
+
+    "_comment_subject": "Allowed: \"sessions\" (one row per dialysis session) | \"patients\" (one row per patient) | \"providers\" (one row per provider, aggregated over the date ran).",
+    "_comment_rangeMode": "Allowed: \"daily\" | \"weekly\" | \"monthly\" | \"custom\". The preset modes DISABLE the date inputs and derive the range themselves — only \"custom\" keeps dateFrom/dateTo editable.",
+    "_comment_dateFrom": "Custom-range start. \"YYYY-MM-DD\" or templates \"{{today_minus_N}}\" / \"{{today_plus_N}}\" (N = days, always future-proof). Ignored unless rangeMode=\"custom\".",
+    "_comment_dateTo": "Custom-range end — same rules as dateFrom.",
+    "_comment_branchFilter": "SELECT OPTION TEXT, exactly as in the dropdown: \"All Branches\" | \"Main Branch\" | \"Jeddah\" | \"Branch 3\" | \"Branch 4\" | \"Branch 5\" | \"Branch 6\" | \"Branch 7\". Empty \"\" = leave untouched (stays All Branches).",
+    "_comment_systemFilter": "SELECT OPTION TEXT: \"All Systems\" | \"In Center\" | \"Home Hemodialysis\". Empty \"\" = leave untouched.",
+    "_comment_visitStatusFilter": "SELECT OPTION TEXT: \"All Statuses\" | \"In Active\" | \"In Progress\" | \"Start Procedure\" | \"End Procedure\" | \"Completed\" | \"Reopened\" | \"Co_sign\" | \"Canceled\". Empty \"\" = leave untouched.",
+    "_comment_saveReport": "\"DYNAMIC\" = unique name per run (recommended — re-runs never collide and old kept rows stay intact). Any other string = fixed display name.",
+    "_comment_frequency": "Verified on staging: \"one_time\" (the only frequency radio the Save form currently renders).",
+    "_comment_visibility": "Allowed: \"private\" (only you see it in My Reports) | \"public\" (visible to all users; row badge shows Public).",
+    "_comment_recipients": "REQUIRED by the server form — leaving it empty makes the Save POST silently fail browser validation. Comma-separated emails, e.g. \"a@x.com, b@x.com\". Keep a .example domain in tests."
   },
   "_fields": {
     "subject": "sessions",
@@ -9,9 +21,9 @@
     "dateFrom": "{{today_minus_7}}",
     "dateTo": "{{today_plus_30}}",
 
-    "branchFilter": "Jeddah",
-    "systemFilter": "In Center",
-    "visitStatusFilter": "",
+    "branchFilter": "Main Branch",
+    "systemFilter": "Home Hemodialysis",
+    "visitStatusFilter": "Completed",
 
     "saveReport": "DYNAMIC",
     "frequency": "one_time",
@@ -24,15 +36,15 @@
       "patientId": true,
       "mrn": true,
       "name": true,
-      "dob": false,
-      "age": false,
-      "gender": false,
-      "patientStatus": false,
-      "physician": false,
-      "primaryNurse": false,
-      "socialWorker": false,
-      "nurseTeamLeader": false,
-      "referredHospital": false
+      "dob": true,
+      "age": true,
+      "gender": true,
+      "patientStatus": true,
+      "physician": true,
+      "primaryNurse": true,
+      "socialWorker": true,
+      "nurseTeamLeader": true,
+      "referredHospital": true
     },
     "session-details": {
       "sessionDate": true,
