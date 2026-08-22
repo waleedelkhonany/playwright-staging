@@ -36,6 +36,7 @@ import { test, expect } from '../src/fixtures/auth.fixture';
 import { CustomReportsPage } from '../src/pages/custom-reports.page';
 import { getCustomReportData } from '../src/helpers/custom-report-data.loader';
 import catalog from '../config/custom-report-scenarios/choose-fields.catalog.json';
+import scenario from '../config/custom-report-scenarios/sessions-saved-report.scenario.json';
 
 test.describe('E2E: Custom Reports — kept saved report (no delete)', () => {
 
@@ -51,29 +52,53 @@ test.describe('E2E: Custom Reports — kept saved report (no delete)', () => {
     // =========================================================================
     // 1. Load configurable test parameters (all values from the scenario JSON)
     // =========================================================================
-    const data = getCustomReportData('sessions-saved-report.scenario.json');
-    const reportName = data.saveReport!;
+    const reportName = scenario._fields.saveReport === 'DYNAMIC'
+      ? undefined // let the loader generate the unique name
+      : scenario._fields.saveReport;
 
     // =========================================================================
-    // 1b. Validate column keys against the Choose-Fields catalog
-    //     ("ALL" skips validation — every field is selected by definition)
+    // 1b. Resolve the COLUMN CHECKLIST against the Choose-Fields catalog
+    //     Every catalog key must appear exactly once in scenario.columns;
+    //     true → include the column, false → leave it out.
+    //     "selectAll": true short-circuits the checklist into "ALL".
     // =========================================================================
-    const allKeys: string[] = Object.values(catalog._fields)
+    const catalogKeys: string[] = Object.values(catalog._fields)
       .flat()
       .map((entry: any) => entry.key as string);
-    console.log(`[Catalog] ${allKeys.length} choose-fields available ` +
-      `(${Object.keys(catalog._fields).length} groups) — set "fields": "ALL" to select them all`);
 
-    if (!/^all$/i.test((data.fields ?? '').trim())) {
-      const requested = data.fields!.split(',').map((k) => k.trim()).filter(Boolean);
-      const unknown = requested.filter((k) => !allKeys.includes(k));
+    let selectedFields: string;
+    if (scenario.selectAll === true) {
+      selectedFields = 'ALL';
+      console.log(`[Columns] selectAll=true → ALL ${catalogKeys.length} choose-fields will be included`);
+    } else {
+      const checklistKeys = Object.values(scenario.columns ?? {})
+        .flatMap((group: any) => Object.keys(group));
+      const selected = Object.values(scenario.columns ?? {})
+        .flatMap((group: any) => Object.entries(group))
+        .filter(([, on]) => on === true)
+        .map(([key]) => key);
+
+      const unknown = checklistKeys.filter((k) => !catalogKeys.includes(k));
+      const missing = catalogKeys.filter((k) => !checklistKeys.includes(k));
       expect(
         unknown,
-        `Unknown field key(s): ${JSON.stringify(unknown)}. ` +
-        `Valid keys live in config/custom-report-scenarios/choose-fields.catalog.json — e.g. ${allKeys.slice(0, 8).join(', ')}...`,
+        `Scenario checklist has key(s) NOT in choose-fields.catalog.json: ${JSON.stringify(unknown)}. ` +
+        'Fix the typo or update the catalog.',
       ).toEqual([]);
-      console.log(`[Catalog] ✅ All ${requested.length} requested keys exist in the catalog`);
+      expect(
+        missing,
+        `Scenario checklist is MISSING catalog key(s): ${JSON.stringify(missing)}. ` +
+        'Add them (the developer likely added new Choose Fields) so every option stays visible.',
+      ).toEqual([]);
+
+      selectedFields = selected.join(',');
+      console.log(`[Columns] ${selected.length}/${catalogKeys.length} chosen: ${selectedFields || '(none)'}`);
     }
+
+    const data = getCustomReportData('sessions-saved-report.scenario.json', {
+      ...(reportName ? { saveReport: reportName } : {}),
+      fields: selectedFields,
+    });
 
     console.log('═══════════════════════════════════════════════');
     console.log('  CUSTOM REPORTS — KEPT REPORT');
@@ -83,12 +108,12 @@ test.describe('E2E: Custom Reports — kept saved report (no delete)', () => {
     console.log(`  System:       ${data.systemFilter || '(all)'}`);
     console.log(`  Visit Status: ${data.visitStatusFilter || '(all)'}`);
     console.log(`  Columns:      ${data.fields}`);
-    console.log(`  Report Name:  ${reportName}`);
+    console.log(`  Report Name:  ${data.saveReport}`);
     console.log(`  Frequency:    ${data.frequency}, Visibility: ${data.visibility}`);
     console.log(`  Recipients:   ${data.recipients}`);
     console.log('═══════════════════════════════════════════════');
 
-    expect(reportName, 'scenario must provide saveReport').toBeTruthy();
+    expect(data.saveReport, 'scenario must provide saveReport').toBeTruthy();
     expect(data.recipients, 'recipients is required by the server form').toBeTruthy();
 
     // =========================================================================
@@ -129,26 +154,26 @@ test.describe('E2E: Custom Reports — kept saved report (no delete)', () => {
     // =========================================================================
     console.log('\n📋 Step 5: Save the report...');
     await reportsPage.saveReport(data);
-    const toastVisible = await reportsPage.isSuccessToastVisible(reportName);
+    const toastVisible = await reportsPage.isSuccessToastVisible(data.saveReport!);
     expect(toastVisible, 'success toast "{name}" has been saved.').toBeTruthy();
-    console.log(`[Test] ✅ Saved — toast confirmed for "${reportName}"`);
+    console.log(`[Test] ✅ Saved — toast confirmed for "${data.saveReport}"`);
 
     // =========================================================================
     // 7. Verify the row persists in My Reports
     // =========================================================================
     console.log('\n📋 Step 6: Verify the row in My Reports...');
     await reportsPage.verifySavedReportRow(
-      reportName,
+      data.saveReport!,
       'Sessions',
       data.visibility === 'public' ? 'Public' : 'Private',
     );
-    const savedId = await reportsPage.findSavedReportId(reportName);
+    const savedId = await reportsPage.findSavedReportId(data.saveReport!);
     expect(savedId).toBeTruthy();
     console.log(`[Test] ✅ Report KEPT on staging — id: ${savedId}`);
 
     console.log('\n═══════════════════════════════════════════════');
     console.log('  ✅ CUSTOM REPORT CREATED AND LEFT IN PLACE');
-    console.log(`  ✅ Name: "${reportName}"`);
+    console.log(`  ✅ Name: "${data.saveReport}"`);
     console.log(`  ✅ Id:   ${savedId}  (delete manually from My Reports if needed)`);
     console.log('═══════════════════════════════════════════════');
   });

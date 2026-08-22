@@ -1,7 +1,7 @@
 {
-  "_description": "Custom Reports KEPT-REPORT scenario (v2) — builds a SESSIONS report over a CUSTOM date range, saves it, and INTENTIONALLY does NOT delete it. Column selection now comes from the CATALOG file (choose-fields.catalog.json): 'fields' lists catalog keys, or use \"ALL\" to select every available field. EVERY value below is editable from this file alone: dateFrom/dateTo (YYYY-MM-DD or {{today_minus_N}}/{{today_plus_N}} templates), branchFilter/systemFilter/visitStatusFilter (SELECT OPTION TEXTS), fields (catalog keys or ALL), saveReport (DYNAMIC = unique name per run), frequency (one_time|weekly|monthly|quarterly), visibility (private|public), recipients (required by the server form).",
+  "_description": "Custom Reports KEPT-REPORT scenario (v3, checklist style) — builds a SESSIONS report over a CUSTOM date range, saves it, and INTENTIONALLY does NOT delete it. Column selection uses the CHECKLIST below: every key from choose-fields.catalog.json is listed with true/false — true puts the column in the report, false leaves it out. Keys are validated against the catalog at runtime (unknown/stale keys fail fast with suggestions). Set \"selectAll\": true at the top level to include EVERY field and skip the checklist. Other editable values: dateFrom/dateTo (YYYY-MM-DD or {{today_minus_N}}/{{today_plus_N}} templates), branchFilter/systemFilter/visitStatusFilter (SELECT OPTION TEXTS), saveReport (DYNAMIC = unique name per run), frequency (one_time|weekly|monthly|quarterly), visibility (private|public), recipients (required by the server form).",
   "_config": {
-    "_configNote": "rangeMode=custom keeps the date inputs EDITABLE (preset modes disable them). Column keys are matched by checkbox-ID SUFFIX; ambiguous keys fail fast with the matching ids. Preview columns always render in PAGE order regardless of JSON order."
+    "_configNote": "rangeMode=custom keeps the date inputs EDITABLE (preset modes disable them). Preview columns always render in PAGE order regardless of the checklist order."
   },
   "_fields": {
     "subject": "sessions",
@@ -13,12 +13,90 @@
     "systemFilter": "In Center",
     "visitStatusFilter": "",
 
-    "fields": "patientId,mrn,name,sessionDate,visitStatus,ufVolume,hgb,potassium,apptDate,apptStatus",
-    "_fields_note": "Keys come from choose-fields.catalog.json (66 fields, 6 groups). Use \"ALL\" to select every field, or list any subset of catalog keys.",
-
     "saveReport": "DYNAMIC",
     "frequency": "one_time",
     "visibility": "public",
     "recipients": "reports-team@careconnect.example"
+  },
+
+  "columns": {
+    "patient-info": {
+      "patientId": true,
+      "mrn": true,
+      "name": true,
+      "dob": false,
+      "age": false,
+      "gender": false,
+      "patientStatus": false,
+      "physician": false,
+      "primaryNurse": false,
+      "socialWorker": false,
+      "nurseTeamLeader": false,
+      "referredHospital": false
+    },
+    "session-details": {
+      "sessionDate": true,
+      "visitStatus": true,
+      "visitSystem": false,
+      "visitBranch": false,
+      "visitTypeName": false,
+      "station": false,
+      "checkIn": false,
+      "checkOut": false,
+      "procedureStart": false,
+      "procedureEnd": false,
+      "visitDuration": false,
+      "procedureDuration": false,
+      "sessionNurse": false,
+      "sessionDoctor": false,
+      "sessionSocialWorker": false
+    },
+    "treatment-data": {
+      "treatmentDuration": false,
+      "ufVolume": true,
+      "ufGoal": false,
+      "bfrActual": false,
+      "preWeight": false,
+      "postWeight": false,
+      "dryWeight": false,
+      "flowsheetCompleted": false
+    },
+    "dialysis-prescription": {
+      "dialyzer": false,
+      "dialyzerArea": false,
+      "bfrPrescribed": false,
+      "prescribedDuration": false,
+      "prescribedFrequency": false,
+      "modality": false,
+      "vascularAccess": false,
+      "accessSite": false,
+      "dialysateType": false,
+      "anticoagulation": false,
+      "prescribedDryWeight": false
+    },
+    "labs": {
+      "hgb": true,
+      "potassium": true,
+      "phosphorus": false,
+      "albumin": false,
+      "calcium": false,
+      "pth": false,
+      "ferritin": false,
+      "tsat": false,
+      "creatinine": false,
+      "bicarbonate": false,
+      "bunPre": false,
+      "labCompany": false
+    },
+    "appointment-details": {
+      "apptDate": true,
+      "apptTime": false,
+      "apptEndTime": false,
+      "apptType": false,
+      "scheduledDuration": false,
+      "confirmationStatus": false,
+      "apptStatus": true,
+      "noShowReason": false
+    }
   }
 }
